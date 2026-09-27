@@ -16,11 +16,11 @@ import {
 export default function DoctorChangePassword() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    currentPassword: "",
+    oldPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -53,14 +53,14 @@ export default function DoctorChangePassword() {
     try {
       setLoading(true);
       const response = await changePassword({
-        currentPassword: formData.currentPassword,
+        oldPassword: formData.oldPassword,
         newPassword: formData.newPassword
       });
 
       if (response.status === 1) {
         setSuccess("Password changed successfully!");
         setFormData({
-          currentPassword: "",
+          oldPassword: "",
           newPassword: "",
           confirmPassword: ""
         });
@@ -122,19 +122,19 @@ export default function DoctorChangePassword() {
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
-                  type={showCurrentPassword ? "text" : "password"}
-                  name="currentPassword"
-                  value={formData.currentPassword}
+                  type={showOldPassword ? "text" : "password"}
+                  name="oldPassword"
+                  value={formData.oldPassword}
                   onChange={handleChange}
                   required
                   className="w-full pl-12 pr-12 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  onClick={() => setShowOldPassword(!showOldPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>

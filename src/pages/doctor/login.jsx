@@ -57,8 +57,12 @@ const DoctorLogin = () => {
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100/80 p-8 relative z-10 animate-scaleUp">
         {/* Header / Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-light text-brand-primary border border-brand-primary/10 shadow-xs mb-4">
-            <Leaf size={24} fill="currentColor" />
+          <div className="w-32 h-32 mx-auto mb-4 flex items-center justify-center">
+            <img
+              src="/logo.png"
+              alt="Leaf Homeo Care"
+              className="w-full h-full object-contain"
+            />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">
             Leaf Homeo Care

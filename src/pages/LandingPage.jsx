@@ -3,17 +3,19 @@ import { Link } from 'react-router-dom';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-brand-light to-blue-50 flex items-center justify-center p-4">
       <div className="max-w-2xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-green-600 to-green-500 p-8 text-center">
-          <div className="w-24 h-24 bg-white rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <svg className="w-16 h-16 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-            </svg>
+        <div className="bg-gradient-to-r from-brand-primary to-brand-dark p-8 text-center">
+          <div className="w-48 h-48 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <img
+              src="/logo.png"
+              alt="Leaf Homeo Care"
+              className="w-40 h-40 object-contain"
+            />
           </div>
           <h1 className="text-4xl font-bold text-white mb-2">Leaf Homeo Care</h1>
-          <p className="text-green-100 text-lg">Natural Healing, Modern Care</p>
+          <p className="text-brand-light text-lg">Natural Healing, Modern Care</p>
         </div>
 
         {/* Content Section */}
@@ -28,9 +30,9 @@ const LandingPage = () => {
 
           {/* Features */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <div className="text-center p-4 bg-green-50 rounded-xl">
-              <div className="w-12 h-12 bg-green-100 rounded-full mx-auto mb-3 flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center p-4 bg-brand-light rounded-xl">
+              <div className="w-12 h-12 bg-brand-primary/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                <svg className="w-6 h-6 text-brand-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </div>
@@ -61,7 +63,7 @@ const LandingPage = () => {
 
           {/* CTA Button */}
           <div className="mt-8 text-center">
-            <button className="w-full bg-gradient-to-r from-green-600 to-green-500 text-white font-semibold py-4 px-8 rounded-xl hover:from-green-700 hover:to-green-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            <button className="w-full bg-gradient-to-r from-brand-primary to-brand-dark text-white font-semibold py-4 px-8 rounded-xl hover:from-brand-hover hover:to-brand-dark transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
               Get Started
             </button>
           </div>
@@ -70,9 +72,9 @@ const LandingPage = () => {
           <div className="mt-8 text-center text-gray-500 text-sm space-y-2">
             <p>© 2024 Leaf Homeo Care. All rights reserved.</p>
             <div className="flex justify-center space-x-4">
-              <Link to="/terms" className="hover:text-green-600 transition-colors">Terms & Conditions</Link>
+              <Link to="/terms" className="hover:text-brand-primary transition-colors">Terms & Conditions</Link>
               <span>|</span>
-              <Link to="/privacy" className="hover:text-green-600 transition-colors">Privacy Policy</Link>
+              <Link to="/privacy" className="hover:text-brand-primary transition-colors">Privacy Policy</Link>
             </div>
           </div>
         </div>

@@ -33,12 +33,12 @@ import DoctorAppointments from "../pages/doctor/Appointments";
 import DoctorProfile from "../pages/doctor/Profile";
 import DoctorAppointmentRequests from "../pages/doctor/AppointmentRequests";
 import DoctorPatientDetails from "../pages/doctor/PatientDetails";
-import DoctorConsultationHistory from "../pages/doctor/ConsultationHistory";
 import DoctorAvailability from "../pages/doctor/Availability";
 import DoctorNotifications from "../pages/doctor/Notifications";
 import DoctorEditProfile from "../pages/doctor/EditProfile";
 import DoctorChangePassword from "../pages/doctor/ChangePassword";
 import DoctorSetupPassword from "../pages/doctor/SetupPassword";
+import ConsultationForm from "../pages/doctor/ConsultationForm";
 import PatientVideoCall from "../pages/patient/VideoCall";
 import DoctorVideoCall from "../pages/doctor/VideoCall";
 import PublicDoctorProfile from "../pages/PublicDoctorProfile";
@@ -96,9 +96,9 @@ function AppRouter() {
       <Route path="/patient/blog" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><PatientBlog /></ProtectedRoute>} />
       <Route path="/doctor/dashboard" element={<ProtectedRoute allowedRole="doctor"><DoctorDashboard /></ProtectedRoute>} />
       <Route path="/doctor/appointments" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointments /></ProtectedRoute>} />
+      <Route path="/doctor/consultation/:consultationId" element={<ProtectedRoute allowedRole="doctor"><ConsultationForm /></ProtectedRoute>} />
       <Route path="/doctor/appointment-requests" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointmentRequests /></ProtectedRoute>} />
       <Route path="/doctor/patient/:patientId" element={<ProtectedRoute allowedRole="doctor"><DoctorPatientDetails /></ProtectedRoute>} />
-      <Route path="/doctor/consultation-history" element={<ProtectedRoute allowedRole="doctor"><DoctorConsultationHistory /></ProtectedRoute>} />
       <Route path="/doctor/availability" element={<ProtectedRoute allowedRole="doctor"><DoctorAvailability /></ProtectedRoute>} />
       <Route path="/doctor/notifications" element={<ProtectedRoute allowedRole="doctor"><DoctorNotifications /></ProtectedRoute>} />
       <Route path="/doctor/profile" element={<ProtectedRoute allowedRole="doctor"><DoctorProfile /></ProtectedRoute>} />

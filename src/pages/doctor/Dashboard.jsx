@@ -94,6 +94,31 @@ export default function DoctorDashboard() {
     }
   };
 
+  const handleNotificationClick = async (notification) => {
+    try {
+      // Navigate based on notification type
+      if (notification.type === 'appointment_request') {
+        navigate('/doctor/appointment-requests');
+      } else if (notification.type === 'payment_required') {
+        navigate('/doctor/appointments');
+      } else if (notification.type === 'appointment_reminder') {
+        navigate('/doctor/appointments');
+      } else if (notification.type === 'payment_reminder') {
+        navigate('/doctor/appointments');
+      } else if (notification.type === 'chat_message') {
+        navigate('/doctor/chat');
+      } else if (notification.referenceId) {
+        // Generic navigation based on reference
+        navigate('/doctor/appointments');
+      }
+      
+      // Delete notification after click
+      await handleDeleteNotification(notification.id);
+    } catch (error) {
+      console.error('Error handling notification click:', error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -215,7 +240,8 @@ export default function DoctorDashboard() {
         {notifications.slice(0, 3).map((notification) => (
           <div
             key={notification.id}
-            className={`p-4 rounded-xl border transition-all ${
+            onClick={() => handleNotificationClick(notification)}
+            className={`p-4 rounded-xl border transition-all cursor-pointer ${
               !notification.isRead
                 ? 'bg-brand-light/30 border-brand-primary/20'
                 : 'bg-gray-50/50 border-gray-100'
@@ -230,7 +256,10 @@ export default function DoctorDashboard() {
                 </p>
               </div>
               <button
-                onClick={() => handleDeleteNotification(notification.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteNotification(notification.id);
+                }}
                 className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
               >
                 <X size={14} />

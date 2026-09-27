@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Video as VideoIcon, VideoOff, Mic, MicOff, PhoneOff, Monitor, MonitorOff, Signal, Clock, X, User, AlertCircle, RefreshCw, FileText, Download } from "lucide-react";
+import { Video as VideoIcon, VideoOff, Mic, MicOff, PhoneOff, Monitor, MonitorOff, Signal, Clock, X, User, AlertCircle, RefreshCw, FileText } from "lucide-react";
 import { getVideoToken, endVideoCall } from "../api/videoApi";
 import * as TwilioVideo from 'twilio-video';
 import axios from 'axios';
@@ -29,6 +29,30 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   const [consultationNotes, setConsultationNotes] = useState('');
   const [submittingForm, setSubmittingForm] = useState(false);
 
+  // Comprehensive consultation form states
+  const [formData, setFormData] = useState({
+    chiefComplaints: '',
+    appetite: '',
+    thirst: '',
+    desire: '',
+    aversion: '',
+    habits: '',
+    stool: '',
+    urine: '',
+    perspiration: '',
+    menWomen: '',
+    sleep: '',
+    dream: '',
+    thermal: '',
+    amelioration: '',
+    aggravation: '',
+    otherComplaints: '',
+    levelsOfHealth: '',
+    perception: '',
+    screenshots: []
+  });
+  const [savedFormData, setSavedFormData] = useState(null); // For save functionality
+
   const localVideoRef = useRef(null);
   const localAudioRef = useRef(null);
   const participantVideoRefs = useRef({});
@@ -39,14 +63,26 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   useEffect(() => {
     console.log("VideoCall component mounted with appointmentId:", appointmentId);
     console.log("Type of appointmentId:", typeof appointmentId);
-    
+
     if (!appointmentId || appointmentId === "undefined" || appointmentId === "null") {
       console.error("Invalid appointmentId provided:", appointmentId);
       setError("Invalid appointment ID provided. Please navigate from the appointments page.");
       setCallState('ended');
       return;
     }
-    
+
+    // Load saved form data if exists
+    const savedDraft = localStorage.getItem(`consultation_draft_${appointmentId}`);
+    if (savedDraft) {
+      try {
+        const parsedData = JSON.parse(savedDraft);
+        setFormData(parsedData);
+        console.log("Loaded saved form data:", parsedData);
+      } catch (err) {
+        console.error("Error parsing saved form data:", err);
+      }
+    }
+
     initializePreCall();
 
     return () => {
@@ -543,44 +579,50 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
 
   const endCall = async () => {
     setShowEndCallConfirm(false);
-    
-    // If doctor and form not submitted, show form
-    if (userType === 'doctor' && !consultationNotes.trim()) {
-      setShowConsultationForm(true);
-      return;
-    }
-    
-    // If doctor and form has notes, submit it first
-    if (userType === 'doctor' && consultationNotes.trim()) {
-      await submitConsultationForm();
-      return;
-    }
-    
+
+    // End the call first regardless of form status
     try {
-      // First notify the backend that the call is ending
       await endVideoCall(appointmentId);
     } catch (err) {
       console.error('Error notifying backend of call end:', err);
     }
-    
-    // Then cleanup the room and local tracks
+
     await cleanupRoom();
     setCallState('ended');
-    
+
     if (onEndCall) {
       onEndCall();
     }
   };
 
-  const submitConsultationForm = async () => {
-    if (!consultationNotes.trim()) {
-      alert('Please fill in the consultation notes before ending the call.');
+  const handleSaveForm = async () => {
+    try {
+      // Save form data locally (could be saved to backend as draft)
+      setSavedFormData({...formData});
+      localStorage.setItem(`consultation_draft_${appointmentId}`, JSON.stringify(formData));
+      alert('Form saved successfully! You can submit it later.');
+    } catch (err) {
+      console.error('Error saving form:', err);
+      alert('Failed to save form. Please try again.');
+    }
+  };
+
+  const handleLaterSubmit = () => {
+    // Hide form but keep data saved
+    setShowConsultationForm(false);
+    alert('Form saved. You can submit it later from the appointment details.');
+  };
+
+  const handleSubmitForm = async () => {
+    if (!formData.chiefComplaints.trim()) {
+      alert('Please fill in at least the chief complaints before submitting.');
       return;
     }
 
     try {
       setSubmittingForm(true);
       console.log('Submitting consultation form for appointment:', appointmentId);
+      console.log('Form data:', formData);
       const token = sessionStorage.getItem("token");
       const API = axios.create({
         baseURL: import.meta.env.VITE_API_URL,
@@ -592,10 +634,38 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         return config;
       });
 
-      const response = await API.post("/api/v1/appointment/submit-consultation", {
-        appointmentId,
-        notes: consultationNotes,
-        callDuration: callDuration
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('appointmentId', appointmentId);
+      formDataToSend.append('chiefComplaints', formData.chiefComplaints);
+      formDataToSend.append('appetite', formData.appetite);
+      formDataToSend.append('thirst', formData.thirst);
+      formDataToSend.append('desire', formData.desire);
+      formDataToSend.append('aversion', formData.aversion);
+      formDataToSend.append('habits', formData.habits);
+      formDataToSend.append('stool', formData.stool);
+      formDataToSend.append('urine', formData.urine);
+      formDataToSend.append('perspiration', formData.perspiration);
+      formDataToSend.append('menWomen', formData.menWomen);
+      formDataToSend.append('sleep', formData.sleep);
+      formDataToSend.append('dream', formData.dream);
+      formDataToSend.append('thermal', formData.thermal);
+      formDataToSend.append('amelioration', formData.amelioration);
+      formDataToSend.append('aggravation', formData.aggravation);
+      formDataToSend.append('otherComplaints', formData.otherComplaints);
+      formDataToSend.append('levelsOfHealth', formData.levelsOfHealth);
+      formDataToSend.append('perception', formData.perception);
+      formDataToSend.append('callDuration', callDuration);
+
+      // Add screenshots
+      formData.screenshots.forEach((file) => {
+        formDataToSend.append('screenshots', file);
+      });
+
+      const response = await API.post("/api/v1/appointment/submit-consultation", formDataToSend, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       console.log('Consultation submission response:', response.data);
@@ -603,17 +673,12 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       if (response.data.status === 1) {
         console.log('Consultation submitted successfully');
         alert('Consultation submitted successfully!');
-        
-        // Generate and download PDF
-        await generateAndDownloadPDF(response.data.data);
-        
-        // End the call
-        await endVideoCall(appointmentId);
-        await cleanupRoom();
-        setCallState('ended');
-        if (onEndCall) {
-          onEndCall();
-        }
+
+        // Clear local storage draft
+        localStorage.removeItem(`consultation_draft_${appointmentId}`);
+
+        // Don't end the call automatically - just hide the form
+        setShowConsultationForm(false);
       } else {
         console.error('Consultation submission failed:', response.data.message);
         alert('Failed to submit consultation: ' + response.data.message);
@@ -626,59 +691,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     }
   };
 
-  const generateAndDownloadPDF = async (consultationData) => {
-    // Create a simple PDF-like HTML content
-    const pdfContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Consultation Report</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 40px; line-height: 1.6; }
-          .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #10b981; padding-bottom: 20px; }
-          .header h1 { color: #10b981; margin: 0; }
-          .section { margin-bottom: 20px; }
-          .section h3 { color: #333; border-bottom: 1px solid #ddd; padding-bottom: 10px; }
-          .label { font-weight: bold; color: #555; }
-          .value { color: #333; margin-left: 10px; }
-          .notes { background: #f5f5f5; padding: 15px; border-radius: 5px; white-space: pre-wrap; }
-          .footer { margin-top: 40px; text-align: center; color: #888; font-size: 12px; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>Leaf Homeo Care</h1>
-          <p>Consultation Report</p>
-        </div>
-        <div class="section">
-          <h3>Appointment Details</h3>
-          <p><span class="label">Appointment ID:</span><span class="value">${appointmentId}</span></p>
-          <p><span class="label">Date:</span><span class="value">${new Date().toLocaleDateString()}</span></p>
-          <p><span class="label">Duration:</span><span class="value">${formatDuration(callDuration)}</span></p>
-        </div>
-        <div class="section">
-          <h3>Consultation Notes</h3>
-          <div class="notes">${consultationNotes}</div>
-        </div>
-        <div class="footer">
-          <p>Generated by Leaf Homeo Care</p>
-          <p>${new Date().toLocaleString()}</p>
-        </div>
-      </body>
-      </html>
-    `;
 
-    // Create a blob and download
-    const blob = new Blob([pdfContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `consultation_${appointmentId}_${Date.now()}.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   const handleEndCallClick = () => {
     if (callState === 'in-call' || callState === 'connecting') {
@@ -1224,22 +1237,270 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
               </div>
             </div>
 
-            {/* Consultation Notes */}
-            <div>
-              <label className="text-xs font-bold text-gray-700 mb-2 block flex items-center gap-2">
-                <FileText size={12} className="text-teal-600" />
-                Notes
-              </label>
-              <textarea
-                value={consultationNotes}
-                onChange={(e) => setConsultationNotes(e.target.value)}
-                rows={12}
-                placeholder="Enter consultation details, diagnosis, prescription..."
-                className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 text-gray-800 resize-none text-sm font-medium"
-              />
-              <p className="text-xs text-gray-400 mt-2">
-                This will be submitted when you end the call
-              </p>
+            {/* Comprehensive Consultation Form */}
+            <div className="space-y-4">
+              {/* Chief Complaints & Associate Symptoms */}
+              <div>
+                <label className="text-xs font-bold text-gray-700 mb-2 block">
+                  CHIEF COMPLAINTS & ASSOCIATE SYMPTOMS
+                </label>
+                <textarea
+                  value={formData.chiefComplaints}
+                  onChange={(e) => setFormData({...formData, chiefComplaints: e.target.value})}
+                  rows={4}
+                  placeholder="Enter chief complaints and associate symptoms..."
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 text-gray-800 resize-none text-sm"
+                />
+              </div>
+
+              {/* Personal History */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <label className="text-xs font-bold text-gray-700 mb-3 block">
+                  PERSONAL HISTORY
+                </label>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Appetite</label>
+                    <input
+                      type="text"
+                      value={formData.appetite}
+                      onChange={(e) => setFormData({...formData, appetite: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Appetite details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Thirst</label>
+                    <input
+                      type="text"
+                      value={formData.thirst}
+                      onChange={(e) => setFormData({...formData, thirst: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Thirst details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Desire</label>
+                    <input
+                      type="text"
+                      value={formData.desire}
+                      onChange={(e) => setFormData({...formData, desire: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Desire details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Aversion</label>
+                    <input
+                      type="text"
+                      value={formData.aversion}
+                      onChange={(e) => setFormData({...formData, aversion: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Aversion details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Habits</label>
+                    <input
+                      type="text"
+                      value={formData.habits}
+                      onChange={(e) => setFormData({...formData, habits: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Habits details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Stool</label>
+                    <input
+                      type="text"
+                      value={formData.stool}
+                      onChange={(e) => setFormData({...formData, stool: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Stool details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Urine</label>
+                    <input
+                      type="text"
+                      value={formData.urine}
+                      onChange={(e) => setFormData({...formData, urine: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Urine details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Perspiration</label>
+                    <input
+                      type="text"
+                      value={formData.perspiration}
+                      onChange={(e) => setFormData({...formData, perspiration: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Perspiration details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">For Men/Women</label>
+                    <input
+                      type="text"
+                      value={formData.menWomen}
+                      onChange={(e) => setFormData({...formData, menWomen: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Men/Women specific details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Sleep</label>
+                    <input
+                      type="text"
+                      value={formData.sleep}
+                      onChange={(e) => setFormData({...formData, sleep: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Sleep details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Dream</label>
+                    <input
+                      type="text"
+                      value={formData.dream}
+                      onChange={(e) => setFormData({...formData, dream: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Dream details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Thermal</label>
+                    <input
+                      type="text"
+                      value={formData.thermal}
+                      onChange={(e) => setFormData({...formData, thermal: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Thermal details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Amelioration</label>
+                    <input
+                      type="text"
+                      value={formData.amelioration}
+                      onChange={(e) => setFormData({...formData, amelioration: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Amelioration details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Aggravation</label>
+                    <input
+                      type="text"
+                      value={formData.aggravation}
+                      onChange={(e) => setFormData({...formData, aggravation: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Aggravation details"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Any other complaints</label>
+                    <input
+                      type="text"
+                      value={formData.otherComplaints}
+                      onChange={(e) => setFormData({...formData, otherComplaints: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Other complaints"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-600 mb-1 block">Levels Of Health</label>
+                    <input
+                      type="text"
+                      value={formData.levelsOfHealth}
+                      onChange={(e) => setFormData({...formData, levelsOfHealth: e.target.value})}
+                      className="w-full p-2 border border-gray-300 rounded-lg text-sm"
+                      placeholder="Levels of health"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Upload Screenshots */}
+              <div>
+                <label className="text-xs font-bold text-gray-700 mb-2 block">
+                  Upload Screenshots (Max 5)
+                </label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files);
+                    if (formData.screenshots.length + files.length > 5) {
+                      alert('Maximum 5 screenshots allowed');
+                      return;
+                    }
+                    setFormData({...formData, screenshots: [...formData.screenshots, ...files]});
+                  }}
+                  className="w-full p-2 border-2 border-gray-200 rounded-xl text-sm"
+                />
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {formData.screenshots.map((file, index) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Screenshot ${index + 1}`}
+                        className="w-16 h-16 object-cover rounded-lg border"
+                      />
+                      <button
+                        onClick={() => {
+                          const newScreenshots = formData.screenshots.filter((_, i) => i !== index);
+                          setFormData({...formData, screenshots: newScreenshots});
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Perception */}
+              <div>
+                <label className="text-xs font-bold text-gray-700 mb-2 block">
+                  Perception
+                </label>
+                <textarea
+                  value={formData.perception}
+                  onChange={(e) => setFormData({...formData, perception: e.target.value})}
+                  rows={4}
+                  placeholder="Enter perception details..."
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 text-gray-800 resize-none text-sm"
+                />
+              </div>
+
+              {/* Form Actions */}
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={handleSaveForm}
+                  disabled={submittingForm}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                >
+                  {submittingForm ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  onClick={handleLaterSubmit}
+                  disabled={submittingForm}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                >
+                  Later
+                </button>
+                <button
+                  onClick={handleSubmitForm}
+                  disabled={submittingForm}
+                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
+                >
+                  {submittingForm ? 'Submitting...' : 'Submit'}
+                </button>
+              </div>
             </div>
           </div>
         )}

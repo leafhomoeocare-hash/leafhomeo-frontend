@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Calendar, Clock, Video, Check, X, Filter, Loader2, AlertCircle, CheckCircle, XCircle, MessageSquare } from "lucide-react";
+import { Search, Calendar, Clock, Video, Check, X, Filter, Loader2, AlertCircle, CheckCircle, XCircle, MessageSquare, FileText } from "lucide-react";
 import DoctorLayout from "../../components/DoctorLayout";
 import { getDoctorAppointments, acceptAppointment, rejectAppointment } from "../../api/doctorApi";
 import Swal from "sweetalert2";
@@ -539,6 +539,15 @@ export default function DoctorAppointments() {
                           </div>
                         )}
                       </>
+                    )}
+                    {appointment.status.toLowerCase() === "completed" && appointment.consultationId && (
+                      <button
+                        onClick={() => navigate(`/doctor/consultation/${appointment.consultationId}`)}
+                        className="flex items-center gap-2 px-4 py-2.5 h-10 min-w-[100px] justify-center bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 transition-all text-sm border-2 border-blue-500"
+                      >
+                        <FileText size={16} />
+                        Consultation
+                      </button>
                     )}
                   </div>
                 </div>

@@ -772,6 +772,38 @@ function AppointmentDetailsModal({ open, onClose, appointment, updatingShipping,
               )}
             </div>
           </div>
+
+          {/* Consultation / Prescription Card */}
+          {appointment.consultation && (
+            <div className="border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="bg-gray-50/70 px-4 py-3 border-b border-gray-100">
+                <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">Consultation & Prescription</h4>
+              </div>
+              <div className="p-4 space-y-3">
+                {appointment.consultation.chiefComplaints && (
+                  <div>
+                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Chief Complaints</p>
+                    <p className="text-sm text-gray-700 mt-1">{appointment.consultation.chiefComplaints}</p>
+                  </div>
+                )}
+                {appointment.consultation.perception && (
+                  <div>
+                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Perception / Prescription</p>
+                    <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{appointment.consultation.perception}</p>
+                  </div>
+                )}
+                {appointment.consultation.callDuration && (
+                  <div>
+                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Call Duration</p>
+                    <p className="text-sm text-gray-700 mt-1">{appointment.consultation.callDuration}</p>
+                  </div>
+                )}
+                {!appointment.consultation.chiefComplaints && !appointment.consultation.perception && (
+                  <p className="text-gray-400 italic text-sm">No consultation details available.</p>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

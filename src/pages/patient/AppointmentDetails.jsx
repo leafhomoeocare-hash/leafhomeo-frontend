@@ -53,6 +53,7 @@ export default function AppointmentDetails() {
       setLoadingDates(true);
       const dates = [];
       const today = new Date();
+      const minAllowedTime = new Date(today.getTime() + 8 * 60 * 60 * 1000);
       
       // Check next 30 days for available slots
       for (let i = 0; i < 30; i++) {
@@ -60,14 +61,29 @@ export default function AppointmentDetails() {
         date.setDate(today.getDate() + i);
         const dateStr = date.toISOString().split('T')[0];
         
+        // Check if this date is at least 8 hours from now
+        const dateObj = new Date(dateStr);
+        if (dateObj < minAllowedTime) {
+          continue; // Skip dates that are less than 8 hours from now
+        }
+        
         try {
           const response = await getAvailabilitySlots(selectedDoctor.id, dateStr);
           if (response.status === 1 && response.slots && response.slots.length > 0) {
-            const hasAvailableSlot = response.slots.some(slot => slot.available);
-            dates.push({
-              date: dateStr,
-              hasSlots: hasAvailableSlot
+            // Filter slots that are at least 8 hours from now
+            const validSlots = response.slots.filter(slot => {
+              const [hours, minutes] = slot.time.split(':').map(Number);
+              const slotTime = new Date(dateStr);
+              slotTime.setHours(hours, minutes, 0, 0);
+              return slot.available && slotTime >= minAllowedTime;
             });
+            
+            if (validSlots.length > 0) {
+              dates.push({
+                date: dateStr,
+                hasSlots: true
+              });
+            }
           }
         } catch (err) {
           // Skip this date if error
@@ -89,8 +105,19 @@ export default function AppointmentDetails() {
       setError(null);
       const response = await getAvailabilitySlots(selectedDoctor.id, selectedDate);
       if (response.status === 1) {
-        // The API returns slots with availability status
-        setAvailableSlots(response.slots || []);
+        // Filter slots based on 8-hour gap from current time
+        const now = new Date();
+        const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+        
+        const filteredSlots = (response.slots || []).filter(slot => {
+          const [hours, minutes] = slot.time.split(':').map(Number);
+          const slotTime = new Date(selectedDate);
+          slotTime.setHours(hours, minutes, 0, 0);
+          
+          return slot.available && slotTime >= minAllowedTime;
+        });
+        
+        setAvailableSlots(filteredSlots);
       } else {
         setError(response.message || "Failed to fetch available slots");
       }
@@ -109,6 +136,16 @@ export default function AppointmentDetails() {
     e.preventDefault();
     if (!selectedDate || !selectedTime || !symptoms) {
       setError("Please fill in all required fields");
+      return;
+    }
+
+    // Validate that selected time is at least 8 hours from now
+    const now = new Date();
+    const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const selectedDateTime = new Date(`${selectedDate} ${selectedTime}`);
+    
+    if (selectedDateTime < minAllowedTime) {
+      setError("Appointment must be at least 8 hours from now");
       return;
     }
 
@@ -358,9 +395,10 @@ export default function AppointmentDetails() {
                   <p className="text-sm">{error}</p>
                 </div>
               ) : availableSlots.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-2xl text-gray-400">
-                  <Calendar className="h-8 w-8 mb-2" />
-                  <p className="text-sm">No available slots for this date. Please try another date.</p>
+                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-amber-200 rounded-2xl bg-amber-50">
+                  <Clock className="h-8 w-8 mb-2 text-amber-600" />
+                  <p className="text-sm text-amber-700 font-medium">No available time slots for this date.</p>
+                  <p className="text-xs text-amber-600 mt-2 text-center">Appointments must be booked at least 8 hours in advance. Please select a future date.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">

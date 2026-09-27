@@ -74,12 +74,42 @@ export default function BookAnyDoctor() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  const timeSlots = [
+  const allTimeSlots = [
     "09:00", "09:30", "10:00", "10:30", 
     "11:00", "11:30", "12:00", "12:30",
     "14:00", "14:30", "15:00", "15:30",
     "16:00", "16:30", "17:00", "17:30"
   ];
+
+  // Filter time slots based on current time and 8-hour gap
+  const timeSlots = allTimeSlots.filter(time => {
+    const now = new Date();
+    const selectedDateObj = new Date(selectedDate);
+    
+    // Check if selected date is today
+    const isToday = selectedDate === today;
+    
+    if (isToday) {
+      // For today, check if slot is at least 8 hours from now
+      const [hours, minutes] = time.split(':').map(Number);
+      const slotTime = new Date(selectedDate);
+      slotTime.setHours(hours, minutes, 0, 0);
+      
+      // Calculate 8 hours from now
+      const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      
+      return slotTime >= minAllowedTime;
+    } else {
+      // For future dates, check if it's at least 8 hours from now
+      const [hours, minutes] = time.split(':').map(Number);
+      const slotTime = new Date(selectedDate);
+      slotTime.setHours(hours, minutes, 0, 0);
+      
+      const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+      
+      return slotTime >= minAllowedTime;
+    }
+  });
 
   return (
     <PatientLayout>
@@ -142,22 +172,33 @@ export default function BookAnyDoctor() {
                 Select Preferred Time
               </label>
               
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                {timeSlots.map((time, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setSelectedTime(time)}
-                    className={`p-3 rounded-xl border-2 text-sm font-bold transition-all ${
-                      selectedTime === time
-                        ? "border-brand-primary bg-brand-primary text-white shadow-lg shadow-brand-primary/30"
-                        : "border-gray-200 hover:border-brand-primary hover:bg-brand-light/30 text-gray-700"
-                    }`}
-                  >
-                    {time}
-                  </button>
-                ))}
-              </div>
+              {timeSlots.length > 0 ? (
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                  {timeSlots.map((time, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setSelectedTime(time)}
+                      className={`p-3 rounded-xl border-2 text-sm font-bold transition-all ${
+                        selectedTime === time
+                          ? "border-brand-primary bg-brand-primary text-white shadow-lg shadow-brand-primary/30"
+                          : "border-gray-200 hover:border-brand-primary hover:bg-brand-light/30 text-gray-700"
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-center">
+                  <p className="text-amber-700 font-medium text-sm">
+                    ⚠️ No available time slots for this date. Appointments must be booked at least 8 hours in advance.
+                  </p>
+                  <p className="text-amber-600 text-xs mt-2">
+                    Please select a future date to see available slots.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

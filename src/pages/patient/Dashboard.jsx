@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
-import { Video, Star, Calendar, Package, MessageSquare, ArrowRight, ArrowLeft, Clock, ShieldAlert, User, Mail, Phone, MapPin, Edit, Trash2, X, Save } from "lucide-react";
+import { Video, Star, Calendar, Package, MessageSquare, ArrowRight, ArrowLeft, Clock, ShieldAlert, User, Mail, Phone, MapPin, Edit, X, Save } from "lucide-react";
 import { getUpcomingAppointments } from "../../api/appointmentApi";
 import { getExpertDoctors } from "../../api/doctorApi";
 import { getUser, updateProfile, getNotifications, deleteNotification } from "../../api/authApi";
@@ -37,6 +37,31 @@ export default function PatientDashboard() {
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
     } catch (error) {
       console.error('Error deleting notification:', error);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    try {
+      // Navigate based on notification type
+      if (notification.type === 'appointment_request') {
+        navigate('/patient/appointments');
+      } else if (notification.type === 'payment_required') {
+        navigate('/patient/appointments');
+      } else if (notification.type === 'appointment_reminder') {
+        navigate('/patient/appointments');
+      } else if (notification.type === 'payment_reminder') {
+        navigate('/patient/appointments');
+      } else if (notification.type === 'chat_message') {
+        navigate('/patient/chat');
+      } else if (notification.referenceId) {
+        // Generic navigation based on reference
+        navigate('/patient/appointments');
+      }
+      
+      // Delete notification after click
+      await handleDeleteNotification(notification.id);
+    } catch (error) {
+      console.error('Error handling notification click:', error);
     }
   };
 
@@ -109,45 +134,6 @@ export default function PatientDashboard() {
     }
   };
 
-  const handleDeletePatient = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "This action cannot be undone!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#10b981",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!"
-    });
-
-    if (result.isConfirmed) {
-      try {
-        setLoading(true);
-        // For now, just clear sessionStorage and redirect
-        // TODO: Add delete API call when available
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "Account deleted successfully",
-          confirmButtonColor: "#10b981"
-        }).then(() => {
-          sessionStorage.clear();
-          window.location.href = "/";
-        });
-      } catch (error) {
-        console.error(error);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Something went wrong",
-          confirmButtonColor: "#10b981"
-        });
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
   const openEditModal = async () => {
     try {
       const response = await getUser();
@@ -197,7 +183,8 @@ export default function PatientDashboard() {
         {notifications.slice(0, 3).map((notification) => (
           <div
             key={notification.id}
-            className={`p-4 rounded-xl border transition-all ${
+            onClick={() => handleNotificationClick(notification)}
+            className={`p-4 rounded-xl border transition-all cursor-pointer ${
               !notification.isRead
                 ? 'bg-brand-light/30 border-brand-primary/20'
                 : 'bg-gray-50/50 border-gray-100'
@@ -212,7 +199,10 @@ export default function PatientDashboard() {
                 </p>
               </div>
               <button
-                onClick={() => handleDeleteNotification(notification.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteNotification(notification.id);
+                }}
                 className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors cursor-pointer"
               >
                 <X size={14} />
@@ -248,7 +238,7 @@ export default function PatientDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h4 className="text-base font-extrabold text-gray-900 tracking-tight">Profile Management</h4>
-            <p className="text-xs text-gray-400 mt-0.5">Update your personal information or delete your account</p>
+            <p className="text-xs text-gray-400 mt-0.5">Update your personal information</p>
           </div>
           <div className="flex gap-3">
             <button
@@ -256,13 +246,6 @@ export default function PatientDashboard() {
               className="flex items-center gap-2 bg-brand-light text-brand-primary hover:bg-brand-primary hover:text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border border-brand-primary/20"
             >
               <Edit size={14} /> Edit Profile
-            </button>
-            <button
-              onClick={handleDeletePatient}
-              disabled={loading}
-              className="flex items-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border border-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Trash2 size={14} /> Delete Account
             </button>
           </div>
         </div>
@@ -326,7 +309,7 @@ export default function PatientDashboard() {
                 
                 return (
                   <div className="mt-5 flex gap-3">
-                    {showCallButton || upcomingAppointment.status === 'paid' || upcomingAppointment.status === 'accepted' ? (
+                    {showCallButton ? (
                       <button 
                         onClick={() => {
                           console.log("Upcoming appointment object:", upcomingAppointment);
@@ -346,12 +329,14 @@ export default function PatientDashboard() {
                         <Video className="h-4 w-4" /> Call available {timeDiff > 0 ? `${Math.ceil(timeDiff / (60 * 1000))} min before` : 'ended'}
                       </div>
                     )}
-                    <button 
-                      onClick={() => navigate(`/patient/chat?doctor=${upcomingAppointment.doctorId}`)}
-                      className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all border border-blue-200 cursor-pointer"
-                    >
-                      <MessageSquare className="h-4 w-4" /> Chat with Doctor
-                    </button>
+                    {upcomingAppointment.status === 'paid' && (
+                      <button 
+                        onClick={() => navigate(`/patient/chat?doctor=${upcomingAppointment.doctorId}`)}
+                        className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all border border-blue-200 cursor-pointer"
+                      >
+                        <MessageSquare className="h-4 w-4" /> Chat with Doctor
+                      </button>
+                    )}
                   </div>
                 );
               })()}

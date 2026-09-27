@@ -58,9 +58,11 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         {/* Brand Header */}
         <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
           <Link to="/admin/dashboard" className="flex items-center gap-2.5 text-white decoration-transparent">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-green-600 shadow-lg shadow-green-600/30">
-              🌿
-            </span>
+            <img
+              src="/logo.png"
+              alt="Leaf Homeo"
+              className="h-14 w-auto object-contain"
+            />
             <span className="font-sans text-lg font-bold tracking-tight">
               Leaf Homeo
             </span>
@@ -106,10 +108,20 @@ function TopHeader({ setSidebarOpen }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
+    // Only fetch notifications on dashboard page
+    const isDashboard = location.pathname === '/admin/dashboard';
+    
+    if (!isDashboard) {
+      // Clear notifications when not on dashboard
+      setNotifications([]);
+      return;
+    }
+
     fetchNotifications();
-  }, []);
+  }, [location.pathname]);
 
   const fetchNotifications = async () => {
     try {

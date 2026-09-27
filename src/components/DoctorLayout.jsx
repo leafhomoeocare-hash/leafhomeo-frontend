@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Calendar,
   Users,
-  FileText,
   Bell,
   Search,
   LogOut,
@@ -27,7 +26,6 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/doctor/dashboard" },
   { icon: Calendar, label: "Appointments", path: "/doctor/appointments" },
   { icon: Calendar, label: "Appointment Requests", path: "/doctor/appointment-requests" },
-  { icon: FileText, label: "Consultation History", path: "/doctor/consultation-history" },
   { icon: Clock, label: "Availability", path: "/doctor/availability" },
   { icon: BookOpen, label: "Blog", path: "/doctor/blog" },
   { icon: MessageSquare, label: "Chat", path: "/doctor/chat" },
@@ -55,15 +53,17 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         {/* Brand Header */}
         <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
           <Link to="/doctor/dashboard" className="flex items-center gap-2.5 text-white decoration-transparent">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-primary shadow-lg shadow-brand-primary/30 text-white font-bold">
-              🌿
-            </span>
+            <img
+              src="/logo.png"
+              alt="Leaf Homeo"
+              className="h-14 w-auto object-contain"
+            />
             <span className="font-sans text-lg font-bold tracking-tight">
               Leaf Homeo
             </span>
           </Link>
-          <button 
-            onClick={() => setSidebarOpen(false)} 
+          <button
+            onClick={() => setSidebarOpen(false)}
             className="rounded-lg p-1 hover:bg-white/10 lg:hidden text-white/80"
           >
             <X size={20} />
@@ -103,6 +103,7 @@ function TopHeader({ setSidebarOpen }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { showCustomToast, addToastWithNotification } = useNotification();
   const seenNotificationIds = useRef(new Set());
   const initialLoadDone = useRef(false);
@@ -155,15 +156,31 @@ function TopHeader({ setSidebarOpen }) {
   };
 
   const handleNotificationClick = async (notification) => {
-    // Delete notification from database
     try {
+      // Navigate based on notification type
+      if (notification.type === 'appointment_request') {
+        navigate('/doctor/appointment-requests');
+      } else if (notification.type === 'payment_required') {
+        navigate('/doctor/appointments');
+      } else if (notification.type === 'appointment_reminder') {
+        navigate('/doctor/appointments');
+      } else if (notification.type === 'payment_reminder') {
+        navigate('/doctor/appointments');
+      } else if (notification.type === 'chat_message') {
+        navigate('/doctor/chat');
+      } else if (notification.referenceId) {
+        // Generic navigation based on reference
+        navigate('/doctor/appointments');
+      }
+
+      // Delete notification from database
       await deleteNotification(notification.id);
       // Remove from local state
       setNotifications(prev =>
         prev.filter(n => n.id !== notification.id)
       );
     } catch (error) {
-      console.error('Error deleting notification:', error);
+      console.error('Error handling notification click:', error);
     }
 
     setShowNotifications(false);
@@ -189,6 +206,15 @@ function TopHeader({ setSidebarOpen }) {
   };
 
   useEffect(() => {
+    // Only fetch notifications on dashboard page
+    const isDashboard = location.pathname === '/doctor/dashboard';
+    
+    if (!isDashboard) {
+      // Clear notifications when not on dashboard
+      setNotifications([]);
+      return;
+    }
+
     // Initial fetch - show toasts for existing unread notifications
     fetchNotifications(true);
 
@@ -198,7 +224,7 @@ function TopHeader({ setSidebarOpen }) {
     }, 10000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     sessionStorage.clear();

@@ -291,12 +291,13 @@ export default function MyAppointments() {
     });
   };
 
-  const canJoinCall = (appointmentDateTime) => {
+  const canJoinCall = (appointment) => {
     const now = new Date();
-    const appointmentTime = new Date(appointmentDateTime);
+    const appointmentTime = new Date(appointment.appointmentDateTime);
     const timeDiff = appointmentTime - now;
     const minutesDiff = Math.ceil(timeDiff / (1000 * 60));
-    return minutesDiff >= -15 && minutesDiff <= 60;
+    // Allow joining 10 minutes before appointment until 30 minutes after
+    return minutesDiff >= -30 && minutesDiff <= 10;
   };
 
   const getInitials = (name) => {
@@ -484,7 +485,7 @@ export default function MyAppointments() {
                         className="flex items-center gap-2 px-4 py-2.5 h-10 min-w-[100px] justify-center bg-brand-primary text-white rounded-xl font-medium hover:bg-brand-hover transition-all text-sm border-2 border-brand-primary"
                       >
                         <Video size={16} />
-                        Join Call
+                        Start Video Call
                       </button>
                     )}
                     {appointment.status.toLowerCase() === "accepted" && (

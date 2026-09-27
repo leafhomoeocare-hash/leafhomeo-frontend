@@ -12,8 +12,7 @@ import {
   AlertCircle, 
   CheckCircle, 
   XCircle,
-  User,
-  Video
+  User
 } from "lucide-react";
 import { acceptAppointment, rejectAppointment, getDoctorAppointments } from "../../api/doctorApi";
 import Swal from "sweetalert2";
@@ -473,12 +472,6 @@ export default function AppointmentRequests() {
                           Reject
                         </button>
                       </>
-                    )}
-                    {appointment.status.toLowerCase() === "accepted" && (
-                      <button className="flex items-center gap-2 px-4 py-2.5 h-10 min-w-[100px] justify-center bg-brand-primary text-white rounded-xl font-medium hover:bg-brand-hover transition-all">
-                        <Video size={16} />
-                        Join Call
-                      </button>
                     )}
                   </div>
                 </div>

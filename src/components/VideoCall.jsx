@@ -84,11 +84,22 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       }
     }
 
-    initializePreCall();
+    // Try to auto-reconnect first
+    const attemptReconnect = async () => {
+      try {
+        setCallState('connecting');
+        await joinRoom();
+      } catch (err) {
+        console.log("Auto-reconnect failed, starting pre-call flow:", err.message);
+        initializePreCall();
+      }
+    };
+
+    attemptReconnect();
 
     return () => {
-      // Don't call cleanupRoom on unmount to avoid marking appointment as completed
-      // Just disconnect from room without notifying backend
+      // On unmount, just disconnect from room without marking as ended
+      // This allows reconnection on page reload
       if (room) {
         try {
           room.disconnect();
@@ -103,6 +114,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         track.detach().forEach(element => element.remove());
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appointmentId]);
 
   // Network status monitoring
@@ -293,10 +305,20 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       console.log("Token received, room name:", roomName);
       console.log("Attempting to connect to Twilio room:", roomName);
 
-      // Connect to room using pre-acquired tracks (Twilio best practice)
+      // Create local tracks if not already created
+      let tracksToUse = localTracks;
+      if (localTracks.length === 0) {
+        tracksToUse = await TwilioVideo.createLocalTracks({
+          audio: true,
+          video: { width: 640, height: 480, frameRate: 24, facingMode: 'user' }
+        });
+        setLocalTracks(tracksToUse);
+      }
+
+      // Connect to room using tracks
       const room = await TwilioVideo.connect(token, {
         name: roomName,
-        tracks: localTracks,
+        tracks: tracksToUse,
         dominantSpeaker: true,
         networkQuality: { local: 1, remote: 1 }
       });
@@ -333,7 +355,8 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         setCallState('ended');
         // Don't automatically notify backend on disconnect
         // Only notify when user intentionally ends the call
-        if (onEndCall) {
+        // Only call onEndCall if it was intentional end
+        if (intentionalEnd && onEndCall) {
           onEndCall();
         }
       });
@@ -362,7 +385,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         setParticipantCount(room.participants.size);
         removeParticipant(participant);
         
-        // If no one else is in the room, show a message but don't auto-end
+        // If no one else is in the room, show a message but don't auto-end or redirect
         // Let the user decide when to end the call
         if (room.participants.size === 0) {
           console.log("All participants left, waiting for user to end call");
@@ -638,6 +661,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     await cleanupRoom(true); // true = intentional end
     setCallState('ended');
 
+    // Only call onEndCall if it was intentional
     if (onEndCall) {
       onEndCall();
     }

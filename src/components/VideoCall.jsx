@@ -23,6 +23,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   const [networkStatus, setNetworkStatus] = useState('connected'); // 'connected', 'reconnecting', 'disconnected'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [intentionalEnd, setIntentionalEnd] = useState(false); // Flag to distinguish intentional end vs page reload
   
   // Consultation form states (doctor only)
   const [showConsultationForm, setShowConsultationForm] = useState(true); // Show by default for doctors
@@ -86,7 +87,21 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     initializePreCall();
 
     return () => {
-      cleanupRoom();
+      // Don't call cleanupRoom on unmount to avoid marking appointment as completed
+      // Just disconnect from room without notifying backend
+      if (room) {
+        try {
+          room.disconnect();
+        } catch (err) {
+          console.error('Error disconnecting room on unmount:', err);
+        }
+      }
+      
+      // Clean up local tracks
+      localTracks.forEach(track => {
+        track.stop();
+        track.detach().forEach(element => element.remove());
+      });
     };
   }, [appointmentId]);
 
@@ -142,7 +157,13 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       // Use Twilio's createLocalTracks as per their documentation
       const tracks = await TwilioVideo.createLocalTracks({
         audio: true,
-        video: { width: 640, height: 480, frameRate: 24, facingMode: 'user' }
+        video: { 
+          width: 640, 
+          height: 480, 
+          frameRate: 24, 
+          facingMode: 'user',
+          name: 'camera'
+        }
       });
       
       setLocalTracks(tracks);
@@ -153,7 +174,14 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         previewVideoRef.current.innerHTML = '';
         const mediaElement = localVideoTrack.attach();
         mediaElement.className = 'w-full h-full object-cover';
+        mediaElement.muted = true;
+        mediaElement.playsInline = true;
         previewVideoRef.current.appendChild(mediaElement);
+        
+        // Ensure video plays
+        mediaElement.play().catch(err => {
+          console.error('Error playing video preview:', err);
+        });
       }
       
       setPermissionError(null);
@@ -163,6 +191,8 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         setPermissionError('Camera and microphone access are required for video consultation. Please allow access in your browser settings and try again.');
       } else if (err.name === 'NotFoundError') {
         setPermissionError('No camera or microphone found. Please connect a camera and microphone and try again.');
+      } else if (err.name === 'NotReadableError') {
+        setPermissionError('Camera or microphone is already in use by another application. Please close other apps and try again.');
       } else {
         setPermissionError('Failed to access camera and microphone. Please check your devices and try again.');
       }
@@ -182,7 +212,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     }
   };
 
-  const cleanupRoom = async () => {
+  const cleanupRoom = async (isIntentional = false) => {
     if (room) {
       try {
         // Clear participant check interval if it exists
@@ -233,6 +263,15 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     });
     participantVideoRefs.current = {};
     participantAudioRefs.current = {};
+
+    // Only notify backend if it was an intentional end (not page reload)
+    if (isIntentional) {
+      try {
+        await endVideoCall(appointmentId);
+      } catch (err) {
+        console.error('Error notifying backend of call end:', err);
+      }
+    }
   };
 
   const joinRoom = async () => {
@@ -292,10 +331,8 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       room.on('disconnected', () => {
         console.log('Room disconnected - other party ended the call');
         setCallState('ended');
-        // Notify backend that call has ended
-        endVideoCall(appointmentId).catch(err => {
-          console.error('Error notifying backend of disconnection:', err);
-        });
+        // Don't automatically notify backend on disconnect
+        // Only notify when user intentionally ends the call
         if (onEndCall) {
           onEndCall();
         }
@@ -325,12 +362,13 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         setParticipantCount(room.participants.size);
         removeParticipant(participant);
         
-        // If no one else is in the room, end the call for both sides
+        // If no one else is in the room, show a message but don't auto-end
+        // Let the user decide when to end the call
         if (room.participants.size === 0) {
-          console.log("All participants left, ending call for both sides");
-          setTimeout(() => {
-            endCall();
-          }, 3000); // Wait 3 seconds before ending to handle temporary reconnections
+          console.log("All participants left, waiting for user to end call");
+          setCallState('ended');
+          // Show message that other party left
+          setError('The other participant has left the call. Please end the call to complete the appointment.');
         }
       });
 
@@ -579,15 +617,25 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
 
   const endCall = async () => {
     setShowEndCallConfirm(false);
+    setIntentionalEnd(true);
 
-    // End the call first regardless of form status
+    // Notify backend that this user ended the call
+    // Backend will complete appointment only when both parties have ended
     try {
-      await endVideoCall(appointmentId);
+      const response = await endVideoCall(appointmentId);
+      if (response.status === 1) {
+        // Show appropriate message based on whether both ended
+        if (response.message.includes('completed')) {
+          alert('Appointment completed successfully!');
+        } else {
+          alert('Call ended. Waiting for other participant to end the call to complete the appointment.');
+        }
+      }
     } catch (err) {
       console.error('Error notifying backend of call end:', err);
     }
 
-    await cleanupRoom();
+    await cleanupRoom(true); // true = intentional end
     setCallState('ended');
 
     if (onEndCall) {

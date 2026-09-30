@@ -62,6 +62,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   const previewVideoRef = useRef(null);
 
   useEffect(() => {
+    console.log("🔥 VIDEO CALL V2.0 - NEW VERSION WITH RECONNECTION FIX");
     console.log("VideoCall component mounted with appointmentId:", appointmentId);
     console.log("Type of appointmentId:", typeof appointmentId);
 
@@ -317,6 +318,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       setCallState('connecting');
       setError(null);
 
+      console.log("🚀 NEW VERSION V2.0 - Enhanced Video Call with Reconnection Fix");
       console.log("=== Starting joinRoom ===");
       console.log("Requesting video token for appointment:", appointmentId);
       
@@ -433,15 +435,13 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       setCallState(initialState);
       console.log("Initial call state set to:", initialState, "with", room.participants.size, "existing participants");
       
-      // Periodic check for participants (backup mechanism)
+      // Periodic check for participants (backup mechanism) - reduced spam
       const participantCheckInterval = setInterval(() => {
         const currentSize = room.participants.size;
-        console.log("Periodic participant check:", currentSize, "participants");
         if (currentSize > 0) {
-          console.log("Found participants, transitioning to in-call");
           setCallState('in-call');
         }
-      }, 2000);
+      }, 5000); // Increased from 2s to 5s to reduce console spam
       
       // Store interval ID for cleanup
       room.participantCheckInterval = participantCheckInterval;

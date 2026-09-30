@@ -84,13 +84,15 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       }
     }
 
-    // Try to auto-reconnect first
+    // Try to auto-reconnect first with better error handling
     const attemptReconnect = async () => {
       try {
         setCallState('connecting');
         await joinRoom();
       } catch (err) {
         console.log("Auto-reconnect failed, starting pre-call flow:", err.message);
+        // Clear any error before showing pre-call
+        setError(null);
         initializePreCall();
       }
     };
@@ -166,6 +168,13 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
 
   const checkPermissionsAndShowPreview = async () => {
     try {
+      // Clean up any existing tracks first
+      localTracks.forEach(track => {
+        track.stop();
+        track.detach().forEach(element => element.remove());
+      });
+      setLocalTracks([]);
+
       // Use Twilio's createLocalTracks as per their documentation
       const tracks = await TwilioVideo.createLocalTracks({
         audio: true,
@@ -188,11 +197,15 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         mediaElement.className = 'w-full h-full object-cover';
         mediaElement.muted = true;
         mediaElement.playsInline = true;
+        mediaElement.autoplay = true;
         previewVideoRef.current.appendChild(mediaElement);
         
-        // Ensure video plays
+        // Ensure video plays with better error handling
         mediaElement.play().catch(err => {
           console.error('Error playing video preview:', err);
+          // Try alternative method
+          mediaElement.srcObject = localVideoTrack.mediaStream;
+          mediaElement.play().catch(e => console.error('Alternative play failed:', e));
         });
       }
       
@@ -205,6 +218,19 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         setPermissionError('No camera or microphone found. Please connect a camera and microphone and try again.');
       } else if (err.name === 'NotReadableError') {
         setPermissionError('Camera or microphone is already in use by another application. Please close other apps and try again.');
+      } else if (err.name === 'OverconstrainedError') {
+        setPermissionError('Camera does not support the requested resolution. Trying with default settings...');
+        // Retry with default settings
+        try {
+          const tracks = await TwilioVideo.createLocalTracks({
+            audio: true,
+            video: true
+          });
+          setLocalTracks(tracks);
+          setPermissionError(null);
+        } catch (retryErr) {
+          setPermissionError('Failed to access camera with default settings. Please check your devices.');
+        }
       } else {
         setPermissionError('Failed to access camera and microphone. Please check your devices and try again.');
       }

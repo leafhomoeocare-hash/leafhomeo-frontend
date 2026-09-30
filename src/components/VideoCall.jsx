@@ -5,6 +5,7 @@ import * as TwilioVideo from 'twilio-video';
 import axios from 'axios';
 
 const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
+  // VERSION 2.0 - PAGE RELOAD FIX ENABLED
   const [room, setRoom] = useState(null);
   const [localTracks, setLocalTracks] = useState([]);
   const [remoteParticipants, setRemoteParticipants] = useState([]);
@@ -24,6 +25,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [intentionalEnd, setIntentionalEnd] = useState(false); // Flag to distinguish intentional end vs page reload
+  const [versionNumber, setVersionNumber] = useState('2.0.1'); // Version tracking
   
   // Consultation form states (doctor only)
   const [showConsultationForm, setShowConsultationForm] = useState(true); // Show by default for doctors
@@ -62,7 +64,8 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   const previewVideoRef = useRef(null);
 
   useEffect(() => {
-    console.log("🔥 VIDEO CALL V2.0 - NEW VERSION WITH RECONNECTION FIX");
+    console.log("🔥 VIDEO CALL V2.0.1 - PAGE RELOAD FIX");
+    console.log("Version Number:", versionNumber);
     console.log("VideoCall component mounted with appointmentId:", appointmentId);
     console.log("Type of appointmentId:", typeof appointmentId);
 

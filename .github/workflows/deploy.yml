@@ -4,6 +4,10 @@ on:
   push:
     branches: [ main ]
 
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -14,27 +18,18 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
           script: |
+            set -e
             export PATH=/root/.nvm/versions/node/v24.21.0/bin:$PATH
-            cd /root/Leaf-Homeo-care-frontend-
-            
-            # Backup .env file
-            cp .env .env.backup || true
-            
-            # Stash any local changes
-            git stash || true
-            
-            # Fetch and reset to latest
+            cd /root/leafhomeo-frontend
+
             git fetch origin
             git reset --hard origin/main
-            
-            # Restore .env file
-            cp .env.backup .env || true
-            
-            # Install and build
-            npm install
+
+            npm ci
             npm run build
-            
-            # Copy to web directory
+
+            # build successful hone ke baad hi purani files hatao
             rm -rf /var/www/leafhomoeocare-frontend/*
             cp -r dist/* /var/www/leafhomoeocare-frontend/

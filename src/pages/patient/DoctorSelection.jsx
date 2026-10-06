@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import { getExpertDoctors } from "../../api/doctorApi";
 import Swal from "sweetalert2";
+import useDebounce from "../../hooks/useDebounce";
 import {
   Star,
   MapPin,
@@ -22,10 +23,14 @@ export default function DoctorSelection() {
   const navigate = useNavigate();
   const location = useLocation();
   const [doctors, setDoctors] = useState([]);
+  const [allDoctors, setAllDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  
+
+  // Debounced search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   // Check if we should show doctor list (when accessed from sidebar or Browse Doctors button)
   const searchParams = new URLSearchParams(location.search);
   const showDoctorList = searchParams.get('showList') === 'true';
@@ -34,11 +39,29 @@ export default function DoctorSelection() {
     fetchDoctors();
   }, []);
 
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      const filtered = allDoctors.filter(doctor =>
+        (doctor.name && typeof doctor.name === 'string' && doctor.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
+        (doctor.specialization && typeof doctor.specialization === 'string' && doctor.specialization.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+      );
+      setDoctors(filtered);
+    } else {
+      setDoctors(allDoctors);
+    }
+  }, [debouncedSearchTerm, allDoctors]);
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+  };
+
   const fetchDoctors = async () => {
     try {
       setLoading(true);
-      const response = await getExpertDoctors();
+      const response = await getExpertDoctors("");
       if (response.status === 1) {
+        setAllDoctors(response.data || []);
         setDoctors(response.data || []);
       } else {
         Swal.fire({
@@ -59,11 +82,6 @@ export default function DoctorSelection() {
       setLoading(false);
     }
   };
-
-  const filteredDoctors = doctors.filter(doctor =>
-    doctor.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleBookAnyDoctor = () => {
     navigate("/patient/book/any-doctor");
@@ -201,20 +219,20 @@ export default function DoctorSelection() {
                 type="text"
                 placeholder="Search doctors by name or specialization..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium"
               />
             </div>
 
             {/* Doctors Grid */}
-            {filteredDoctors.length === 0 ? (
+            {doctors.length === 0 ? (
               <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
                 <AlertCircle className="h-12 w-12 text-gray-300" />
                 <p className="text-gray-500">No doctors found matching your search</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredDoctors.map((doctor) => (
+                {doctors.map((doctor) => (
                   <div
                     key={doctor.id}
                     className="group bg-white border-2 border-gray-100 rounded-3xl p-5 hover:border-brand-primary hover:shadow-xl hover:shadow-brand-primary/10 transition-all duration-300"

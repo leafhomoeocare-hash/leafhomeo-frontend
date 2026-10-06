@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import { 
-  MessageSquare, 
-  Send, 
-  Search, 
-  Check, 
-  CheckCheck, 
+import {
+  MessageSquare,
+  Send,
+  Search,
+  Check,
+  CheckCheck,
   MessageCircle,
   ChevronLeft,
   Activity
@@ -14,6 +14,7 @@ import {
 
 import AdminLayout from "../../components/AdminLayout";
 import { getContacts, getChatHistory } from "../../api/chatApi";
+import useDebounce from "../../hooks/useDebounce";
 
 export default function AdminChat() {
   const navigate = useNavigate();
@@ -33,6 +34,9 @@ export default function AdminChat() {
   const [isConnected, setIsConnected] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editText, setEditText] = useState("");
+
+  // Debounced search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const socketRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -181,8 +185,8 @@ export default function AdminChat() {
 
   // Filter contacts based on search
   const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    contact.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    contact.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+    contact.email?.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
 
   // Handle sending message

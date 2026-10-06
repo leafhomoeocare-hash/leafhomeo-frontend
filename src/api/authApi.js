@@ -79,6 +79,16 @@ export const deleteNotification = async (notificationId) => {
   return response.data;
 };
 
+export const markNotificationAsRead = async (notificationId) => {
+  const response = await API.put(`/api/v1/auth/notification/${notificationId}/mark-read`);
+  return response.data;
+};
+
+export const markAllNotificationsAsRead = async () => {
+  const response = await API.put("/api/v1/auth/notifications/mark-all-read");
+  return response.data;
+};
+
 export const truncateNotifications = async () => {
   const response = await API.delete("/api/v1/auth/truncate-notifications");
   return response.data;

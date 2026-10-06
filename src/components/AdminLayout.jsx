@@ -5,9 +5,6 @@ import {
   Stethoscope,
   Users,
   Calendar,
-  CreditCard,
-  Truck,
-  BarChart3,
   Bell,
   Search,
   LogOut,
@@ -20,7 +17,8 @@ import {
   Percent,
   MessageSquare
 } from "lucide-react";
-import { getNotifications } from "../api/authApi";
+import { getNotifications, getUser } from "../api/authApi";
+import { getImageUrl, getUserInitials } from "../utils/imageHelper";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
@@ -31,9 +29,6 @@ const navItems = [
   { icon: PenTool, label: "Blogs", path: "/admin/blogs" },
   { icon: Percent, label: "Coupons", path: "/admin/coupons" },
   { icon: FileText, label: "Legal Documents", path: "/admin/legal-documents" },
-  { icon: CreditCard, label: "Payments", path: "/admin/payments" },
-  { icon: Truck, label: "Courier Tracking", path: "/admin/courier" },
-  { icon: BarChart3, label: "Reports", path: "/admin/reports" },
   { icon: User, label: "Profile", path: "/admin/profile" },
 ];
 
@@ -51,19 +46,19 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-gray-900 text-white transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:self-start ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-brand-dark text-white transition-all duration-300 ease-in-out lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 lg:self-start ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Brand Header */}
-        <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
-          <Link to="/admin/dashboard" className="flex items-center gap-2.5 text-white decoration-transparent">
+        <div className="flex h-14 items-center justify-between px-4 border-b border-white/10">
+          <Link to="/admin/dashboard" className="flex items-center gap-2 text-white decoration-transparent">
             <img
               src="/logo.png"
               alt="Leaf Homeo"
-              className="h-14 w-auto object-contain"
+              className="h-10 w-auto object-contain"
             />
-            <span className="font-sans text-lg font-bold tracking-tight">
+            <span className="font-sans text-sm font-bold tracking-tight">
               Leaf Homeo
             </span>
           </Link>
@@ -76,7 +71,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         </div>
 
         {/* Sidebar Links */}
-        <nav className="flex-1 space-y-1.5 px-4 py-6 overflow-y-auto">
+        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -84,14 +79,14 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 decoration-transparent ${
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-200 decoration-transparent ${
                   isActive
-                    ? "bg-green-600 text-white shadow-md shadow-green-600/20 scale-[1.02]"
+                    ? "bg-brand-primary text-white shadow-md shadow-brand-primary/20 scale-[1.02]"
                     : "text-white/85 hover:bg-white/10 hover:text-white"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Icon size={18} className={isActive ? "text-white" : "text-white/70"} />
+                <Icon size={14} className={isActive ? "text-white" : "text-white/70"} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -107,8 +102,25 @@ function TopHeader({ setSidebarOpen }) {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Fetch user data
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await getUser();
+        if (response.status === 1) {
+          setUser(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     // Only fetch notifications on dashboard page
@@ -156,7 +168,7 @@ function TopHeader({ setSidebarOpen }) {
           <input
             type="text"
             placeholder="Search patients, doctors..."
-            className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 text-sm outline-hidden focus:border-brand-primary focus:bg-white transition-all"
+            className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 text-sm outline-hidden focus:border-brand-primary focus:bg-white focus:ring-2 focus:ring-brand-primary/20 transition-all"
           />
         </div>
       </div>
@@ -179,7 +191,7 @@ function TopHeader({ setSidebarOpen }) {
             <div className="absolute right-0 mt-2 w-80 rounded-xl border border-gray-100 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-fadeIn">
               <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
                 <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
-                <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-semibold text-brand-primary bg-brand-light px-2 py-0.5 rounded-full">
                   {notifications.filter(n => !n.isRead).length} new
                 </span>
               </div>
@@ -189,12 +201,12 @@ function TopHeader({ setSidebarOpen }) {
                     <div
                       key={notification.id}
                       className={`px-3 py-2.5 hover:bg-gray-50 cursor-pointer transition-colors ${
-                        !notification.isRead ? "bg-green-50/30" : ""
+                        !notification.isRead ? "bg-brand-light/30" : ""
                       }`}
                     >
                       <div className="flex items-start gap-2">
                         {!notification.isRead && (
-                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-green-600 shrink-0" />
+                          <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0" />
                         )}
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-bold text-gray-900 truncate">Notification</p>
@@ -220,8 +232,16 @@ function TopHeader({ setSidebarOpen }) {
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 rounded-xl p-1.5 hover:bg-gray-50 transition-colors"
           >
-            <div className="h-9 w-9 rounded-xl bg-green-50 flex items-center justify-center font-bold text-green-700 text-sm border border-green-600/10">
-              AD
+            <div className="h-9 w-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-secondary text-sm border border-brand-primary/10 overflow-hidden">
+              {user?.image ? (
+                <img 
+                  src={getImageUrl(user.image)} 
+                  alt="User profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{getUserInitials(user?.name, 'AD')}</span>
+              )}
             </div>
             <span className="text-xs text-gray-400 hidden sm:inline">▾</span>
           </button>

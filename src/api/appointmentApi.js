@@ -35,8 +35,10 @@ export const bookAppointment = async (bookingData) => {
   return response.data;
 };
 
-export const getMyAppointments = async () => {
-  const response = await API.get("/api/v1/appointment/my-appointments");
+export const getMyAppointments = async (page = 1, limit = 10) => {
+  const response = await API.get("/api/v1/appointment/my-appointments", {
+    params: { page, limit }
+  });
   return response.data;
 };
 
@@ -73,6 +75,13 @@ export const updateShippingStatus = async (appointmentId, shippingStatus, tracke
   const response = await API.put(`/api/v1/appointment/update-shipping-status/${appointmentId}`, {
     shippingStatus,
     trackerId
+  });
+  return response.data;
+};
+
+export const getPatientAppointments = async () => {
+  const response = await API.get("/api/v1/appointment/my-appointments", {
+    params: { page: 1, limit: 1000 }
   });
   return response.data;
 };

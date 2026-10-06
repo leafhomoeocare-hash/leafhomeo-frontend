@@ -13,58 +13,90 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const getBlogs = async () => {
-  const response = await API.get("/api/v1/blog/get-blogs");
+// Admin Blog APIs
+export const createBlog = async (blogData) => {
+  const formData = new FormData();
+
+  if (blogData.title) formData.append('title', String(blogData.title));
+  if (blogData.description) formData.append('description', String(blogData.description));
+  if (blogData.authorType) formData.append('authorType', String(blogData.authorType));
+  if (blogData.authorId) formData.append('authorId', String(blogData.authorId));
+  if (blogData.blogType) formData.append('blogType', String(blogData.blogType));
+
+  // Only append image if it's a File object
+  if (blogData.image instanceof File) {
+    formData.append('image', blogData.image);
+  }
+
+  const response = await API.post("/api/v1/admin/blog/create", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };
 
-export const createBlog = async (blogData) => {
-  console.log('Creating blog with data:', blogData);
-  
-  // Always use FormData for consistency with multer
-  const formData = new FormData();
-  formData.append('title', String(blogData.title || ''));
-  formData.append('description', String(blogData.description || ''));
-  formData.append('type', String(blogData.type || 'Patient'));
-  
-  // Add image file if it exists
-  if (blogData.Image instanceof File) {
-    console.log('Adding image file:', blogData.Image.name);
-    formData.append('Image', blogData.Image);
-  } else {
-    console.log('No image file provided');
-  }
-  
-  console.log('Sending FormData');
-  const response = await API.post("/api/v1/admin/add-blog", formData);
+export const getAllBlogs = async (page = 1, limit = 10, search = "") => {
+  const response = await API.post("/api/v1/admin/blog/get-all", { page, limit, search });
+  return response.data;
+};
+
+export const getBlogById = async (blogId) => {
+  const response = await API.post("/api/v1/admin/blog/get-by-id", { blogId });
   return response.data;
 };
 
 export const updateBlog = async (blogData) => {
   const formData = new FormData();
-  
-  console.log('Updating blog with data:', blogData);
-  
-  // Handle text fields
+
   if (blogData.id) formData.append('id', String(blogData.id));
   if (blogData.title) formData.append('title', String(blogData.title));
   if (blogData.description) formData.append('description', String(blogData.description));
-  if (blogData.type) formData.append('type', String(blogData.type));
-  
-  // Handle image file only if it exists
-  if (blogData.Image instanceof File) {
-    console.log('Adding image file:', blogData.Image.name);
-    formData.append('Image', blogData.Image);
-  } else {
-    console.log('No image file provided for update');
+  if (blogData.authorType) formData.append('authorType', String(blogData.authorType));
+  if (blogData.authorId) formData.append('authorId', String(blogData.authorId));
+  if (blogData.blogType) formData.append('blogType', String(blogData.blogType));
+
+  // Only append image if it's a File object
+  if (blogData.image instanceof File) {
+    formData.append('image', blogData.image);
   }
-  
-  // Don't set Content-Type header - let axios set it automatically with boundary
-  const response = await API.post("/api/v1/admin/update-blog", formData);
+
+  const response = await API.post("/api/v1/admin/blog/update", formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };
 
 export const deleteBlog = async (blogId) => {
-  const response = await API.post("/api/v1/admin/delete-blog", { id: blogId });
+  const response = await API.post("/api/v1/admin/blog/delete", { blogId });
+  return response.data;
+};
+
+export const getAuthors = async (type) => {
+  const response = await API.post("/api/v1/admin/blog/get-authors", { type });
+  return response.data;
+};
+
+// Patient Blog APIs
+export const getBlogsForPatient = async (page = 1, limit = 10, search = "") => {
+  const response = await API.post("/api/v1/patient/blog/get-all", { page, limit, search });
+  return response.data;
+};
+
+export const getBlogByIdForPatient = async (blogId) => {
+  const response = await API.post("/api/v1/patient/blog/get-by-id", { blogId });
+  return response.data;
+};
+
+// Doctor Blog APIs
+export const getBlogsForDoctor = async (page = 1, limit = 10, search = "") => {
+  const response = await API.post("/api/v1/doctor/blog/get-all", { page, limit, search });
+  return response.data;
+};
+
+export const getBlogByIdForDoctor = async (blogId) => {
+  const response = await API.post("/api/v1/doctor/blog/get-by-id", { blogId });
   return response.data;
 };

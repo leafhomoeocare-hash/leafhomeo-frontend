@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DoctorLayout from "../../components/DoctorLayout";
-import { 
-  Search, 
-  Calendar, 
-  Filter, 
-  Loader2, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  Search,
+  Calendar,
+  Filter,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
   XCircle,
   Clock,
   User,
@@ -15,6 +15,7 @@ import {
   ChevronDown
 } from "lucide-react";
 import { getDoctorConsultationHistory } from "../../api/doctorApi";
+import useDebounce from "../../hooks/useDebounce";
 
 const STATUS_STYLES = {
   completed: "bg-blue-100 text-blue-700 border-blue-200",
@@ -87,6 +88,9 @@ export default function ConsultationHistory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [showFilters, setShowFilters] = useState(false);
+
+  // Debounced search term
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   useEffect(() => {
     fetchConsultations();
@@ -169,8 +173,8 @@ export default function ConsultationHistory() {
 
   const filteredConsultations = consultations.filter(consultation => {
     const matchesFilter = filter === "all" || consultation.status === filter;
-    const matchesSearch = consultation.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         consultation.reason?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = consultation.patientName?.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+                         consultation.reason?.toLowerCase().includes(debouncedSearchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 

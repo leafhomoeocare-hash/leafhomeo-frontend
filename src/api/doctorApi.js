@@ -22,8 +22,8 @@ export const getDoctors = async (page, limit, search) => {
   return response.data;
 };
 
-export const getExpertDoctors = async () => {
-  const response = await API.post("/api/v1/patient/get-expert-doctors");
+export const getExpertDoctors = async (search = "") => {
+  const response = await API.post("/api/v1/patient/get-expert-doctors", { search });
   return response.data;
 };
 
@@ -43,7 +43,30 @@ export const addDoctor = async (doctorData) => {
     IsExpert: doctorData.isExpert ?? doctorData.IsExpert ?? false,
   };
   delete payload.isExpert;
-  const response = await API.post("/api/v1/admin/add", payload);
+
+  let response;
+  if (doctorData.image instanceof File) {
+    const formData = new FormData();
+    Object.keys(payload).forEach((key) => {
+      // Handle arrays properly
+      if (Array.isArray(payload[key])) {
+        payload[key].forEach((item) => {
+          formData.append(`${key}[]`, item);
+        });
+      } else if (key !== 'image') {
+        formData.append(key, payload[key]);
+      }
+    });
+    // Add image separately
+    formData.append('image', doctorData.image);
+    response = await API.post("/api/v1/admin/add", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  } else {
+    response = await API.post("/api/v1/admin/add", payload);
+  }
   return response.data;
 };
 
@@ -58,13 +81,22 @@ export const updateDoctor = async (doctorData) => {
     IsExpert: doctorData.isExpert ?? doctorData.IsExpert ?? false,
   };
   delete payload.isExpert;
-  
+
   let response;
   if (doctorData.image instanceof File) {
     const formData = new FormData();
     Object.keys(payload).forEach((key) => {
-      formData.append(key, payload[key]);
+      // Handle arrays properly
+      if (Array.isArray(payload[key])) {
+        payload[key].forEach((item) => {
+          formData.append(`${key}[]`, item);
+        });
+      } else if (key !== 'image') {
+        formData.append(key, payload[key]);
+      }
     });
+    // Add image separately
+    formData.append('image', doctorData.image);
     response = await API.post("/api/v1/admin/updatedoctor", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -107,8 +139,10 @@ export const deleteAvailability = async (availabilityId) => {
   return response.data;
 };
 
-export const getDoctorAppointments = async (status) => {
-  const response = await API.post("/api/v1/doctor/appointments", { status });
+export const getDoctorAppointments = async (status, page = 1, limit = 10) => {
+  const response = await API.post("/api/v1/doctor/appointments", { status }, {
+    params: { page, limit }
+  });
   return response.data;
 };
 

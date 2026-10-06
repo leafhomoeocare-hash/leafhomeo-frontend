@@ -2,11 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Swal from "sweetalert2";
 import { adminLogin } from "../../api/authApi";
-import { Leaf, Lock, Mail, Eye, EyeOff } from "lucide-react";
+import { Leaf, Lock, Mail, Eye, EyeOff, AlertCircle } from "lucide-react";
 
 const AdminLogin = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -31,23 +32,13 @@ const AdminLogin = () => {
         // Store token and user data in sessionStorage for multi-tab isolation
         sessionStorage.setItem("token", res.data.token);
         sessionStorage.setItem("user", JSON.stringify(res.data));
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: res.message,
-          confirmButtonColor: '#00B100',
-        }).then(() => {
-          navigate("/admin/dashboard");
-        });
+        navigate("/admin/dashboard");
+      } else {
+        setError(res.message || "Login failed");
       }
     } catch (error) {
       console.log(error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.message || "Something went wrong",
-        confirmButtonColor: '#00B100',
-      });
+      setError(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -74,6 +65,14 @@ const AdminLogin = () => {
             Admin Management Console
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 flex items-center gap-2 p-4 bg-red-50 rounded-xl border border-red-200 text-red-600">
+            <AlertCircle className="h-5 w-5" />
+            <p className="text-sm font-medium">{error}</p>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -130,7 +129,7 @@ const AdminLogin = () => {
           <div className="text-right">
             <Link
               to="/admin/forgot-password"
-              className="text-xs font-bold text-brand-primary hover:underline cursor-pointer"
+              className="text-xs font-bold text-brand-secondary hover:text-brand-primary transition-colors underline decoration-brand-secondary/30 hover:decoration-brand-primary/50 cursor-pointer"
             >
               Forgot Password?
             </Link>

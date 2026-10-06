@@ -12,7 +12,8 @@ const Payment = ({ appointmentId, amount, onSuccess, onCancel }) => {
   const [discountedAmount, setDiscountedAmount] = useState(amount);
   const [couponError, setCouponError] = useState("");
   const [availableCoupons, setAvailableCoupons] = useState([]);
-  const [showCoupons, setShowCoupons] = useState(true);
+  const [showCoupons, setShowCoupons] = useState(false);
+  const [showCouponSection, setShowCouponSection] = useState(false);
   const [loadingCoupons, setLoadingCoupons] = useState(false);
 
   useEffect(() => {
@@ -150,10 +151,49 @@ const Payment = ({ appointmentId, amount, onSuccess, onCancel }) => {
 
   return (
     <div className="space-y-4">
+      {/* Price Breakdown */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
+        <div className="flex justify-between text-gray-600">
+          <span>Original Amount:</span>
+          <span className="font-medium">₹{amount}</span>
+        </div>
+        {appliedCoupon && (
+          <div className="flex justify-between text-green-600">
+            <span>Discount:</span>
+            <span className="font-medium">-₹{appliedCoupon.discountAmount}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
+          <span>Total Amount:</span>
+          <span>₹{discountedAmount}</span>
+        </div>
+      </div>
+
+      {/* Coupon Section Toggle */}
+      {!appliedCoupon && (
+        <button
+          onClick={() => setShowCouponSection(!showCouponSection)}
+          className="w-full text-sm font-medium text-green-600 hover:text-green-700 py-2 text-center"
+        >
+          {showCouponSection ? (
+            <>
+              <ChevronUp className="h-4 w-4 inline mr-1" />
+              Hide Coupon Section
+            </>
+          ) : (
+            <>
+              <ChevronDown className="h-4 w-4 inline mr-1" />
+              Have a coupon code?
+            </>
+          )}
+        </button>
+      )}
+
       {/* Coupon Section */}
-      <div className="bg-gray-50 rounded-lg p-4">
+      {showCouponSection && (
+        <div className="bg-gray-50 rounded-lg p-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Have a coupon code?
+          Enter coupon code
         </label>
         <div className="flex gap-2">
           <input
@@ -211,25 +251,8 @@ const Payment = ({ appointmentId, amount, onSuccess, onCancel }) => {
         {/* Available Coupons Section */}
         {availableCoupons.length > 0 && !appliedCoupon && (
           <div className="mt-4">
-            <button
-              onClick={() => setShowCoupons(!showCoupons)}
-              className="flex items-center gap-2 text-sm font-medium text-green-600 hover:text-green-700 mb-2"
-            >
-              {showCoupons ? (
-                <>
-                  <ChevronUp className="h-4 w-4" />
-                  Hide Available Coupons
-                </>
-              ) : (
-                <>
-                  <ChevronDown className="h-4 w-4" />
-                  Show Available Coupons ({availableCoupons.length})
-                </>
-              )}
-            </button>
-
-            {showCoupons && (
-              <div className="space-y-2 max-h-60 overflow-y-auto">
+            <p className="text-sm font-medium text-gray-700 mb-2">Available Coupons:</p>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
                 {loadingCoupons ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="h-5 w-5 animate-spin text-green-600" />
@@ -263,28 +286,10 @@ const Payment = ({ appointmentId, amount, onSuccess, onCancel }) => {
                   ))
                 )}
               </div>
-            )}
           </div>
         )}
       </div>
-
-      {/* Price Breakdown */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-2">
-        <div className="flex justify-between text-gray-600">
-          <span>Original Amount:</span>
-          <span className="font-medium">₹{amount}</span>
-        </div>
-        {appliedCoupon && (
-          <div className="flex justify-between text-green-600">
-            <span>Discount:</span>
-            <span className="font-medium">-₹{appliedCoupon.discountAmount}</span>
-          </div>
-        )}
-        <div className="flex justify-between text-lg font-bold text-gray-900 pt-2 border-t">
-          <span>Total Amount:</span>
-          <span>₹{discountedAmount}</span>
-        </div>
-      </div>
+      )}
 
       {/* Payment Button */}
       <button

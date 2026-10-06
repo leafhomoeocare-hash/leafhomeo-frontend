@@ -57,6 +57,8 @@ function AddDoctorModal({ open, onClose, onSave, doctorToEdit = null }) {
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
     if (doctorToEdit) {
@@ -71,10 +73,13 @@ function AddDoctorModal({ open, onClose, onSave, doctorToEdit = null }) {
         bio: doctorToEdit.bio || "",
         isExpert: doctorToEdit.isExpert || doctorToEdit.IsExpert || false,
       });
+      setPreviewImage(doctorToEdit.user?.image ? `${import.meta.env.VITE_API_URL}/${doctorToEdit.user.image}` : null);
     } else {
       setForm(emptyForm);
+      setPreviewImage(null);
     }
     setErrors({});
+    setImageFile(null);
   }, [doctorToEdit, open]);
 
   if (!open) return null;
@@ -91,7 +96,10 @@ function AddDoctorModal({ open, onClose, onSave, doctorToEdit = null }) {
     else if (!/^\S+@\S+\.\S+$/.test(form.email)) e.email = "Enter a valid email";
     if (!form.mobile.trim()) e.mobile = "Mobile number is required";
     else if (!/^[+]?[\d\s-]{10,15}$/.test(form.mobile)) e.mobile = "Enter a valid mobile number";
-    if (!form.specialization || form.specialization.length === 0) e.specialization = "At least one specialization is required";
+    // Check if there are specializations in array or temp field
+    const hasSpecializations = (form.specialization && form.specialization.length > 0) ||
+                              (form.tempSpecialization && form.tempSpecialization.trim());
+    if (!hasSpecializations) e.specialization = "At least one specialization is required";
     if (!form.qualification.trim()) e.qualification = "Qualification is required";
     if (!form.experience || Number(form.experience) < 0) e.experience = "Enter valid years of experience";
     if (!form.consultationFee || Number(form.consultationFee) <= 0) e.consultationFee = "Enter a valid fee";
@@ -100,13 +108,27 @@ function AddDoctorModal({ open, onClose, onSave, doctorToEdit = null }) {
   };
 
   const handleSubmit = async () => {
+    // Add tempSpecialization to array if it exists
+    let formToSubmit = { ...form };
+    if (form.tempSpecialization && form.tempSpecialization.trim()) {
+      formToSubmit = {
+        ...formToSubmit,
+        specialization: [...form.specialization, form.tempSpecialization.trim()],
+        tempSpecialization: '',
+      };
+    }
+
+    // Remove tempSpecialization from final submission
+    delete formToSubmit.tempSpecialization;
+
     if (!validate()) return;
     try {
       setSubmitting(true);
       await onSave({
-        ...form,
-        experience: Number(form.experience),
-        consultationFee: Number(form.consultationFee),
+        ...formToSubmit,
+        experience: Number(formToSubmit.experience),
+        consultationFee: Number(formToSubmit.consultationFee),
+        image: imageFile,
       });
       setForm(emptyForm);
       setErrors({});
@@ -315,6 +337,35 @@ function AddDoctorModal({ open, onClose, onSave, doctorToEdit = null }) {
             </div>
           </div>
 
+          <div>
+            <FieldLabel>Profile Image</FieldLabel>
+            <div className="flex items-center gap-4">
+              {previewImage && (
+                <div className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-gray-200">
+                  <img
+                    src={previewImage}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                      setImageFile(file);
+                      setPreviewImage(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-primary file:text-white hover:file:bg-brand-hover cursor-pointer"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-3 bg-gray-50/60">
             <div className="flex items-center gap-2">
               <Award size={18} className="text-brand-primary" />
@@ -378,7 +429,7 @@ export default function DoctorManagement() {
   };
 
   const [search, setSearch] = useState("");
-  const [appliedSearch, setAppliedSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -388,7 +439,7 @@ export default function DoctorManagement() {
   const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getDoctors(currentPage, entriesPerPage, appliedSearch);
+      const response = await getDoctors(currentPage, entriesPerPage, debouncedSearch);
       if (response.status === 1) {
         setDoctors(response.data.doctors);
         setTotalRecords(response.data.totalRecords);
@@ -399,20 +450,27 @@ export default function DoctorManagement() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, entriesPerPage, appliedSearch]);
+  }, [currentPage, entriesPerPage, debouncedSearch]);
 
   useEffect(() => {
     fetchDoctors();
   }, [fetchDoctors]);
 
-  const handleSearchClick = () => {
-    setAppliedSearch(search);
-    setCurrentPage(1);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleEntriesChange = (value) => {
     setEntriesPerPage(value);
     setCurrentPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
   };
 
   const handleEditClick = (doc) => {
@@ -545,19 +603,19 @@ export default function DoctorManagement() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearchClick()}
             placeholder="Search by name, email, mobile, specialization..."
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all focus:border-brand-primary"
+            className="w-full h-11 pl-10 pr-10 rounded-xl border border-gray-200 text-sm outline-hidden transition-all focus:border-brand-primary"
           />
+          {search && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
         <div className="flex gap-2">
-          <button
-            onClick={handleSearchClick}
-            className="flex h-11 items-center justify-center gap-2 text-white px-5 rounded-xl text-sm font-semibold shadow-xs transition-colors bg-brand-primary hover:bg-brand-hover cursor-pointer"
-          >
-            <Search size={16} />
-            Search
-          </button>
           <button
             onClick={() => {
               setDoctorToEdit(null);
@@ -622,9 +680,21 @@ export default function DoctorManagement() {
                 <tr key={doc.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4.5 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-xs flex-shrink-0 border border-brand-primary/10">
-                        {doc.user?.name?.replace("Dr. ", "")?.[0] || "D"}
-                      </div>
+                      {doc.user?.image ? (
+                        <img
+                          src={`${import.meta.env.VITE_API_URL}/${doc.user.image.replace(/\\/g, '/')}`}
+                          alt={doc.user?.name || "Doctor"}
+                          className="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
+                          }}
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-xs flex-shrink-0 border border-brand-primary/10">
+                          {doc.user?.name?.replace("Dr. ", "")?.[0] || "D"}
+                        </div>
+                      )}
                       <div>
                         <span className="font-semibold text-gray-900 flex items-center gap-1.5">
                           {doc.user?.name}
@@ -706,11 +776,11 @@ export default function DoctorManagement() {
                 <div className="flex items-center gap-3 min-w-0">
                   {doc.user?.image ? (
                     <img
-                      src={`http://localhost:5000/${doc.user.image.replace(/\\/g, '/')}`}
+                      src={`${import.meta.env.VITE_API_URL}/${doc.user.image.replace(/\\/g, '/')}`}
                       alt={doc.user?.name || "Doctor"}
                       className="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                       onError={(e) => {
-                        e.target.onerror = null; 
+                        e.target.onerror = null;
                         e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
                       }}
                     />

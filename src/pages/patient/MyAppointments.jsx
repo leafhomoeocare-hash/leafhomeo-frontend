@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import { getMyAppointments, cancelAppointment } from "../../api/appointmentApi";
@@ -10,17 +10,21 @@ import {
   Clock,
   Video,
   X,
-  Search, 
-  Filter,
+  Search,
   Loader2,
   AlertCircle,
   CheckCircle,
   XCircle,
-  MoreVertical,
   MessageSquare,
   Star,
   Send,
-  CreditCard
+  CreditCard,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown
 } from "lucide-react";
 
 export default function MyAppointments() {
@@ -31,25 +35,38 @@ export default function MyAppointments() {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Filters & Search
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Sorting & Pagination
+  const [sortColumn, setSortColumn] = useState("appointmentDateTime");
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
+
+  // Modals & Action loading
   const [cancellingId, setCancellingId] = useState(null);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
-  const [selectedAppointments, setSelectedAppointments] = useState(new Set());
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedAppointmentForPayment, setSelectedAppointmentForPayment] = useState(null);
 
   useEffect(() => {
     if (bookingSuccess) {
-      // Clear the state after showing success
       window.history.replaceState({}, document.title);
     }
     fetchAppointments();
-  }, [filter, bookingSuccess]);
+  }, [bookingSuccess]);
+
+  // Reset pagination when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filter, entriesPerPage]);
 
   const fetchAppointments = async () => {
     try {
@@ -116,16 +133,6 @@ export default function MyAppointments() {
     } finally {
       setCancellingId(null);
     }
-  };
-
-  const handleCheckboxChange = (appointmentId) => {
-    const newSelected = new Set(selectedAppointments);
-    if (newSelected.has(appointmentId)) {
-      newSelected.delete(appointmentId);
-    } else {
-      newSelected.add(appointmentId);
-    }
-    setSelectedAppointments(newSelected);
   };
 
   const handleOpenReviewModal = (appointment) => {
@@ -213,67 +220,60 @@ export default function MyAppointments() {
     });
   };
 
-  const filteredAppointments = appointments.filter(apt => {
-    const matchesSearch = apt.doctorName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === "all" || apt.status.toLowerCase() === filter.toLowerCase();
-    return matchesSearch && matchesFilter;
-  });
-
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
+  // Status Styles & Badges
+  const getStatusBadge = (status) => {
+    const s = (status || "").toLowerCase();
+    switch (s) {
       case "pending":
-        return "bg-amber-100 text-amber-700 border-amber-200";
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+            <Clock className="w-3 h-3 text-amber-500" />
+            Pending
+          </span>
+        );
       case "accepted":
       case "confirmed":
-        return "bg-emerald-100 text-emerald-700 border-emerald-200";
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <CheckCircle className="w-3 h-3 text-emerald-500" />
+            {s === "accepted" ? "Accepted" : "Confirmed"}
+          </span>
+        );
       case "paid":
-        return "bg-teal-100 text-teal-700 border-teal-200";
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200">
+            <CheckCircle className="w-3 h-3 text-teal-500" />
+            Paid
+          </span>
+        );
       case "completed":
-        return "bg-blue-100 text-blue-700 border-blue-200";
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+            <CheckCircle className="w-3 h-3 text-blue-500" />
+            Completed
+          </span>
+        );
       case "cancelled":
-        return "bg-rose-100 text-rose-700 border-rose-200";
+      case "rejected":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+            <XCircle className="w-3 h-3 text-rose-500" />
+            {s === "cancelled" ? "Cancelled" : "Rejected"}
+          </span>
+        );
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
-    }
-  };
-
-  const getStatusBorderColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return "border-l-amber-500";
-      case "accepted":
-      case "confirmed":
-        return "border-l-emerald-500";
-      case "paid":
-        return "border-l-teal-500";
-      case "completed":
-        return "border-l-blue-500";
-      case "cancelled":
-        return "border-l-rose-500";
-      default:
-        return "border-l-gray-400";
-    }
-  };
-
-  const getStatusIcon = (status) => {
-    switch (status.toLowerCase()) {
-      case "pending":
-        return <Clock className="h-4 w-4" />;
-      case "accepted":
-      case "confirmed":
-      case "paid":
-        return <CheckCircle className="h-4 w-4" />;
-      case "completed":
-        return <CheckCircle className="h-4 w-4" />;
-      case "cancelled":
-        return <XCircle className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200">
+            {status}
+          </span>
+        );
     }
   };
 
   const formatDate = (dateString) => {
+    if (!dateString) return "-";
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -283,7 +283,9 @@ export default function MyAppointments() {
   };
 
   const formatTime = (dateString) => {
+    if (!dateString) return "-";
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "-";
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -292,11 +294,11 @@ export default function MyAppointments() {
   };
 
   const canJoinCall = (appointment) => {
+    if (!appointment?.appointmentDateTime) return false;
     const now = new Date();
     const appointmentTime = new Date(appointment.appointmentDateTime);
     const timeDiff = appointmentTime - now;
     const minutesDiff = Math.ceil(timeDiff / (1000 * 60));
-    // Allow joining 10 minutes before appointment until 30 minutes after
     return minutesDiff >= -30 && minutesDiff <= 10;
   };
 
@@ -326,7 +328,72 @@ export default function MyAppointments() {
 
   const getStatusCount = (status) => {
     if (status === "all") return appointments.length;
-    return appointments.filter(app => app.status.toLowerCase() === status.toLowerCase()).length;
+    return appointments.filter(app => (app.status || "").toLowerCase() === status.toLowerCase()).length;
+  };
+
+  // Sorting Handler
+  const handleSort = (columnKey) => {
+    if (sortColumn === columnKey) {
+      setSortOrder(prev => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(columnKey);
+      setSortOrder("asc");
+    }
+  };
+
+  // Filtered & Sorted Appointments
+  const processedAppointments = useMemo(() => {
+    let result = appointments.filter(apt => {
+      const term = searchTerm.toLowerCase().trim();
+      const matchesSearch =
+        !term ||
+        (apt.doctorName || "").toLowerCase().includes(term) ||
+        (apt.appointmentId || "").toString().toLowerCase().includes(term) ||
+        (apt.reason || apt.symptoms || "").toLowerCase().includes(term);
+
+      const matchesFilter = filter === "all" || (apt.status || "").toLowerCase() === filter.toLowerCase();
+      return matchesSearch && matchesFilter;
+    });
+
+    // Sorting
+    result.sort((a, b) => {
+      let aVal = a[sortColumn];
+      let bVal = b[sortColumn];
+
+      if (sortColumn === "appointmentDateTime") {
+        aVal = new Date(a.appointmentDateTime || 0).getTime();
+        bVal = new Date(b.appointmentDateTime || 0).getTime();
+      } else if (sortColumn === "appointmentId") {
+        aVal = (a.appointmentId || a.id || "").toString();
+        bVal = (b.appointmentId || b.id || "").toString();
+      } else if (typeof aVal === "string") {
+        aVal = (aVal || "").toLowerCase();
+        bVal = (bVal || "").toLowerCase();
+      }
+
+      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    return result;
+  }, [appointments, filter, searchTerm, sortColumn, sortOrder]);
+
+  // Pagination Slice
+  const totalEntries = processedAppointments.length;
+  const totalPages = Math.ceil(totalEntries / entriesPerPage) || 1;
+  const startIndex = (currentPage - 1) * entriesPerPage;
+  const currentAppointments = processedAppointments.slice(startIndex, startIndex + entriesPerPage);
+
+  const getSortIcon = (columnKey) => {
+    if (sortColumn !== columnKey) {
+      return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />;
+    }
+    return sortOrder === "asc" ? (
+      <ArrowUp className="w-3.5 h-3.5 text-brand-primary" />
+    ) : (
+      <ArrowDown className="w-3.5 h-3.5 text-brand-primary" />
+    );
   };
 
   if (loading) {
@@ -341,253 +408,427 @@ export default function MyAppointments() {
 
   return (
     <PatientLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">My Appointments</h1>
-          <p className="text-gray-500">View and manage your appointments</p>
+        <div>
+          <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">My Appointments</h1>
+          <p className="text-xs text-gray-500 mt-1 font-medium">View, search, and manage all your homeopathic consultations</p>
         </div>
 
         {/* Success Message */}
         {bookingSuccess && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-            <CheckCircle className="h-5 w-5 text-green-600" />
-            <p className="text-green-800 font-medium">{location.state?.message}</p>
+          <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-3">
+            <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+            <p className="text-emerald-800 text-xs font-semibold">{location.state?.message || "Appointment booked successfully!"}</p>
             <button
               onClick={() => window.history.replaceState({}, document.title)}
-              className="ml-auto text-green-600 hover:text-green-800"
+              className="ml-auto text-emerald-600 hover:text-emerald-800"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
           </div>
         )}
-
-        {/* Search and Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by doctor name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium text-sm shadow-sm"
-            />
-          </div>
-          <div className="flex gap-2">
-            {["all", "Pending", "Confirmed", "Paid", "Completed", "Cancelled"].map((status) => (
-              <button
-                key={status}
-                onClick={() => setFilter(status.toLowerCase())}
-                className={`px-4 py-2.5 rounded-xl font-medium transition-all text-sm flex items-center gap-2 ${
-                  filter === status.toLowerCase()
-                    ? status === "Cancelled"
-                      ? "bg-rose-500 text-white border border-rose-500 shadow-md shadow-rose-500/20"
-                      : "bg-brand-primary text-white border border-brand-primary shadow-md shadow-brand-primary/20"
-                    : status === "Cancelled"
-                      ? "bg-white border border-gray-200 text-rose-600 hover:border-rose-300 hover:bg-rose-50"
-                      : "bg-white border border-gray-200 text-gray-700 hover:border-brand-primary hover:bg-gray-50"
-                }`}
-              >
-                {status}
-                <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  filter === status.toLowerCase()
-                    ? "bg-white/20 text-white"
-                    : "bg-gray-100 text-gray-600"
-                }`}>
-                  {getStatusCount(status)}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 flex items-center gap-2 p-4 bg-red-50 rounded-xl border border-red-200 text-red-600">
-            <AlertCircle className="h-5 w-5" />
-            <p className="text-sm font-medium">{error}</p>
+          <div className="flex items-center gap-2 p-3.5 bg-rose-50 rounded-xl border border-rose-200 text-rose-600">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <p className="text-xs font-semibold">{error}</p>
           </div>
         )}
 
-        {/* Appointments List */}
-        {filteredAppointments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[300px] gap-4 p-8 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-            <Calendar className="h-12 w-12 text-gray-300" />
-            <p className="text-gray-500 font-medium">No appointments found</p>
-            <button
-              onClick={() => navigate("/patient/book")}
-              className="px-6 py-3 bg-brand-primary text-white rounded-xl hover:bg-brand-hover transition-all text-sm font-semibold shadow-md shadow-brand-primary/20"
-            >
-              Book New Appointment
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filteredAppointments.map((appointment, index) => (
-              <div
-                key={appointment.id}
-                className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} border border-gray-200 rounded-2xl p-6 hover:border-brand-primary/50 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 shadow-sm border-l-4 ${getStatusBorderColor(appointment.status)}`}
-              >
-                <div className="flex flex-col lg:flex-row items-start lg:items-center gap-5 lg:gap-8 overflow-x-auto pb-2">
-                  {/* Doctor Info */}
-                  <div className="flex items-center gap-4 min-w-[220px] flex-shrink-0">
-                    {appointment.doctorImage ? (
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-brand-light to-brand-primary/20 overflow-hidden border-2 border-white shadow-md flex-shrink-0">
-                        <img
-                          src={appointment.doctorImage}
-                          alt={appointment.doctorName}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className={`w-16 h-16 rounded-xl ${getAvatarColor(appointment.doctorName)} flex items-center justify-center text-white font-bold text-xl shadow-md flex-shrink-0`}>
-                        {getInitials(appointment.doctorName)}
-                      </div>
-                    )}
-                    <div className="flex-shrink-0">
-                      <h3 className="font-extrabold text-gray-900 text-lg">{appointment.doctorName}</h3>
-                      <p className="text-xs text-gray-500 mt-1">{appointment.reason || appointment.symptoms || "No reason"}</p>
-                      <p className="text-xs font-mono text-gray-400">ID: {appointment.appointmentId}</p>
-                    </div>
-                  </div>
+        {/* Filters and Controls */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-4 space-y-4">
+          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[240px]">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by doctor, ID, or reason..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 text-xs font-medium rounded-xl border border-gray-300 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-gray-800"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
 
-                  {/* Appointment Details - Compact Format */}
-                  <div className="flex items-center gap-3 min-w-[320px] flex-shrink-0">
-                    <div className="flex items-center gap-2 text-base">
-                      <span className="font-semibold text-gray-900">{formatDate(appointment.appointmentDateTime)}</span>
-                      <span className="text-gray-400">•</span>
-                      <span className="font-semibold text-gray-900">{formatTime(appointment.appointmentDateTime)}</span>
-                      <span className="text-gray-400">•</span>
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-bold border ${getStatusColor(appointment.status)}`}>
-                        {getStatusIcon(appointment.status)}
-                        {appointment.status.charAt(0).toUpperCase() + appointment.status.slice(1)}
-                      </span>
-                      <span className="text-gray-400">•</span>
-                      <span className="text-xs text-brand-primary font-semibold">{appointment.requestType === "any_doctor" ? "Any Doctor" : appointment.requestType === "specific_doctor" ? "Specific Doctor" : appointment.requestType || "Any Doctor"}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-3 flex-shrink-0 flex-wrap lg:flex-nowrap w-full lg:w-auto pl-0 lg:pl-6 border-l-0 lg:border-l border-gray-200 lg:ml-3">
-                    {appointment.status.toLowerCase() === "paid" && appointment.doctorUserId && (
-                      <button
-                        onClick={() => navigate("/patient/chat", { state: { selectUserId: appointment.doctorUserId } })}
-                        className="flex items-center gap-2 px-4 py-2.5 h-10 min-w-[100px] justify-center bg-white text-brand-dark rounded-xl font-medium hover:bg-gray-50 transition-all text-sm border-2 border-brand-primary"
-                      >
-                        <MessageSquare size={15} />
-                        Chat
-                      </button>
-                    )}
-                    {appointment.status.toLowerCase() === "paid" && canJoinCall(appointment) && (
-                      <button
-                        onClick={() => navigate(`/patient/video-call?appointmentId=${appointment.id}`)}
-                        className="flex items-center gap-2 px-4 py-2.5 h-10 min-w-[100px] justify-center bg-brand-primary text-white rounded-xl font-medium hover:bg-brand-hover transition-all text-sm border-2 border-brand-primary"
-                      >
-                        <Video size={16} />
-                        Start Video Call
-                      </button>
-                    )}
-                    {appointment.status.toLowerCase() === "accepted" && (
-                      <button
-                        onClick={() => handleOpenPaymentModal(appointment)}
-                        className="flex items-center gap-2 px-4 py-2.5 h-10 min-w-[100px] justify-center bg-brand-primary text-white rounded-xl font-medium hover:bg-brand-hover transition-all text-sm"
-                      >
-                        <CreditCard size={15} />
-                        Pay
-                      </button>
-                    )}
-                    {appointment.status.toLowerCase() === "completed" && !appointment.hasReviewed && (
-                      <button
-                        onClick={() => handleOpenReviewModal(appointment)}
-                        className="flex items-center gap-2 px-4 py-2.5 h-10 min-w-[100px] justify-center bg-white text-brand-dark rounded-xl font-medium hover:bg-gray-50 transition-all text-sm border-2 border-brand-primary"
-                      >
-                        <Star size={15} />
-                        Write Review
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleCancelAppointment(appointment.id)}
-                      disabled={cancellingId === appointment.id}
-                      className={`p-2 h-10 w-10 rounded-xl transition-all cursor-pointer flex items-center justify-center ${
-                        cancellingId === appointment.id
-                          ? "bg-red-100 text-red-600 border-2 border-red-300"
-                          : "bg-gray-100 text-gray-400 border-2 border-gray-200 hover:border-red-300 hover:text-red-500 hover:bg-red-50"
-                      } disabled:opacity-50`}
-                      title="Cancel Appointment"
-                    >
-                      {cancellingId === appointment.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <X size={18} />
-                      )}
-                    </button>
-                  </div>
-                </div>
+            {/* Entries Per Page */}
+            <div className="flex items-center gap-2 self-end lg:self-center">
+              <span className="text-xs text-gray-500 font-medium">Show</span>
+              <div className="relative">
+                <select
+                  value={entriesPerPage}
+                  onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+                  className="appearance-none bg-white border border-gray-300 rounded-xl px-3 py-1.5 pr-8 text-xs font-semibold text-gray-700 focus:outline-none focus:border-brand-primary cursor-pointer"
+                >
+                  {[5, 10, 25, 50].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
               </div>
-            ))}
+              <span className="text-xs text-gray-500 font-medium">entries</span>
+            </div>
           </div>
-        )}
+
+          {/* Status Filter Badges */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none border-t border-gray-100">
+            {["all", "Pending", "Confirmed", "Paid", "Completed", "Cancelled"].map((status) => {
+              const statusKey = status.toLowerCase();
+              const isSelected = filter === statusKey;
+              return (
+                <button
+                  key={status}
+                  onClick={() => setFilter(statusKey)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                    isSelected
+                      ? status === "Cancelled"
+                        ? "bg-rose-500 text-white shadow-xs"
+                        : "bg-brand-primary text-white shadow-xs"
+                      : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200/60"
+                  }`}
+                >
+                  {status}
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                      isSelected ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
+                    }`}
+                  >
+                    {getStatusCount(status)}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Compact Table */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50/80 border-b border-gray-200 text-[11px] uppercase tracking-wider text-gray-500 font-bold">
+                  <th
+                    onClick={() => handleSort("appointmentId")}
+                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>ID</span>
+                      {getSortIcon("appointmentId")}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort("doctorName")}
+                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Doctor</span>
+                      {getSortIcon("doctorName")}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort("appointmentDateTime")}
+                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Date & Time</span>
+                      {getSortIcon("appointmentDateTime")}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort("requestType")}
+                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Type</span>
+                      {getSortIcon("requestType")}
+                    </div>
+                  </th>
+                  <th
+                    onClick={() => handleSort("status")}
+                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span>Status</span>
+                      {getSortIcon("status")}
+                    </div>
+                  </th>
+                  <th className="py-3 px-3.5 text-right font-bold w-48">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 text-xs">
+                {currentAppointments.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Calendar className="h-8 w-8 text-gray-300" />
+                        <p className="text-xs text-gray-500">No appointments match your criteria.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  currentAppointments.map((apt) => {
+                    const statusLower = (apt.status || "").toLowerCase();
+                    const isAccepted = statusLower === "accepted" || statusLower === "confirmed";
+                    const isPaid = statusLower === "paid";
+                    const isCompleted = statusLower === "completed";
+                    const canCancel = ["pending", "accepted", "confirmed"].includes(statusLower);
+
+                    return (
+                      <tr
+                        key={apt.id}
+                        className="hover:bg-brand-light/30 transition-colors"
+                      >
+                        {/* ID */}
+                        <td className="py-3 px-3.5 font-mono text-gray-700 font-semibold whitespace-nowrap w-24">
+                          #{apt.appointmentId || apt.id}
+                        </td>
+
+                        {/* Doctor Info */}
+                        <td className="py-3 px-3.5">
+                          <div className="flex items-center gap-2.5 min-w-[170px]">
+                            {apt.doctorImage ? (
+                              <img
+                                src={apt.doctorImage}
+                                alt={apt.doctorName}
+                                className="w-8 h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0"
+                              />
+                            ) : (
+                              <div
+                                className={`w-8 h-8 rounded-lg ${getAvatarColor(
+                                  apt.doctorName
+                                )} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}
+                              >
+                                {getInitials(apt.doctorName)}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <span className="font-bold text-gray-900 block truncate">
+                                Dr. {apt.doctorName?.replace(/^Dr\.\s*/i, "")}
+                              </span>
+                              <span className="text-[11px] text-gray-400 block truncate">
+                                {apt.reason || apt.symptoms || "General Consultation"}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Date & Time */}
+                        <td className="py-3 px-3.5 whitespace-nowrap w-36">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="font-semibold text-gray-800 flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-brand-primary inline" />
+                              {formatDate(apt.appointmentDateTime)}
+                            </span>
+                            <span className="text-[11px] text-gray-500 font-medium flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-gray-400 inline" />
+                              {formatTime(apt.appointmentDateTime)}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Request Type */}
+                        <td className="py-3 px-3.5 whitespace-nowrap w-32">
+                          <span className="inline-flex px-2 py-0.5 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-700">
+                            {apt.requestType === "any_doctor"
+                              ? "Any Doctor"
+                              : apt.requestType === "specific_doctor"
+                              ? "Specific Doctor"
+                              : apt.requestType || "Standard"}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="py-3 px-3.5 whitespace-nowrap w-28">
+                          {getStatusBadge(apt.status)}
+                        </td>
+
+                        {/* Actions */}
+                        <td className="py-3 px-3.5 whitespace-nowrap text-right w-48">
+                          <div className="flex items-center justify-end gap-1.5 w-full">
+                            {/* Pay Button */}
+                            {isAccepted && (
+                              <button
+                                onClick={() => handleOpenPaymentModal(apt)}
+                                className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                              >
+                                <CreditCard size={13} />
+                                <span>Pay</span>
+                              </button>
+                            )}
+
+                            {/* Chat Button */}
+                            {isPaid && apt.doctorUserId && (
+                              <button
+                                onClick={() =>
+                                  navigate("/patient/chat", {
+                                    state: { selectUserId: apt.doctorUserId }
+                                  })
+                                }
+                                className="h-8 px-3 bg-white text-brand-dark hover:bg-emerald-50 text-xs border border-brand-primary font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                                title="Chat with Doctor"
+                              >
+                                <MessageSquare size={13} />
+                                <span>Chat</span>
+                              </button>
+                            )}
+
+                            {/* Video Call */}
+                            {isPaid && canJoinCall(apt) && (
+                              <button
+                                onClick={() =>
+                                  navigate(`/patient/video-call?appointmentId=${apt.id}`)
+                                }
+                                className="h-8 px-3 bg-brand-primary hover:bg-brand-hover text-white text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                                title="Join Video Call"
+                              >
+                                <Video size={13} />
+                                <span>Call</span>
+                              </button>
+                            )}
+
+                            {/* Write Review */}
+                            {isCompleted && !apt.hasReviewed && (
+                              <button
+                                onClick={() => handleOpenReviewModal(apt)}
+                                className="h-8 px-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                              >
+                                <Star size={13} className="fill-amber-400 text-amber-400" />
+                                <span>Review</span>
+                              </button>
+                            )}
+
+                            {/* Cancel */}
+                            {canCancel && (
+                              <button
+                                onClick={() => handleCancelAppointment(apt.id)}
+                                disabled={cancellingId === apt.id}
+                                className="h-8 w-8 flex items-center justify-center text-gray-400 hover:text-rose-600 hover:bg-rose-50 border border-gray-200 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                                title="Cancel Appointment"
+                              >
+                                {cancellingId === apt.id ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-500" />
+                                ) : (
+                                  <X size={15} />
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination Footer */}
+          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span className="text-gray-500 font-medium">
+              Showing{" "}
+              <span className="font-bold text-gray-800">
+                {totalEntries === 0 ? 0 : startIndex + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-bold text-gray-800">
+                {Math.min(startIndex + entriesPerPage, totalEntries)}
+              </span>{" "}
+              of <span className="font-bold text-gray-800">{totalEntries}</span> entries
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                className="px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+              >
+                <ChevronLeft size={14} />
+                <span>Prev</span>
+              </button>
+
+              <span className="px-3 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-700">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                className="px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+              >
+                <span>Next</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* Review Modal */}
         {reviewModalOpen && selectedAppointment && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-xl border border-gray-100">
-              {/* Modal Header */}
-              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl border border-gray-100 overflow-hidden">
+              <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Write a Review</h3>
                   <p className="text-xs text-gray-400 mt-0.5">Rate your experience with Dr. {selectedAppointment.doctorName}</p>
                 </div>
                 <button
                   onClick={() => setReviewModalOpen(false)}
-                  className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
                 >
-                  <X size={20} className="text-gray-500" />
+                  <X size={18} />
                 </button>
               </div>
 
-              {/* Modal Body */}
-              <div className="p-6 space-y-6">
-                {/* Rating */}
+              <div className="p-6 space-y-5">
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-3 block">Rating</label>
-                  <div className="flex gap-2">
-                    {[1, 2, 3, 4, 5].map((rating) => (
+                  <label className="text-xs font-bold text-gray-700 mb-2 block">Rating</label>
+                  <div className="flex gap-1.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
                       <button
-                        key={rating}
+                        key={star}
                         type="button"
-                        onClick={() => setReviewRating(rating)}
-                        className="p-2 transition-all"
+                        onClick={() => setReviewRating(star)}
+                        className="p-1 cursor-pointer transition-transform hover:scale-110"
                       >
                         <Star
-                          size={32}
-                          className={rating <= reviewRating ? "text-amber-400 fill-amber-400" : "text-gray-300"}
+                          size={28}
+                          className={star <= reviewRating ? "text-amber-400 fill-amber-400" : "text-gray-300"}
                         />
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* Review Text */}
                 <div>
-                  <label className="text-sm font-bold text-gray-700 mb-3 block">Your Review</label>
+                  <label className="text-xs font-bold text-gray-700 mb-2 block">Your Feedback</label>
                   <textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    rows={5}
-                    placeholder="Share your experience with this doctor..."
-                    className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 resize-none font-medium"
+                    rows={4}
+                    placeholder="Describe your consultation experience..."
+                    className="w-full p-3 text-xs border border-gray-300 rounded-xl focus:outline-none focus:border-brand-primary text-gray-800 resize-none font-medium"
                   />
                 </div>
               </div>
 
-              {/* Modal Footer */}
-              <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex items-center justify-end gap-3">
+              <div className="bg-gray-50/80 border-t border-gray-100 px-6 py-3.5 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setReviewModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 transition-all cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -595,16 +836,16 @@ export default function MyAppointments() {
                   type="button"
                   onClick={handleSubmitReview}
                   disabled={submittingReview}
-                  className="flex items-center gap-2 bg-brand-primary hover:bg-brand-hover text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md shadow-brand-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 bg-brand-primary hover:bg-brand-hover text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
                 >
                   {submittingReview ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       Submitting...
                     </>
                   ) : (
                     <>
-                      <Send size={14} />
+                      <Send size={13} />
                       Submit Review
                     </>
                   )}
@@ -616,9 +857,8 @@ export default function MyAppointments() {
 
         {/* Payment Modal */}
         {paymentModalOpen && selectedAppointmentForPayment && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl border border-gray-100">
-              {/* Modal Header */}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-md shadow-xl border border-gray-100 overflow-hidden">
               <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Complete Payment</h3>
@@ -626,13 +866,12 @@ export default function MyAppointments() {
                 </div>
                 <button
                   onClick={() => setPaymentModalOpen(false)}
-                  className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
                 >
-                  <X size={20} className="text-gray-500" />
+                  <X size={18} />
                 </button>
               </div>
 
-              {/* Modal Body */}
               <div className="p-6">
                 <Payment
                   appointmentId={selectedAppointmentForPayment.id}

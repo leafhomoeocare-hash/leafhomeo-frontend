@@ -8,6 +8,7 @@ const DoctorLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -29,20 +30,10 @@ const DoctorLogin = () => {
         sessionStorage.setItem("user", JSON.stringify(response.data));
         navigate("/doctor/dashboard");
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: response.message || 'Login failed. Please check your credentials.',
-          confirmButtonColor: '#00B100',
-        });
+        setError(response.message || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Login failed. Please check your credentials.',
-        confirmButtonColor: '#00B100',
-      });
+      setError('Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
@@ -71,6 +62,14 @@ const DoctorLogin = () => {
             Doctor Portal Login
           </p>
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 flex items-center gap-2 p-4 bg-red-50 rounded-xl border border-red-200 text-red-600">
+            <AlertCircle className="h-5 w-5" />
+            <p className="text-sm font-medium">{error}</p>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -128,7 +127,7 @@ const DoctorLogin = () => {
             <button
               type="button"
               onClick={() => navigate("/doctor/forgot-password")}
-              className="text-xs font-bold text-brand-primary hover:underline cursor-pointer"
+              className="text-xs font-bold text-brand-secondary hover:text-brand-primary transition-colors underline decoration-brand-secondary/30 hover:decoration-brand-primary/50 cursor-pointer"
             >
               Forgot Password?
             </button>

@@ -44,20 +44,10 @@ const Login = () => {
           navigate("/patient/dashboard");
         }
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: response.message || "Login failed",
-          confirmButtonColor: "#10b981"
-        });
+        setError(response.message || "Login failed");
       }
     } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: err.response?.data?.message || "Something went wrong. Please try again.",
-        confirmButtonColor: "#10b981"
-      });
+      setError(err.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -151,7 +141,7 @@ const Login = () => {
             <button
               type="button"
               onClick={() => navigate("/patient/forgot-password")}
-              className="text-xs font-bold text-brand-primary hover:underline cursor-pointer"
+              className="text-xs font-bold text-brand-secondary hover:text-brand-primary transition-colors underline decoration-brand-secondary/30 hover:decoration-brand-primary/50 cursor-pointer"
             >
               Forgot Password?
             </button>

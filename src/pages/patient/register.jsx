@@ -167,21 +167,9 @@ const Register = () => {
       );
 
       if (response.status === 1) {
-        Swal.fire({
-          icon: "success",
-          title: "Success",
-          text: "Account created successfully! Redirecting to login...",
-          confirmButtonColor: "#10b981"
-        }).then(() => {
-          navigate("/login");
-        });
+        navigate("/login");
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: response.data.message || "Registration failed",
-          confirmButtonColor: "#10b981"
-        });
+        setError(response.data.message || "Registration failed");
       }
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong. Please try again.");
@@ -231,7 +219,7 @@ const Register = () => {
           {/* Full Name */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block">
-              Full Name
+              Full Name <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -243,7 +231,7 @@ const Register = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-brand-primary focus:border-brand-primary font-medium"
+                className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary font-medium"
                 required
               />
             </div>
@@ -252,7 +240,7 @@ const Register = () => {
           {/* Email */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block">
-              Email Address
+              Email Address <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -264,7 +252,7 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="patient@email.com"
-                className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-brand-primary focus:border-brand-primary font-medium"
+                className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary font-medium"
                 required
               />
             </div>
@@ -272,8 +260,8 @@ const Register = () => {
 
           {/* Mobile */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block">
-              Mobile Number
+            <label className="text-xs font-bold text-brand-secondary uppercase tracking-wider block">
+              Mobile Number <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -285,18 +273,23 @@ const Register = () => {
                 value={formData.mobile}
                 onChange={handleChange}
                 placeholder="9876543210"
-                className="w-full h-11 pl-10 pr-24 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-brand-primary focus:border-brand-primary font-medium"
+                className={`w-full h-11 pl-10 pr-32 rounded-xl border text-sm outline-hidden transition-all font-medium ${
+                  phoneVerified 
+                    ? 'bg-green-50 border-green-300 text-green-800' 
+                    : 'bg-gray-50/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary'
+                }`}
                 required
                 disabled={phoneVerified}
               />
-              <p className="text-xs text-gray-500 mt-1">
-                Enter 10-digit number. Country code (+91) will be added automatically.
-              </p>
               <button
                 type="button"
                 onClick={handleSendOTP}
                 disabled={otpLoading || phoneVerified}
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-brand-primary text-white text-xs font-bold rounded-lg hover:bg-brand-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                className={`absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 text-xs font-bold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 z-10 ${
+                  phoneVerified 
+                    ? 'bg-green-600 text-white cursor-default' 
+                    : 'bg-brand-primary text-white hover:bg-brand-hover'
+                }`}
               >
                 {otpLoading ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -308,13 +301,16 @@ const Register = () => {
                 {phoneVerified ? "Verified" : "Send OTP"}
               </button>
             </div>
+            <p className="text-xs text-gray-500 mt-1">
+              Enter 10-digit number. Country code (+91) will be added automatically.
+            </p>
           </div>
 
           {/* OTP Verification */}
           {otpSent && !phoneVerified && (
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block">
-                OTP Verification
+            <div className="space-y-1.5 bg-brand-light/30 p-4 rounded-xl border border-brand-primary/20">
+              <label className="text-xs font-bold text-brand-secondary uppercase tracking-wider block mb-2">
+                OTP Verification <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -326,7 +322,7 @@ const Register = () => {
                   value={formData.otp}
                   onChange={handleChange}
                   placeholder="Enter 6-digit OTP"
-                  className="w-full h-11 pl-10 pr-24 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-brand-primary focus:border-brand-primary font-medium"
+                  className="w-full h-11 pl-10 pr-32 rounded-xl border border-brand-primary/30 text-sm outline-hidden transition-all bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary font-medium"
                   maxLength={6}
                   required
                 />
@@ -334,7 +330,7 @@ const Register = () => {
                   type="button"
                   onClick={handleVerifyOTP}
                   disabled={otpLoading}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 bg-brand-primary text-white text-xs font-bold rounded-lg hover:bg-brand-hover transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 z-10"
                 >
                   {otpLoading ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -343,7 +339,7 @@ const Register = () => {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-600 mt-2">
                 OTP sent to your mobile. Valid for 10 minutes.
               </p>
             </div>
@@ -351,10 +347,10 @@ const Register = () => {
 
           {/* Phone Verified Badge */}
           {phoneVerified && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 rounded-xl border border-green-200">
+            <div className="flex items-center gap-2 p-3 bg-gradient-to-r from-green-50 to-brand-light rounded-xl border border-green-300 shadow-sm">
               <CheckCircle className="h-5 w-5 text-green-600" />
-              <p className="text-sm font-medium text-green-600">
-                Phone number verified successfully
+              <p className="text-sm font-bold text-green-700">
+                Phone number verified successfully ✓
               </p>
             </div>
           )}
@@ -362,7 +358,7 @@ const Register = () => {
           {/* Password */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block">
-              Password
+              Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -374,14 +370,14 @@ const Register = () => {
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full h-11 pl-10 pr-12 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-brand-primary focus:border-brand-primary font-medium"
+                className="w-full h-11 pl-10 pr-12 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary font-medium"
                 required
                 minLength={6}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-lg"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-primary p-1 rounded-lg transition-colors"
               >
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
@@ -391,7 +387,7 @@ const Register = () => {
           {/* Confirm Password */}
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-gray-600 uppercase tracking-wider block">
-              Confirm Password
+              Confirm Password <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
@@ -403,14 +399,14 @@ const Register = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 placeholder="••••••••"
-                className="w-full h-11 pl-10 pr-12 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-brand-primary focus:border-brand-primary font-medium"
+                className="w-full h-11 pl-10 pr-12 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary font-medium"
                 required
                 minLength={6}
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-lg"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-primary p-1 rounded-lg transition-colors"
               >
                 {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>

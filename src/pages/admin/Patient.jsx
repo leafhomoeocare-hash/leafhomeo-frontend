@@ -31,7 +31,7 @@ export default function PatientManagement() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [appliedSearch, setAppliedSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,7 +41,7 @@ export default function PatientManagement() {
   const fetchPatients = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getPatients(currentPage, entriesPerPage, appliedSearch);
+      const response = await getPatients(currentPage, entriesPerPage, debouncedSearch);
       if (response.status === 1) {
         setPatients(response.data?.patients || []);
         setTotalRecords(response.data?.totalRecords || 0);
@@ -52,20 +52,27 @@ export default function PatientManagement() {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, entriesPerPage, appliedSearch]);
+  }, [currentPage, entriesPerPage, debouncedSearch]);
 
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
 
-  const handleSearchClick = () => {
-    setAppliedSearch(search);
-    setCurrentPage(1);
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const handleEntriesChange = (value) => {
     setEntriesPerPage(value);
     setCurrentPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearch("");
   };
 
   const goPrevPage = () => setCurrentPage((p) => Math.max(1, p - 1));
@@ -157,25 +164,25 @@ export default function PatientManagement() {
       </div>
 
       {/* Search row */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearchClick()}
             placeholder="Search by name, email, mobile..."
-            className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all focus:border-brand-primary"
+            className="w-full h-11 pl-10 pr-10 rounded-xl border border-gray-200 text-sm outline-hidden transition-all focus:border-brand-primary"
           />
+          {search && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+          )}
         </div>
-        <button
-          onClick={handleSearchClick}
-          className="flex h-11 items-center justify-center gap-2 text-white px-6 rounded-xl text-sm font-semibold shadow-xs transition-colors bg-brand-primary hover:bg-brand-hover cursor-pointer"
-        >
-          <Search size={16} />
-          Search
-        </button>
       </div>
 
       {/* Table card */}

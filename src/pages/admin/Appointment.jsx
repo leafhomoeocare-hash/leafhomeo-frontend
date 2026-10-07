@@ -4,12 +4,9 @@ import { Search, MoreVertical, Calendar, Clock, ChevronDown, User, Phone, Check,
 import AdminLayout from "../../components/AdminLayout";
 import { getAppointments, updateShippingStatus } from "../../api/appointmentApi";
 
-const ENTRIES_OPTIONS = [5, 10, 25, 50];
-
 const COLUMNS = [
   { key: "appointmentId", label: "Appointment ID" },
   { key: "name", label: "Patient" },
-  { key: "mobile", label: "Phone" },
   { key: "datetime", label: "Date & Time" },
   { key: "doctor", label: "Doctor" },
   { key: "status", label: "Status" },
@@ -132,10 +129,10 @@ export default function AppointmentManagement() {
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
 
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const entriesPerPage = 10; // Fixed entries per page
 
   const [selectedAppt, setSelectedAppt] = useState(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -235,11 +232,6 @@ export default function AppointmentManagement() {
     setCurrentPage(1);
   };
 
-  const handleEntriesChange = (value) => {
-    setEntriesPerPage(value);
-    setCurrentPage(1);
-  };
-
   const goPrevPage = () => setCurrentPage((p) => Math.max(1, p - 1));
   const goNextPage = () => setCurrentPage((p) => Math.min(totalPages, p + 1));
 
@@ -279,35 +271,6 @@ export default function AppointmentManagement() {
 
       {/* Table card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
-        {/* Entries per page header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50 bg-white">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <select
-                value={entriesPerPage}
-                onChange={(e) => handleEntriesChange(Number(e.target.value))}
-                className="appearance-none border border-gray-200 rounded-xl pl-3 pr-8 py-1.5 text-sm text-gray-700 outline-hidden focus:border-brand-primary bg-white cursor-pointer"
-              >
-                {ENTRIES_OPTIONS.map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={14}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-              />
-            </div>
-            <span className="text-sm text-gray-500 font-medium">entries per page</span>
-          </div>
-          {loading && (
-            <span className="text-xs text-brand-primary font-bold animate-pulse">
-              Loading...
-            </span>
-          )}
-        </div>
-
         {/* Table - desktop/tablet */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -351,7 +314,6 @@ export default function AppointmentManagement() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-semibold">{appt.patient?.mobile || "-"}</td>
                     <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap">
                       {typeof dt === "object" ? (
                         <div className="flex flex-col gap-0.5">

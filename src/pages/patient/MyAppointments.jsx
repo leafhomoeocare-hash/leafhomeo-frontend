@@ -22,6 +22,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronDown
 } from "lucide-react";
 
@@ -38,9 +40,11 @@ export default function MyAppointments() {
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Sorting (Pagination removed)
+  // Sorting & Pagination
   const [sortColumn, setSortColumn] = useState("appointmentDateTime");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [entriesPerPage, setEntriesPerPage] = useState(10);
 
   // Modals & Action loading
   const [cancellingId, setCancellingId] = useState(null);
@@ -59,7 +63,10 @@ export default function MyAppointments() {
     fetchAppointments();
   }, [bookingSuccess]);
 
-
+  // Reset pagination when search or filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filter, entriesPerPage]);
 
   const fetchAppointments = async () => {
     try {
@@ -372,6 +379,12 @@ export default function MyAppointments() {
     return result;
   }, [appointments, filter, searchTerm, sortColumn, sortOrder]);
 
+  // Pagination Slice
+  const totalEntries = processedAppointments.length;
+  const totalPages = Math.ceil(totalEntries / entriesPerPage) || 1;
+  const startIndex = (currentPage - 1) * entriesPerPage;
+  const currentAppointments = processedAppointments.slice(startIndex, startIndex + entriesPerPage);
+
   const getSortIcon = (columnKey) => {
     if (sortColumn !== columnKey) {
       return <ArrowUpDown className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600" />;
@@ -445,6 +458,26 @@ export default function MyAppointments() {
                   <X size={14} />
                 </button>
               )}
+            </div>
+
+            {/* Entries Per Page */}
+            <div className="flex items-center gap-2 self-end lg:self-center">
+              <span className="text-xs text-gray-500 font-medium">Show</span>
+              <div className="relative">
+                <select
+                  value={entriesPerPage}
+                  onChange={(e) => setEntriesPerPage(Number(e.target.value))}
+                  className="appearance-none bg-white border border-gray-300 rounded-xl px-3 py-1.5 pr-8 text-xs font-semibold text-gray-700 focus:outline-none focus:border-brand-primary cursor-pointer"
+                >
+                  {[5, 10, 25, 50].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+              </div>
+              <span className="text-xs text-gray-500 font-medium">entries</span>
             </div>
 
 
@@ -538,7 +571,7 @@ export default function MyAppointments() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-xs">
-                {processedAppointments.length === 0 ? (
+                {currentAppointments.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
                       <div className="flex flex-col items-center justify-center gap-2">
@@ -548,7 +581,7 @@ export default function MyAppointments() {
                     </td>
                   </tr>
                 ) : (
-                  processedAppointments.map((apt) => {
+                  currentAppointments.map((apt) => {
                     const statusLower = (apt.status || "").toLowerCase();
                     const isAccepted = statusLower === "accepted" || statusLower === "confirmed";
                     const isPaid = statusLower === "paid";
@@ -702,6 +735,45 @@ export default function MyAppointments() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Pagination Footer */}
+          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <span className="text-gray-500 font-medium">
+              Showing{" "}
+              <span className="font-bold text-gray-800">
+                {totalEntries === 0 ? 0 : startIndex + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-bold text-gray-800">
+                {Math.min(startIndex + entriesPerPage, totalEntries)}
+              </span>{" "}
+              of <span className="font-bold text-gray-800">{totalEntries}</span> entries
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage <= 1}
+                className="px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+              >
+                <ChevronLeft size={14} />
+                <span>Prev</span>
+              </button>
+
+              <span className="px-3 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-700">
+                {currentPage} / {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage >= totalPages}
+                className="px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+              >
+                <span>Next</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
 

@@ -683,7 +683,9 @@ function AppointmentDetailsModal({ open, onClose, appointment, updatingShipping,
                 <h4 className="font-bold text-gray-900 mt-0.5 text-base truncate">{appointment.doctor?.name || "Not Assigned"}</h4>
                 {appointment.doctor ? (
                   <>
-                    <p className="text-xs text-brand-primary font-bold mt-1 truncate">{appointment.doctor.specialization}</p>
+                    <p className="text-xs text-brand-primary font-bold mt-1 truncate">
+                      {Array.isArray(appointment.doctor.specialization) ? appointment.doctor.specialization.join(", ") : appointment.doctor.specialization}
+                    </p>
                     <p className="text-xs text-gray-500 font-semibold">Qual: {appointment.doctor.qualification}</p>
                     <p className="text-xs text-gray-500 font-semibold">Exp: {appointment.doctor.experience} Yrs</p>
                   </>

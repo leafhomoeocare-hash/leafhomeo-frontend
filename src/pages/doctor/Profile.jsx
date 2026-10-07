@@ -165,7 +165,9 @@ export default function DoctorProfile() {
               <div>
                 <h2 className="text-2xl font-bold">{profileData.name}</h2>
                 <p className="text-white/80 mt-1">Doctor ID: {profileData.id}</p>
-                <p className="text-white/70 mt-1 text-sm">{profileData.specialization}</p>
+                <p className="text-white/70 mt-1 text-sm">
+                  {Array.isArray(profileData.specialization) ? profileData.specialization.join(", ") : profileData.specialization}
+                </p>
               </div>
             </div>
           </div>

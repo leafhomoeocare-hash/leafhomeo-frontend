@@ -43,7 +43,10 @@ export default function DoctorSelection() {
     if (debouncedSearchTerm) {
       const filtered = allDoctors.filter(doctor =>
         (doctor.name && typeof doctor.name === 'string' && doctor.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
-        (doctor.specialization && typeof doctor.specialization === 'string' && doctor.specialization.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
+        (doctor.specialization && (
+          (typeof doctor.specialization === 'string' && doctor.specialization.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) ||
+          (Array.isArray(doctor.specialization) && doctor.specialization.some(s => s.toLowerCase().includes(debouncedSearchTerm.toLowerCase())))
+        ))
       );
       setDoctors(filtered);
     } else {
@@ -248,7 +251,7 @@ export default function DoctorSelection() {
                       <div className="flex-1 min-w-0">
                         <h5 className="font-bold text-gray-900 text-base group-hover:text-brand-primary transition-colors truncate">{doctor.name}</h5>
                         <p className="text-xs font-bold text-brand-primary uppercase tracking-wide truncate mt-1">
-                          {doctor.specialization}
+                          {Array.isArray(doctor.specialization) ? doctor.specialization.join(", ") : doctor.specialization}
                         </p>
                         <div className="flex items-center gap-2 mt-2">
                           <Star size={14} className="text-amber-400 fill-amber-400" />

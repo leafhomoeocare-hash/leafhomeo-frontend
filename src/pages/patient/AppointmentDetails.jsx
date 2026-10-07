@@ -285,7 +285,9 @@ export default function AppointmentDetails() {
             </div>
             <div className="flex-1">
               <h3 className="font-bold text-gray-900 text-xl">{selectedDoctor.name}</h3>
-              <p className="text-sm text-brand-primary font-semibold mt-1">{selectedDoctor.specialization}</p>
+              <p className="text-sm text-brand-primary font-semibold mt-1">
+                {Array.isArray(selectedDoctor.specialization) ? selectedDoctor.specialization.join(", ") : selectedDoctor.specialization}
+              </p>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div>

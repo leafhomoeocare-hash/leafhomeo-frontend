@@ -721,7 +721,7 @@ export default function DoctorManagement() {
                   <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.user?.email}</td>
                   <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.user?.mobile}</td>
                   <td className="px-6 py-4.5 text-gray-800 font-semibold whitespace-nowrap">
-                    {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : doc.specialization}
+                    {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : (doc.specialization || "-")}
                   </td>
                   <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.qualification}</td>
                   <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.experience} Years</td>
@@ -798,7 +798,7 @@ export default function DoctorManagement() {
                       )}
                     </p>
                     <p className="text-xs font-semibold text-brand-primary truncate">
-                      {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : doc.specialization}
+                      {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : (doc.specialization || "-")}
                     </p>
                     <div className="flex items-center gap-1.5 mt-1">
                       {doc.user?.isPasswordSet ? (

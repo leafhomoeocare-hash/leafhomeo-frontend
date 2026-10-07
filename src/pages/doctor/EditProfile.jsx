@@ -228,7 +228,7 @@ export default function DoctorEditProfile() {
                     </span>
                     <input
                       type="text"
-                      value={profileData.specialization}
+                      value={Array.isArray(profileData.specialization) ? profileData.specialization.join(", ") : profileData.specialization}
                       onChange={(e) => setProfileData({ ...profileData, specialization: e.target.value })}
                       className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-1 focus:ring-brand-primary focus:border-brand-primary font-medium"
                       required

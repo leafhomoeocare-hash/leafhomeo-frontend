@@ -232,7 +232,7 @@ function DashboardContent() {
                       </span>
                     </div>
                     <p className="text-xs text-brand-primary font-bold mt-0.5">
-                      {upcomingAppointment.specialization || "Homeopathy Consultant"}
+                      {Array.isArray(upcomingAppointment.specialization) ? upcomingAppointment.specialization.join(", ") : (upcomingAppointment.specialization || "Homeopathy Consultant")}
                     </p>
                     <div className="flex items-center gap-3 text-[11px] text-gray-400 font-semibold mt-1">
                       <span>📅 {new Date(upcomingAppointment.appointmentDateTime).toLocaleDateString()}</span>
@@ -369,7 +369,7 @@ function DashboardContent() {
                     <div className="flex-1 min-w-0">
                       <h5 className="font-bold text-gray-900 text-base group-hover:text-brand-primary transition-colors truncate">{doc.name}</h5>
                       <p className="text-xs font-bold text-brand-primary uppercase tracking-wide truncate mt-1">
-                        {doc.specialization}
+                        {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : doc.specialization}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <Star size={14} className="text-amber-400 fill-amber-400" />

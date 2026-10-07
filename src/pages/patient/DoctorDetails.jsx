@@ -148,7 +148,9 @@ export default function DoctorDetails() {
                       </span>
                     )}
                   </div>
-                  <p className="text-xl text-brand-primary font-semibold mt-2">{profileData.specialization}</p>
+                  <p className="text-xl text-brand-primary font-semibold mt-2">
+                    {Array.isArray(profileData.specialization) ? profileData.specialization.join(", ") : profileData.specialization}
+                  </p>
                   <div className="flex items-center gap-6 mt-4 flex-wrap">
                     <div className="flex items-center gap-2">
                       <Star className="h-5 w-5 text-amber-400 fill-amber-400" />

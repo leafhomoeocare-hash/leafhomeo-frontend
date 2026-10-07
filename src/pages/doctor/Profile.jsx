@@ -19,6 +19,7 @@ import {
   Edit
 } from "lucide-react";
 import { getUser } from "../../api/authApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import axios from "axios";
 
 export default function DoctorProfile() {
@@ -156,7 +157,7 @@ export default function DoctorProfile() {
             <div className="flex items-center gap-6">
               <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm overflow-hidden border-2 border-white/30">
                 <img
-                  src={profileData.image}
+                  src={getImageUrl(profileData.image) || "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=200&q=80"}
                   alt={profileData.name}
                   className="w-full h-full object-cover"
                 />

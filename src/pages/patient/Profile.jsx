@@ -3,12 +3,13 @@ import { useNavigate } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 // import { getPatientProfile } from "../../api/patientApi";
 import { getUser } from "../../api/authApi";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Calendar, 
+import { getImageUrl } from "../../utils/imageHelper";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
   Edit,
   Loader2,
   AlertCircle
@@ -117,7 +118,7 @@ export default function Profile() {
             <div className="flex items-center gap-6">
               <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm overflow-hidden border-2 border-white/30">
                 <img
-                  src={profileData.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"}
+                  src={getImageUrl(profileData.image) || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"}
                   alt={profileData.name}
                   className="w-full h-full object-cover"
                 />

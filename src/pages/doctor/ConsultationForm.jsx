@@ -239,7 +239,7 @@ const ConsultationForm = () => {
                     {existingScreenshots.map((screenshot, index) => (
                       <div key={index} className="relative group">
                         <img
-                          src={`http://localhost:5000${screenshot}`}
+                          src={`${import.meta.env.VITE_API_URL}${screenshot}`}
                           alt={`Screenshot ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         />

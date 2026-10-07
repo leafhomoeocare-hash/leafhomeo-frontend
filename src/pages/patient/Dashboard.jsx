@@ -361,7 +361,7 @@ function DashboardContent() {
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-light to-brand-primary/20 overflow-hidden border-2 border-white shadow-md shrink-0">
                       <img
-                        src={doc.image ? (doc.image.startsWith("http") ? doc.image : `http://localhost:5000/${doc.image}`) : "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
+                        src={doc.image ? (doc.image.startsWith("http") ? doc.image : `${import.meta.env.VITE_API_URL}/${doc.image}`) : "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
                         alt={doc.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />

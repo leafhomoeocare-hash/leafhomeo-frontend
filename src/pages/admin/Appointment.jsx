@@ -332,7 +332,7 @@ export default function AppointmentManagement() {
                       <div className="flex items-center gap-3 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
                         {appt.patient?.image ? (
                           <img
-                            src={`http://localhost:5000/${appt.patient.image.replace(/\\/g, '/')}`}
+                            src={`${import.meta.env.VITE_API_URL}/${appt.patient.image.replace(/\\/g, '/')}`}
                             alt={appt.patient.name}
                             className="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                             onError={(e) => {
@@ -372,7 +372,7 @@ export default function AppointmentManagement() {
                       <div className="flex items-center gap-3">
                         {appt.doctor?.image ? (
                           <img
-                            src={`http://localhost:5000/${appt.doctor.image.replace(/\\/g, '/')}`}
+                            src={`${import.meta.env.VITE_API_URL}/${appt.doctor.image.replace(/\\/g, '/')}`}
                             alt={appt.doctor.name}
                             className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                             onError={(e) => {
@@ -409,7 +409,7 @@ export default function AppointmentManagement() {
                       )}
                     </td>
                     <td className="px-6 py-4.5 whitespace-nowrap">
-                      {appt.status === "paid" ? (
+                      {appt.status === "completed" ? (
                         <select
                           value={appt.shippingStatus || "draft"}
                           onChange={(e) => handleShippingStatusChange(appt, e.target.value)}
@@ -466,7 +466,7 @@ export default function AppointmentManagement() {
                   <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
                     {appt.patient?.image ? (
                       <img
-                        src={`http://localhost:5000/${appt.patient.image.replace(/\\/g, '/')}`}
+                        src={`${import.meta.env.VITE_API_URL}/${appt.patient.image.replace(/\\/g, '/')}`}
                         alt={appt.patient.name}
                         className="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                         onError={(e) => {
@@ -515,7 +515,7 @@ export default function AppointmentManagement() {
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Shipping</p>
                     <div className="mt-0.5">
-                      {appt.status === "paid" ? (
+                      {appt.status === "completed" ? (
                         <select
                           value={appt.shippingStatus || "draft"}
                           onChange={(e) => handleShippingStatusChange(appt, e.target.value)}
@@ -625,11 +625,11 @@ function AppointmentDetailsModal({ open, onClose, appointment, updatingShipping,
   if (!open || !appointment) return null;
 
   const dt = formatDateTime(appointment.appointmentDate);
-  const patientImg = appointment.patient?.image 
-    ? `http://localhost:5000/${appointment.patient.image.replace(/\\/g, '/')}`
+  const patientImg = appointment.patient?.image
+    ? `${import.meta.env.VITE_API_URL}/${appointment.patient.image.replace(/\\/g, '/')}`
     : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
   const doctorImg = appointment.doctor?.image
-    ? `http://localhost:5000/${appointment.doctor.image.replace(/\\/g, '/')}`
+    ? `${import.meta.env.VITE_API_URL}/${appointment.doctor.image.replace(/\\/g, '/')}`
     : "https://cdn-icons-png.flaticon.com/512/387/387561.png";
 
   return (

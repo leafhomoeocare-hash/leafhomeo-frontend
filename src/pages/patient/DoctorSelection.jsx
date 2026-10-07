@@ -240,7 +240,7 @@ export default function DoctorSelection() {
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-light to-brand-primary/20 overflow-hidden border-2 border-white shadow-md shrink-0">
                         <img
-                          src={doctor.image ? (doctor.image.startsWith("http") ? doctor.image : `http://localhost:5000/${doctor.image}`) : "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
+                          src={doctor.image ? (doctor.image.startsWith("http") ? doctor.image : `${import.meta.env.VITE_API_URL}/${doctor.image}`) : "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
                           alt={doctor.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />

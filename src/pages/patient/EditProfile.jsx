@@ -77,7 +77,7 @@ export default function EditProfile() {
           country: data.country || ""
         });
         if (data.image) {
-          setImagePreview(`http://localhost:5000/uploads/${data.image}`);
+          setImagePreview(`${import.meta.env.VITE_API_URL}/uploads/${data.image}`);
         }
       } else {
         setError(userResponse.message || "Failed to fetch profile data");

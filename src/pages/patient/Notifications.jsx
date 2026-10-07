@@ -24,7 +24,7 @@ export default function Notifications() {
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:5000/api/v1/auth/get-notifications", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/get-notifications`, {
         headers: {
           Authorization: sessionStorage.getItem("token")
         }

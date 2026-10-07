@@ -272,7 +272,7 @@ export default function AppointmentManagement() {
       {/* Table card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
         {/* Table - desktop/tablet */}
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden md:block">
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50/50 border-b border-gray-100">
               <tr className="text-left text-gray-500 uppercase tracking-wider text-xs">

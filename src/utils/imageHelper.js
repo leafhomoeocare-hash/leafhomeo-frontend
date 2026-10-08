@@ -1,43 +1,44 @@
 /**
  * Image URL Helper
- * Handles converting relative image paths to full URLs based on environment
+ * Relative aur purane localhost wale image paths ko sahi full URL mein badalta hai
  */
 
+const API_URL = import.meta.env.VITE_API_URL || window.location.origin;
+
 /**
- * Get full image URL with base URL
- * @param {string} imagePath - The image path (can be relative or absolute)
- * @returns {string|null} - Full URL or null if no image path
+ * Image ka full URL banata hai
+ * @param {string} imagePath - Image path (relative, absolute ya purana localhost URL)
+ * @returns {string|null} - Full URL, ya image path na ho to null
  */
 export const getImageUrl = (imagePath) => {
   if (!imagePath) return null;
-  
-  // If already a full URL, return as is
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-  
-  // Get base URL from environment or use localhost for development
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5174';
-  
-  // Ensure proper path formatting
-  const formattedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-  
-  return `${baseUrl}${formattedPath}`;
+
+  // Purana localhost URL hata do -> "/uploads/xxx.jpg" bachega
+  const cleaned = imagePath.replace(
+    /^https?:\/\/(localhost|127\.0\.0\.1):\d+/,
+    ''
+  );
+
+  // Koi aur full URL (cloudinary, s3 etc.) ho to waise hi return karo
+  if (/^https?:\/\//.test(cleaned)) return cleaned;
+
+  // Aage "/" ho ya na ho, hamesha ek hi "/" lagao
+  return `${API_URL}/${cleaned.replace(/^\/+/, '')}`;
 };
 
 /**
- * Get user initials from name
- * @param {string} name - User's full name
- * @param {string} fallback - Fallback initials if name is empty
- * @returns {string} - Two-letter initials
+ * Name se initials nikalta hai
+ * @param {string} name - User ka poora naam
+ * @param {string} fallback - Naam khaali ho to ye initials
+ * @returns {string} - Do letter ke initials
  */
 export const getUserInitials = (name, fallback = 'PT') => {
   if (!name) return fallback;
-  
+
   const words = name.trim().split(' ');
   if (words.length >= 2) {
     return (words[0][0] + words[1][0]).toUpperCase();
   }
-  
+
   return name.substring(0, 2).toUpperCase();
 };

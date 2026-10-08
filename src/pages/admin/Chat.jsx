@@ -72,7 +72,7 @@ export default function AdminChat() {
     const token = sessionStorage.getItem("token");
     if (!token) return;
 
-    const socketUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+    const socketUrl = import.meta.env.VITE_API_URL;
     console.log("🔌 Connecting to socket.io server:", socketUrl);
 
     socketRef.current = io(socketUrl, {

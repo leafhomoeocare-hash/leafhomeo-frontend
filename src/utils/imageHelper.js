@@ -17,7 +17,7 @@ export const getImageUrl = (imagePath) => {
   }
   
   // Get base URL from environment or use localhost for development
-  const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:5174';
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5174';
   
   // Ensure proper path formatting
   const formattedPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;

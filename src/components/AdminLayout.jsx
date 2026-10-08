@@ -54,9 +54,9 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         <div className="flex h-14 items-center justify-between px-4 border-b border-white/10">
           <Link to="/admin/dashboard" className="flex items-center gap-2 text-white decoration-transparent">
             <img
-              src="/logo.png"
+              src="/Leaf-LOGO-Kit/SVG/final leaf logo_App icon.svg"
               alt="Leaf Homeo"
-              className="h-10 w-auto object-contain"
+              className="h-9 w-9 object-contain rounded-lg"
             />
             <span className="font-sans text-sm font-bold tracking-tight">
               Leaf Homeo

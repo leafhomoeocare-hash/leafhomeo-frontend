@@ -120,8 +120,12 @@ export default function SetupPassword() {
       <div className="max-w-md w-full">
         {/* Logo and Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-brand-primary rounded-2xl shadow-lg shadow-brand-primary/30 mb-4">
-            <span className="text-3xl">🌿</span>
+          <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <img
+              src="/Leaf-LOGO-Kit/SVG/final leaf logo_App icon.svg"
+              alt="Leaf Homeo Care"
+              className="w-full h-full object-contain drop-shadow-md rounded-2xl"
+            />
           </div>
           <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Set Your Password</h1>
           <p className="text-gray-600">Create a secure password for your account</p>

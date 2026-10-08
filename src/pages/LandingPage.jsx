@@ -14,7 +14,7 @@ const LandingPage = () => {
           <div className="relative z-10">
             <div className="w-24 h-24 bg-white rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-xl">
               <img
-                src="/logo.png"
+                src="/Leaf-LOGO-Kit/SVG/final leaf logo_App icon.svg"
                 alt="Leaf Homeo Care"
                 className="w-20 h-20 object-contain"
               />

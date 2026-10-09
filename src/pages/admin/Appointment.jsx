@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, MoreVertical, Calendar, Clock, ChevronDown, User, Phone, Check, AlertCircle, X, MessageSquare } from "lucide-react";
 import AdminLayout from "../../components/AdminLayout";
 import { getAppointments, updateShippingStatus } from "../../api/appointmentApi";
+import { getImageUrl } from "../../utils/imageHelper";
 
 const COLUMNS = [
   { key: "appointmentId", label: "Appointment ID" },
@@ -295,7 +296,7 @@ export default function AppointmentManagement() {
                       <div className="flex items-center gap-3 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
                         {appt.patient?.image ? (
                           <img
-                            src={`${import.meta.env.VITE_API_URL}/${appt.patient.image.replace(/\\/g, '/')}`}
+                            src={getImageUrl(appt.patient.image)}
                             alt={appt.patient.name}
                             className="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                             onError={(e) => {
@@ -334,7 +335,7 @@ export default function AppointmentManagement() {
                       <div className="flex items-center gap-3">
                         {appt.doctor?.image ? (
                           <img
-                            src={`${import.meta.env.VITE_API_URL}/${appt.doctor.image.replace(/\\/g, '/')}`}
+                            src={getImageUrl(appt.doctor.image)}
                             alt={appt.doctor.name}
                             className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                             onError={(e) => {
@@ -428,7 +429,7 @@ export default function AppointmentManagement() {
                   <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
                     {appt.patient?.image ? (
                       <img
-                        src={`${import.meta.env.VITE_API_URL}/${appt.patient.image.replace(/\\/g, '/')}`}
+                        src={getImageUrl(appt.patient.image)}
                         alt={appt.patient.name}
                         className="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                         onError={(e) => {
@@ -587,12 +588,10 @@ function AppointmentDetailsModal({ open, onClose, appointment, updatingShipping,
   if (!open || !appointment) return null;
 
   const dt = formatDateTime(appointment.appointmentDate);
-  const patientImg = appointment.patient?.image
-    ? `${import.meta.env.VITE_API_URL}/${appointment.patient.image.replace(/\\/g, '/')}`
-    : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-  const doctorImg = appointment.doctor?.image
-    ? `${import.meta.env.VITE_API_URL}/${appointment.doctor.image.replace(/\\/g, '/')}`
-    : "https://cdn-icons-png.flaticon.com/512/387/387561.png";
+  const patientImg = getImageUrl(appointment.patient?.image)
+    || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+  const doctorImg = getImageUrl(appointment.doctor?.image)
+    || "https://cdn-icons-png.flaticon.com/512/387/387561.png";
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">

@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import DoctorLayout from "../../components/DoctorLayout";
 import { getDoctorAppointments, acceptAppointment, rejectAppointment } from "../../api/doctorApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import Swal from "sweetalert2";
 
 export default function DoctorAppointments() {
@@ -543,7 +544,7 @@ export default function DoctorAppointments() {
                           <div className="flex items-center gap-2.5 min-w-[170px]">
                             {apt.patientImage ? (
                               <img
-                                src={apt.patientImage}
+                                src={getImageUrl(apt.patientImage)}
                                 alt={apt.patientName}
                                 className="w-8 h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0"
                               />

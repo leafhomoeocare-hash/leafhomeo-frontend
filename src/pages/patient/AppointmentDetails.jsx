@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import { getAvailabilitySlots, bookAppointment } from "../../api/appointmentApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import Swal from "sweetalert2";
 import {
   Calendar,
@@ -278,7 +279,7 @@ export default function AppointmentDetails() {
           <div className="flex items-start gap-6">
             <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-white shadow-md shrink-0">
               <img
-                src={selectedDoctor.image || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=150&q=80"}
+                src={getImageUrl(selectedDoctor.image) || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=150&q=80"}
                 alt={selectedDoctor.name}
                 className="w-full h-full object-cover"
               />

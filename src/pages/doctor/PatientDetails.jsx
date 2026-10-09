@@ -17,6 +17,7 @@ import {
   XCircle
 } from "lucide-react";
 import { getPatientDetails, getDoctorConsultationHistory } from "../../api/doctorApi";
+import { getImageUrl } from "../../utils/imageHelper";
 
 export default function PatientDetails() {
   const { patientId } = useParams();
@@ -185,7 +186,7 @@ export default function PatientDetails() {
             <div className="flex items-center gap-6">
               <div className="w-24 h-24 rounded-2xl bg-white/20 backdrop-blur-sm overflow-hidden border-2 border-white/30">
                 <img
-                  src={patientData.image || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"}
+                  src={getImageUrl(patientData.image) || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"}
                   alt={patientData.name}
                   className="w-full h-full object-cover"
                 />

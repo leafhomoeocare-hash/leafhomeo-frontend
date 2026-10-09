@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import { getUser, updateProfile } from "../../api/authApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import Swal from "sweetalert2";
 import {
   User,
@@ -66,7 +67,7 @@ export default function CompleteProfile() {
           country: data.country || ""
         });
         if (data.image) {
-          setImagePreview(`${import.meta.env.VITE_API_URL}/uploads/${data.image}`);
+          setImagePreview(getImageUrl(data.image));
         }
       }
     } catch (err) {

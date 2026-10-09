@@ -18,6 +18,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { getPublicDoctorProfile } from "../api/doctorApi";
+import { getImageUrl } from "../utils/imageHelper";
 
 export default function PublicDoctorProfile() {
   const { name } = useParams();
@@ -111,7 +112,7 @@ export default function PublicDoctorProfile() {
               {/* Profile Image */}
               <div className="w-40 h-40 rounded-3xl bg-white overflow-hidden border-4 border-white shadow-2xl shrink-0">
                 <img
-                  src={profileData.image || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80"}
+                  src={getImageUrl(profileData.image) || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=300&q=80"}
                   alt={profileData.name}
                   className="w-full h-full object-cover"
                 />

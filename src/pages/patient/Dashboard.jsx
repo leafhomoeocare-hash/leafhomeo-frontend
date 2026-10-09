@@ -4,6 +4,7 @@ import PatientLayout from "../../components/PatientLayout";
 import { Video, Star, Calendar, Package, MessageSquare, ArrowRight, ArrowLeft, Clock, ShieldAlert, Edit, Bell, CheckCheck, X } from "lucide-react";
 import { getUpcomingAppointments, getPatientAppointments } from "../../api/appointmentApi";
 import { getExpertDoctors } from "../../api/doctorApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import { usePatientNotifications } from "../../components/PatientLayout";
 
 const formatTimeDifference = (dateString) => {
@@ -219,7 +220,7 @@ function DashboardContent() {
                 <div className="flex items-center gap-3.5">
                   <div className="h-14 w-14 rounded-xl bg-gray-100 overflow-hidden border border-gray-200 shrink-0">
                     <img
-                      src={upcomingAppointment.doctorImage || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=150&q=80"}
+                      src={getImageUrl(upcomingAppointment.doctorImage) || "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=150&q=80"}
                       alt={upcomingAppointment.doctorName}
                       className="w-full h-full object-cover"
                     />
@@ -361,7 +362,7 @@ function DashboardContent() {
                   <div className="flex items-start gap-4 mb-4">
                     <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-light to-brand-primary/20 overflow-hidden border-2 border-white shadow-md shrink-0">
                       <img
-                        src={doc.image ? (doc.image.startsWith("http") ? doc.image : `${import.meta.env.VITE_API_URL}/${doc.image}`) : "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
+                        src={getImageUrl(doc.image) || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
                         alt={doc.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                       />

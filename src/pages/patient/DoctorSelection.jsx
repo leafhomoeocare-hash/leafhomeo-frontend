@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import { getExpertDoctors } from "../../api/doctorApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import Swal from "sweetalert2";
 import useDebounce from "../../hooks/useDebounce";
 import {
@@ -243,7 +244,7 @@ export default function DoctorSelection() {
                     <div className="flex items-start gap-4 mb-4">
                       <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-light to-brand-primary/20 overflow-hidden border-2 border-white shadow-md shrink-0">
                         <img
-                          src={doctor.image ? (doctor.image.startsWith("http") ? doctor.image : `${import.meta.env.VITE_API_URL}/${doctor.image}`) : "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
+                          src={getImageUrl(doctor.image) || "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&w=200&q=80"}
                           alt={doctor.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         />

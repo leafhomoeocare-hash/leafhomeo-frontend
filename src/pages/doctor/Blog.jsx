@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Search, Calendar, User, ArrowRight, Stethoscope, FileText, X } from "lucide-react";
 import { getBlogsForDoctor, getBlogByIdForDoctor } from "../../api/blogApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import DoctorLayout from "../../components/DoctorLayout";
 
 const ENTRIES_OPTIONS = [6, 12, 24];
@@ -156,7 +157,7 @@ export default function DoctorBlog() {
                   <div className="relative h-48 overflow-hidden bg-gradient-to-br from-brand-light to-brand-primary/20">
                     {blog.image ? (
                       <img
-                        src={`${import.meta.env.VITE_API_URL}/${blog.image}`}
+                        src={getImageUrl(blog.image)}
                         alt={blog.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -252,7 +253,7 @@ export default function DoctorBlog() {
               <div className="relative h-64 overflow-hidden bg-gradient-to-br from-brand-light to-brand-primary/20">
                 {selectedBlog.image ? (
                   <img
-                    src={`${import.meta.env.VITE_API_URL}/${selectedBlog.image}`}
+                    src={getImageUrl(selectedBlog.image)}
                     alt={selectedBlog.title}
                     className="w-full h-full object-cover"
                   />

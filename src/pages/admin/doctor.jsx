@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
+import { getImageUrl } from "../../utils/imageHelper";
 import {
   Plus,
   X,
@@ -73,7 +74,7 @@ function AddDoctorModal({ open, onClose, onSave, doctorToEdit = null }) {
         bio: doctorToEdit.bio || "",
         isExpert: doctorToEdit.isExpert || doctorToEdit.IsExpert || false,
       });
-      setPreviewImage(doctorToEdit.user?.image ? `${import.meta.env.VITE_API_URL}/${doctorToEdit.user.image}` : null);
+      setPreviewImage(getImageUrl(doctorToEdit.user?.image));
     } else {
       setForm(emptyForm);
       setPreviewImage(null);
@@ -682,7 +683,7 @@ export default function DoctorManagement() {
                     <div className="flex items-center gap-3">
                       {doc.user?.image ? (
                         <img
-                          src={`${import.meta.env.VITE_API_URL}/${doc.user.image.replace(/\\/g, '/')}`}
+                          src={getImageUrl(doc.user.image)}
                           alt={doc.user?.name || "Doctor"}
                           className="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                           onError={(e) => {
@@ -776,7 +777,7 @@ export default function DoctorManagement() {
                 <div className="flex items-center gap-3 min-w-0">
                   {doc.user?.image ? (
                     <img
-                      src={`${import.meta.env.VITE_API_URL}/${doc.user.image.replace(/\\/g, '/')}`}
+                      src={getImageUrl(doc.user.image)}
                       alt={doc.user?.name || "Doctor"}
                       className="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-gray-100"
                       onError={(e) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { getImageUrl } from "../../utils/imageHelper";
 import {
   Plus,
   X,
@@ -173,7 +174,7 @@ function BlogManagement() {
       blogType: blog.blogType || "all",
       image: null,
     });
-    setPreviewImage(blog.image ? `${import.meta.env.VITE_API_URL}/${blog.image}` : null);
+    setPreviewImage(getImageUrl(blog.image));
     setImageFile(null);
     setShowModal(true);
   };
@@ -779,7 +780,7 @@ function BlogManagement() {
               {selectedBlog.image && (
                 <div>
                   <img
-                    src={`${import.meta.env.VITE_API_URL}/${selectedBlog.image}`}
+                    src={getImageUrl(selectedBlog.image)}
                     alt={selectedBlog.title}
                     className="w-full h-64 object-cover rounded-xl"
                   />

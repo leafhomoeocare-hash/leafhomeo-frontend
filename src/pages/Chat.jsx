@@ -24,6 +24,7 @@ import {
 import PatientLayout from "../components/PatientLayout";
 import DoctorLayout from "../components/DoctorLayout";
 import { getContacts, getChatHistory, getContactById, editMessage, deleteMessage, getChatHistoryByAppointments, uploadAttachment } from "../api/chatApi";
+import { getImageUrl } from "../utils/imageHelper";
 
 export default function Chat() {
   const location = useLocation();
@@ -893,7 +894,7 @@ export default function Chat() {
                     <div className="relative flex-shrink-0">
                       {contact.image ? (
                         <img
-                          src={contact.image}
+                          src={getImageUrl(contact.image)}
                           alt={contact.name}
                           className="h-12 w-12 rounded-2xl object-cover border border-slate-150 shadow-2xs"
                         />
@@ -958,7 +959,7 @@ export default function Chat() {
                   <div className="relative">
                     {selectedContact.image ? (
                       <img
-                        src={selectedContact.image}
+                        src={getImageUrl(selectedContact.image)}
                         alt={selectedContact.name}
                         className="h-12 w-12 rounded-2xl object-cover border border-slate-150 shadow-2xs"
                       />

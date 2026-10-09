@@ -14,6 +14,7 @@ import {
 
 import AdminLayout from "../../components/AdminLayout";
 import { getContacts, getChatHistory } from "../../api/chatApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import useDebounce from "../../hooks/useDebounce";
 
 export default function AdminChat() {
@@ -271,7 +272,7 @@ export default function AdminChat() {
                     <div className="relative flex-shrink-0">
                       {contact.image ? (
                         <img
-                          src={contact.image}
+                          src={getImageUrl(contact.image)}
                           alt={contact.name}
                           className="h-10 w-10 rounded-full object-cover"
                         />
@@ -325,7 +326,7 @@ export default function AdminChat() {
                   <div className="flex items-center gap-3">
                     {selectedContact.image ? (
                       <img
-                        src={selectedContact.image}
+                        src={getImageUrl(selectedContact.image)}
                         alt={selectedContact.name}
                         className="h-10 w-10 rounded-full object-cover"
                       />

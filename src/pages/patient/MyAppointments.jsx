@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import { getMyAppointments, cancelAppointment } from "../../api/appointmentApi";
+import { getImageUrl } from "../../utils/imageHelper";
 import Payment from "../../components/Payment";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -603,7 +604,7 @@ export default function MyAppointments() {
                           <div className="flex items-center gap-2.5 min-w-[170px]">
                             {apt.doctorImage ? (
                               <img
-                                src={apt.doctorImage}
+                                src={getImageUrl(apt.doctorImage)}
                                 alt={apt.doctorName}
                                 className="w-8 h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0"
                               />

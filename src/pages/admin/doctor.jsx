@@ -663,23 +663,23 @@ export default function DoctorManagement() {
         </div>
 
         {/* Table - desktop/tablet */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-sm text-left">
+        <div className="hidden md:block">
+          <table className="w-full text-sm text-left table-auto">
             <thead className="bg-gray-50/50 border-b border-gray-100">
               <tr className="text-left text-gray-500 uppercase tracking-wider text-xs">
                 {COLUMNS.map((col) => (
-                  <th key={col.key} className="px-6 py-4 font-semibold whitespace-nowrap">
+                  <th key={col.key} className="px-6 py-4 font-semibold">
                     {col.label}
                   </th>
                 ))}
-                <th className="px-6 py-4 font-semibold whitespace-nowrap">Status</th>
-                <th className="px-6 py-4 font-semibold whitespace-nowrap text-right">Actions</th>
+                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {doctors.map((doc) => (
                 <tr key={doc.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4.5 whitespace-nowrap">
+                  <td className="px-6 py-4.5">
                     <div className="flex items-center gap-3">
                       {doc.user?.image ? (
                         <img
@@ -719,15 +719,15 @@ export default function DoctorManagement() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.user?.email}</td>
-                  <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.user?.mobile}</td>
-                  <td className="px-6 py-4.5 text-gray-800 font-semibold whitespace-nowrap">
+                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.user?.email}</td>
+                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.user?.mobile}</td>
+                  <td className="px-6 py-4.5 text-gray-800 font-semibold">
                     {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : (doc.specialization || "-")}
                   </td>
-                  <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.qualification}</td>
-                  <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{doc.experience} Years</td>
-                  <td className="px-6 py-4.5 text-gray-800 font-bold whitespace-nowrap">₹{doc.consultationFee}</td>
-                  <td className="px-6 py-4.5 whitespace-nowrap">
+                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.qualification}</td>
+                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.experience} Years</td>
+                  <td className="px-6 py-4.5 text-gray-800 font-bold">₹{doc.consultationFee}</td>
+                  <td className="px-6 py-4.5">
                     <span
                       className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                         doc.isExpert || doc.IsExpert
@@ -738,7 +738,7 @@ export default function DoctorManagement() {
                       {doc.isExpert || doc.IsExpert ? "Expert" : "General"}
                     </span>
                   </td>
-                  <td className="px-6 py-4.5 text-right whitespace-nowrap">
+                  <td className="px-6 py-4.5 text-right">
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => handleEditClick(doc)}

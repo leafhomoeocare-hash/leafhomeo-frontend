@@ -379,7 +379,8 @@ export default function AdminChat() {
                               <span className="text-xs opacity-70">
                                 {new Date(msg.createdAt).toLocaleTimeString([], {
                                   hour: '2-digit',
-                                  minute: '2-digit'
+                                  minute: '2-digit',
+                                  timeZone: 'Asia/Kolkata'
                                 })}
                               </span>
                               {isMine && (

@@ -64,7 +64,8 @@ const formatDate = (dateString) => {
     weekday: "short",
     year: "numeric",
     month: "short",
-    day: "numeric"
+    day: "numeric",
+    timeZone: "Asia/Kolkata"
   });
 };
 

@@ -236,8 +236,8 @@ function DashboardContent() {
                       {Array.isArray(upcomingAppointment.specialization) ? upcomingAppointment.specialization.join(", ") : (upcomingAppointment.specialization || "Homeopathy Consultant")}
                     </p>
                     <div className="flex items-center gap-3 text-[11px] text-gray-400 font-semibold mt-1">
-                      <span>📅 {new Date(upcomingAppointment.appointmentDateTime).toLocaleDateString()}</span>
-                      <span>⏰ {new Date(upcomingAppointment.appointmentDateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                      <span>📅 {new Date(upcomingAppointment.appointmentDateTime).toLocaleDateString(undefined, {timeZone: 'Asia/Kolkata'})}</span>
+                      <span>⏰ {new Date(upcomingAppointment.appointmentDateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZone: 'Asia/Kolkata'})}</span>
                     </div>
                   </div>
                 </div>

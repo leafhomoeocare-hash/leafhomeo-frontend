@@ -44,8 +44,8 @@ function formatDateTime(dateStr) {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "-";
-  const date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-  const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+  const date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
+  const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
   return { date, time };
 }
 
@@ -65,7 +65,7 @@ function formatDate(dateStr) {
   if (!dateStr) return "-";
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "-";
-  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
 }
 
 function formatRequestType(type) {

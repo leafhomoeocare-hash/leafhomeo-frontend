@@ -150,7 +150,8 @@ export default function AdminChatMonitoring() {
                         <span className="text-xs opacity-50">
                           {new Date(msg.createdAt).toLocaleTimeString([], {
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
+                            timeZone: 'Asia/Kolkata'
                           })}
                         </span>
                       </div>

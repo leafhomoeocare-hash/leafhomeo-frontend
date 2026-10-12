@@ -33,12 +33,13 @@ export default function BookAnyDoctor() {
       setBookingLoading(true);
       setError(null);
 
-      // Create date in local timezone - keep it as ISO-like string without UTC conversion
-      const appointmentDateTime = `${selectedDate}T${selectedTime}:00`;
+      // Create date in local timezone and convert to ISO with timezone offset
+      const appointmentDate = new Date(`${selectedDate}T${selectedTime}:00`);
+      const appointmentDateTimeISO = appointmentDate.toISOString();
 
       const bookingData = {
         requestType: "any_doctor",
-        appointmentDateTime: appointmentDateTime,
+        appointmentDateTime: appointmentDateTimeISO,
         reason: symptoms
       };
 

@@ -140,11 +140,18 @@ export default function AppointmentDetails() {
       return;
     }
 
+    // Validate that selected time is in the available slots
+    const isSlotAvailable = availableSlots.some(slot => slot.time === selectedTime && slot.available);
+    if (!isSlotAvailable) {
+      setError("Please select a valid available time slot");
+      return;
+    }
+
     // Validate that selected time is at least 8 hours from now
     const now = new Date();
     const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
     const selectedDateTime = new Date(`${selectedDate} ${selectedTime}`);
-    
+
     if (selectedDateTime < minAllowedTime) {
       setError("Appointment must be at least 8 hours from now");
       return;

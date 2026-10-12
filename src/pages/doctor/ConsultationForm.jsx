@@ -40,8 +40,37 @@ const ConsultationForm = () => {
   useEffect(() => {
     if (consultationId) {
       fetchConsultation();
+    } else {
+      // If no consultationId, check for draft from localStorage
+      loadDraftIfExists();
     }
   }, [consultationId]);
+
+  const loadDraftIfExists = () => {
+    // Try to find draft from URL params or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const aptId = urlParams.get('appointmentId');
+    
+    if (aptId) {
+      const savedDraft = localStorage.getItem(`consultation_draft_${aptId}`);
+      if (savedDraft) {
+        try {
+          const parsedData = JSON.parse(savedDraft);
+          setAppointmentId(aptId);
+          setFormData(parsedData);
+          setLoading(false);
+          console.log("Loaded draft from localStorage:", parsedData);
+        } catch (err) {
+          console.error("Error parsing draft:", err);
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  };
 
   const fetchConsultation = async () => {
     try {
@@ -166,6 +195,10 @@ const ConsultationForm = () => {
       );
 
       if (response.data.status === 1) {
+        // Clear draft from localStorage if it exists
+        if (appointmentId) {
+          localStorage.removeItem(`consultation_draft_${appointmentId}`);
+        }
         Swal.fire({
           icon: "success",
           title: "Success",
@@ -182,6 +215,32 @@ const ConsultationForm = () => {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveDraft = () => {
+    if (!appointmentId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Warning",
+        text: "No appointment ID found. Cannot save draft.",
+      });
+      return;
+    }
+    try {
+      localStorage.setItem(`consultation_draft_${appointmentId}`, JSON.stringify(formData));
+      Swal.fire({
+        icon: "success",
+        title: "Draft Saved",
+        text: "Your draft has been saved. You can continue later.",
+      });
+    } catch (err) {
+      console.error("Error saving draft:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to save draft",
+      });
     }
   };
 
@@ -210,6 +269,12 @@ const ConsultationForm = () => {
             <div>
               <h1 className="text-2xl font-bold text-gray-800">Consultation Form</h1>
               <p className="text-sm text-gray-500 mt-1">Review and update consultation details</p>
+              {!consultationId && appointmentId && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold mt-2 border border-amber-200">
+                  <FileText size={12} />
+                  Draft Mode
+                </span>
+              )}
             </div>
           </div>
           {consultation && (
@@ -583,6 +648,13 @@ const ConsultationForm = () => {
               className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
             >
               Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              className="px-8 py-3 border-2 border-amber-400 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-all"
+            >
+              Save Draft
             </button>
             <button
               type="submit"

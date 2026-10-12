@@ -40,6 +40,11 @@ export default function DoctorAppointments() {
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
 
+  // Check for draft consultation forms
+  const hasDraft = (appointmentId) => {
+    return localStorage.getItem(`consultation_draft_${appointmentId}`) !== null;
+  };
+
   useEffect(() => {
     fetchAppointments();
   }, [filter]);
@@ -669,6 +674,18 @@ export default function DoctorAppointments() {
                               >
                                 <FileText size={13} />
                                 <span>Rx</span>
+                              </button>
+                            )}
+
+                            {/* Complete Draft Form (when draft exists) */}
+                            {hasDraft(apt.id) && !isCompleted && (
+                              <button
+                                onClick={() => navigate(`/doctor/consultation-form?appointmentId=${apt.id}`)}
+                                className="h-8 px-2.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                                title="Complete Draft Consultation Form"
+                              >
+                                <FileText size={13} />
+                                <span>Draft</span>
                               </button>
                             )}
                           </div>

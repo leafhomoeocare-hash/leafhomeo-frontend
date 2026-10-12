@@ -679,7 +679,7 @@ export default function DoctorManagement() {
             <tbody className="divide-y divide-gray-100">
               {doctors.map((doc) => (
                 <tr key={doc.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4.5">
+                  <td className="px-6 py-4.5 min-w-[200px]">
                     <div className="flex items-center gap-3">
                       {doc.user?.image ? (
                         <img
@@ -696,21 +696,21 @@ export default function DoctorManagement() {
                           {doc.user?.name?.replace("Dr. ", "")?.[0] || "D"}
                         </div>
                       )}
-                      <div>
-                        <span className="font-semibold text-gray-900 flex items-center gap-1.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold text-gray-900 flex items-center gap-1.5 truncate">
                           {doc.user?.name}
                           {(doc.isExpert || doc.IsExpert) && (
-                            <Star size={13} className="text-amber-400 fill-amber-400" />
+                            <Star size={13} className="text-amber-400 fill-amber-400 flex-shrink-0" />
                           )}
-                        </span>
+                        </div>
                         <div className="flex items-center gap-1.5 mt-1">
                           {doc.user?.isPasswordSet ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
                               <ShieldCheck size={10} />
                               Verified
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
                               <ShieldAlert size={10} />
                               Not Verified
                             </span>
@@ -774,7 +774,7 @@ export default function DoctorManagement() {
           {doctors.map((doc) => (
             <div key={doc.id} className="p-5 hover:bg-gray-50/50">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
                   {doc.user?.image ? (
                     <img
                       src={getImageUrl(doc.user.image)}
@@ -791,7 +791,7 @@ export default function DoctorManagement() {
                     </div>
                   )}
 
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-900 flex items-center gap-1.5 truncate">
                       {doc.user?.name}
                       {(doc.isExpert || doc.IsExpert) && (
@@ -803,12 +803,12 @@ export default function DoctorManagement() {
                     </p>
                     <div className="flex items-center gap-1.5 mt-1">
                       {doc.user?.isPasswordSet ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
                           <ShieldCheck size={10} />
                           Verified
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
                           <ShieldAlert size={10} />
                           Not Verified
                         </span>

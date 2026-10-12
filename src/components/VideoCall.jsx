@@ -82,6 +82,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       try {
         const parsedData = JSON.parse(savedDraft);
         setFormData(parsedData);
+        setShowConsultationForm(true); // Show form if draft exists
         console.log("Loaded saved form data:", parsedData);
       } catch (err) {
         console.error("Error parsing saved form data:", err);

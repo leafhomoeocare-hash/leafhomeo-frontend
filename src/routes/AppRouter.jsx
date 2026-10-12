@@ -97,6 +97,7 @@ function AppRouter() {
       <Route path="/doctor/dashboard" element={<ProtectedRoute allowedRole="doctor"><DoctorDashboard /></ProtectedRoute>} />
       <Route path="/doctor/appointments" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointments /></ProtectedRoute>} />
       <Route path="/doctor/consultation/:consultationId" element={<ProtectedRoute allowedRole="doctor"><ConsultationForm /></ProtectedRoute>} />
+      <Route path="/doctor/consultation-form" element={<ProtectedRoute allowedRole="doctor"><ConsultationForm /></ProtectedRoute>} />
       <Route path="/doctor/appointment-requests" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointmentRequests /></ProtectedRoute>} />
       <Route path="/doctor/patient/:patientId" element={<ProtectedRoute allowedRole="doctor"><DoctorPatientDetails /></ProtectedRoute>} />
       <Route path="/doctor/availability" element={<ProtectedRoute allowedRole="doctor"><DoctorAvailability /></ProtectedRoute>} />

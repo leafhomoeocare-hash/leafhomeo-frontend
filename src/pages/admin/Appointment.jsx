@@ -5,6 +5,19 @@ import AdminLayout from "../../components/AdminLayout";
 import { getAppointments, updateShippingStatus } from "../../api/appointmentApi";
 import { getImageUrl } from "../../utils/imageHelper";
 
+// Simple debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 const COLUMNS = [
   { key: "appointmentId", label: "Appointment ID" },
   { key: "name", label: "Patient" },
@@ -227,6 +240,21 @@ export default function AppointmentManagement() {
     fetchAppointments();
   }, [fetchAppointments]);
 
+  // Debounced search - auto search after 500ms of no typing
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      setAppliedSearch(value);
+      setCurrentPage(1);
+    }, 500),
+    []
+  );
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+    debouncedSearch(value);
+  };
+
   const handleSearchClick = () => {
     setAppliedSearch(search);
     setCurrentPage(1);
@@ -254,8 +282,7 @@ export default function AppointmentManagement() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearchClick()}
+            onChange={handleSearchChange}
             placeholder="Search by patient name, phone, doctor..."
             className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all focus:border-brand-primary"
           />

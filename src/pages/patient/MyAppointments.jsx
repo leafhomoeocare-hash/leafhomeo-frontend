@@ -590,6 +590,7 @@ export default function MyAppointments() {
                     const isAccepted = statusLower === "accepted" || statusLower === "confirmed";
                     const isPaid = statusLower === "paid";
                     const isCompleted = statusLower === "completed";
+                    const isCancelled = statusLower === "cancelled" || statusLower === "rejected";
                     const canCancel = ["pending", "accepted", "confirmed"].includes(statusLower);
 
                     return (
@@ -685,7 +686,7 @@ export default function MyAppointments() {
                             )}
 
                             {/* Chat Button */}
-                            {isPaid && apt.doctorUserId && (
+                            {isPaid && !isCancelled && apt.doctorUserId && (
                               <button
                                 onClick={() =>
                                   navigate("/patient/chat", {
@@ -701,7 +702,7 @@ export default function MyAppointments() {
                             )}
 
                             {/* Video Call */}
-                            {isPaid && canJoinCall(apt) && (
+                            {isPaid && !isCancelled && canJoinCall(apt) && (
                               <button
                                 onClick={() =>
                                   navigate(`/patient/video-call?appointmentId=${apt.id}`)
@@ -715,7 +716,7 @@ export default function MyAppointments() {
                             )}
 
                             {/* Write Review */}
-                            {isCompleted && !apt.hasReviewed && (
+                            {isCompleted && !isCancelled && !apt.hasReviewed && (
                               <button
                                 onClick={() => handleOpenReviewModal(apt)}
                                 className="h-8 px-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"

@@ -145,7 +145,7 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
         </button>
 
         {/* Search */}
-        <div className="relative hidden sm:block w-72 md:w-96">
+        {/* <div className="relative hidden sm:block w-72 md:w-96">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <Search size={16} />
           </span>
@@ -154,7 +154,7 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
             placeholder="Search doctors, appointments..."
             className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 text-sm outline-hidden focus:border-brand-primary focus:bg-white focus:ring-2 focus:ring-brand-primary/20 transition-all"
           />
-        </div>
+        </div> */}
 
         {/* Brand indicator for mobile */}
         <div className="flex items-center gap-2 lg:hidden">
@@ -275,21 +275,21 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
 
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl ring-1 ring-black/5 animate-fadeIn">
-              <button 
+              <button
                 onClick={() => { navigate("/patient/profile"); setShowProfileMenu(false); }}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <User size={15} className="text-gray-400" />
                 Profile
               </button>
-              <button 
+              {/* <button
                 onClick={() => { navigate("/patient/profile/edit"); setShowProfileMenu(false); }}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <Settings size={15} className="text-gray-400" />
                 Complete Profile
-              </button>
-              <button 
+              </button> */}
+              <button
                 onClick={() => { navigate("/patient/profile/change-password"); setShowProfileMenu(false); }}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               >

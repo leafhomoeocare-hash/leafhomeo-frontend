@@ -249,7 +249,7 @@ export default function AppointmentManagement() {
       </div>
 
       {/* Search row */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      {/* <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -268,17 +268,17 @@ export default function AppointmentManagement() {
           <Search size={16} />
           Search
         </button>
-      </div>
+      </div> */}
 
       {/* Table card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
         {/* Table - desktop/tablet */}
         <div className="hidden md:block">
-          <table className="w-full text-sm text-left">
+          <table className="w-full text-xs text-left">
             <thead className="bg-gray-50/50 border-b border-gray-100">
-              <tr className="text-left text-gray-500 uppercase tracking-wider text-xs">
+              <tr className="text-left text-gray-500 uppercase tracking-wider text-[10px]">
                 {COLUMNS.map((col) => (
-                  <th key={col.key} className="px-6 py-4 font-semibold whitespace-nowrap">
+                  <th key={col.key} className="px-4 py-3 font-semibold whitespace-nowrap">
                     {col.label}
                   </th>
                 ))}
@@ -289,41 +289,41 @@ export default function AppointmentManagement() {
                 const dt = formatDateTime(appt.appointmentDate);
                 return (
                   <tr key={appt.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-6 py-4.5 whitespace-nowrap">
-                      <span className="font-semibold text-gray-900 text-sm">#{appt.appointmentId || appt.id}</span>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="font-semibold text-gray-900 text-xs">#{appt.appointmentId || appt.id}</span>
                     </td>
-                    <td className="px-6 py-4.5 whitespace-nowrap">
-                      <div className="flex items-center gap-3 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-2 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
                         {appt.patient?.image ? (
                           <img
                             src={getImageUrl(appt.patient.image)}
                             alt={appt.patient.name}
-                            className="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                            className="w-7 h-7 rounded-lg object-cover flex-shrink-0 border border-gray-100"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
                             }}
                           />
                         ) : (
-                          <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-xs border border-brand-primary/10 flex-shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] border border-brand-primary/10 flex-shrink-0">
                             {appt.patient?.name?.[0] || "P"}
                           </div>
                         )}
                         <div>
-                          <span className="font-semibold text-gray-900 block hover:underline">{appt.patient?.name}</span>
-                          <span className="text-xs text-gray-400">{appt.patient?.email || "-"}</span>
+                          <span className="font-semibold text-gray-900 block text-xs hover:underline truncate max-w-[150px]">{appt.patient?.name}</span>
+                          <span className="text-[10px] text-gray-400 truncate max-w-[150px]">{appt.patient?.email || "-"}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap">
+                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                       {typeof dt === "object" ? (
                         <div className="flex flex-col gap-0.5">
-                          <span className="flex items-center gap-1.5 font-semibold text-gray-800 text-sm">
-                            <Calendar size={13} className="text-brand-primary" />
+                          <span className="flex items-center gap-1 font-semibold text-gray-800 text-xs">
+                            <Calendar size={11} className="text-brand-primary" />
                             {dt.date}
                           </span>
-                          <span className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-                            <Clock size={12} />
+                          <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                            <Clock size={10} />
                             {dt.time}
                           </span>
                         </div>
@@ -331,44 +331,44 @@ export default function AppointmentManagement() {
                         "-"
                       )}
                     </td>
-                    <td className="px-6 py-4.5 text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
+                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
                         {appt.doctor?.image ? (
                           <img
                             src={getImageUrl(appt.doctor.image)}
                             alt={appt.doctor.name}
-                            className="w-8 h-8 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                            className="w-7 h-7 rounded-lg object-cover flex-shrink-0 border border-gray-100"
                             onError={(e) => {
                               e.target.onerror = null;
                               e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
                             }}
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-xs border border-brand-primary/10 flex-shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] border border-brand-primary/10 flex-shrink-0">
                             {appt.doctor?.name?.replace("Dr. ", "")?.[0] || "D"}
                           </div>
                         )}
-                        <span className="font-semibold text-gray-900">{appt.doctor?.name || "Not Assigned"}</span>
+                        <span className="font-semibold text-gray-900 text-xs truncate max-w-[120px]">{appt.doctor?.name || "Not Assigned"}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4.5 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <StatusBadge status={appt.status} />
                     </td>
-                    <td className="px-6 py-4.5 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <PaymentBadge status={appt.payment?.status || "pending"} />
                     </td>
-                    <td className="px-6 py-4.5 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {appt.trackingUrl ? (
-                        <a 
-                          href={appt.trackingUrl} 
-                          target="_blank" 
+                        <a
+                          href={appt.trackingUrl}
+                          target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-blue-600 hover:underline font-semibold"
+                          className="text-[10px] text-blue-600 hover:underline font-semibold"
                         >
                           Track Package
                         </a>
                       ) : (
-                        <span className="text-xs text-gray-400">-</span>
+                        <span className="text-[10px] text-gray-400">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4.5 whitespace-nowrap">

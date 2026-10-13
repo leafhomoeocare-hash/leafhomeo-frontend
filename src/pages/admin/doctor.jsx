@@ -598,7 +598,7 @@ export default function DoctorManagement() {
 
       {/* Search + Add row */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
+        {/* <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -615,7 +615,7 @@ export default function DoctorManagement() {
               <X size={16} />
             </button>
           )}
-        </div>
+        </div> */}
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -664,54 +664,54 @@ export default function DoctorManagement() {
 
         {/* Table - desktop/tablet */}
         <div className="hidden md:block">
-          <table className="w-full text-sm text-left table-auto">
+          <table className="w-full text-xs text-left table-auto">
             <thead className="bg-gray-50/50 border-b border-gray-100">
-              <tr className="text-left text-gray-500 uppercase tracking-wider text-xs">
+              <tr className="text-left text-gray-500 uppercase tracking-wider text-[10px]">
                 {COLUMNS.map((col) => (
-                  <th key={col.key} className="px-6 py-4 font-semibold">
+                  <th key={col.key} className="px-3 py-2.5 font-semibold">
                     {col.label}
                   </th>
                 ))}
-                <th className="px-6 py-4 font-semibold">Status</th>
-                <th className="px-6 py-4 font-semibold text-right">Actions</th>
+                <th className="px-3 py-2.5 font-semibold">Status</th>
+                <th className="px-3 py-2.5 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {doctors.map((doc) => (
                 <tr key={doc.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4.5 min-w-[200px]">
-                    <div className="flex items-center gap-3">
+                  <td className="px-3 py-2.5 min-w-[180px]">
+                    <div className="flex items-center gap-2">
                       {doc.user?.image ? (
                         <img
                           src={getImageUrl(doc.user.image)}
                           alt={doc.user?.name || "Doctor"}
-                          className="w-9 h-9 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                          className="w-7 h-7 rounded-lg object-cover flex-shrink-0 border border-gray-100"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
                           }}
                         />
                       ) : (
-                        <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-xs flex-shrink-0 border border-brand-primary/10">
+                        <div className="w-7 h-7 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] flex-shrink-0 border border-brand-primary/10">
                           {doc.user?.name?.replace("Dr. ", "")?.[0] || "D"}
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-gray-900 flex items-center gap-1.5 truncate">
+                        <div className="font-semibold text-gray-900 flex items-center gap-1 truncate text-xs">
                           {doc.user?.name}
                           {(doc.isExpert || doc.IsExpert) && (
-                            <Star size={13} className="text-amber-400 fill-amber-400 flex-shrink-0" />
+                            <Star size={11} className="text-amber-400 fill-amber-400 flex-shrink-0" />
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 mt-1">
+                        <div className="flex items-center gap-1 mt-0.5">
                           {doc.user?.isPasswordSet ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
-                              <ShieldCheck size={10} />
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
+                              <ShieldCheck size={8} />
                               Verified
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
-                              <ShieldAlert size={10} />
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
+                              <ShieldAlert size={8} />
                               Not Verified
                             </span>
                           )}
@@ -719,17 +719,17 @@ export default function DoctorManagement() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.user?.email}</td>
-                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.user?.mobile}</td>
-                  <td className="px-6 py-4.5 text-gray-800 font-semibold">
+                  <td className="px-3 py-2.5 text-gray-600 font-medium text-xs truncate max-w-[120px]">{doc.user?.email}</td>
+                  <td className="px-3 py-2.5 text-gray-600 font-medium text-xs">{doc.user?.mobile}</td>
+                  <td className="px-3 py-2.5 text-gray-800 font-semibold text-xs truncate max-w-[100px]">
                     {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : (doc.specialization || "-")}
                   </td>
-                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.qualification}</td>
-                  <td className="px-6 py-4.5 text-gray-600 font-medium">{doc.experience} Years</td>
-                  <td className="px-6 py-4.5 text-gray-800 font-bold">₹{doc.consultationFee}</td>
-                  <td className="px-6 py-4.5">
+                  <td className="px-3 py-2.5 text-gray-600 font-medium text-xs truncate max-w-[100px]">{doc.qualification}</td>
+                  <td className="px-3 py-2.5 text-gray-600 font-medium text-xs">{doc.experience} Years</td>
+                  <td className="px-3 py-2.5 text-gray-800 font-bold text-xs">₹{doc.consultationFee}</td>
+                  <td className="px-3 py-2.5">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                      className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
                         doc.isExpert || doc.IsExpert
                           ? "bg-amber-50 text-amber-700 border-amber-200"
                           : "bg-gray-50 text-gray-600 border-gray-200"
@@ -738,21 +738,21 @@ export default function DoctorManagement() {
                       {doc.isExpert || doc.IsExpert ? "Expert" : "General"}
                     </span>
                   </td>
-                  <td className="px-6 py-4.5 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
+                  <td className="px-3 py-2.5 text-right">
+                    <div className="flex items-center justify-end gap-1">
                       <button
                         onClick={() => handleEditClick(doc)}
-                        className="text-blue-600 hover:text-blue-800 p-1.5 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer"
+                        className="text-blue-600 hover:text-blue-800 p-1 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
                         title="Edit Doctor"
                       >
-                        <Edit size={16} />
+                        <Edit size={14} />
                       </button>
                       <button
                         onClick={() => handleDeleteClick(doc)}
-                        className="text-rose-600 hover:text-rose-800 p-1.5 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                        className="text-rose-600 hover:text-rose-800 p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
                         title="Delete Doctor"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
                     </div>
                   </td>
@@ -760,7 +760,7 @@ export default function DoctorManagement() {
               ))}
               {!loading && doctors.length === 0 && (
                 <tr>
-                  <td colSpan={COLUMNS.length + 2} className="px-6 py-12 text-center text-gray-400 font-medium">
+                  <td colSpan={COLUMNS.length + 2} className="px-3 py-8 text-center text-gray-400 font-medium text-xs">
                     No doctors match your search criteria.
                   </td>
                 </tr>
@@ -772,44 +772,44 @@ export default function DoctorManagement() {
         {/* Cards - mobile only */}
         <div className="md:hidden divide-y divide-gray-100">
           {doctors.map((doc) => (
-            <div key={doc.id} className="p-5 hover:bg-gray-50/50">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div key={doc.id} className="p-3 hover:bg-gray-50/50">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   {doc.user?.image ? (
                     <img
                       src={getImageUrl(doc.user.image)}
                       alt={doc.user?.name || "Doctor"}
-                      className="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                      className="w-8 h-8 rounded-lg object-cover flex-shrink-0 border border-gray-100"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
                       }}
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-sm flex-shrink-0 border border-brand-primary/10">
+                    <div className="w-8 h-8 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] flex-shrink-0 border border-brand-primary/10">
                       {doc.user?.name?.replace("Dr. ", "")?.[0] || "D"}
                     </div>
                   )}
 
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold text-gray-900 flex items-center gap-1.5 truncate">
+                    <p className="font-semibold text-gray-900 flex items-center gap-1 truncate text-xs">
                       {doc.user?.name}
                       {(doc.isExpert || doc.IsExpert) && (
-                        <Star size={12} className="text-amber-400 fill-amber-400 flex-shrink-0" />
+                        <Star size={10} className="text-amber-400 fill-amber-400 flex-shrink-0" />
                       )}
                     </p>
-                    <p className="text-xs font-semibold text-brand-primary truncate">
+                    <p className="text-[10px] font-semibold text-brand-primary truncate">
                       {Array.isArray(doc.specialization) ? doc.specialization.join(", ") : (doc.specialization || "-")}
                     </p>
-                    <div className="flex items-center gap-1.5 mt-1">
+                    <div className="flex items-center gap-1 mt-0.5">
                       {doc.user?.isPasswordSet ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
-                          <ShieldCheck size={10} />
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-green-50 text-green-700 border border-green-200 flex-shrink-0">
+                          <ShieldCheck size={8} />
                           Verified
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
-                          <ShieldAlert size={10} />
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex-shrink-0">
+                          <ShieldAlert size={8} />
                           Not Verified
                         </span>
                       )}
@@ -819,28 +819,28 @@ export default function DoctorManagement() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleEditClick(doc)}
-                    className="text-blue-600 hover:text-blue-800 p-1.5 rounded-xl hover:bg-blue-50 transition-colors cursor-pointer"
+                    className="text-blue-600 hover:text-blue-800 p-1 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
                     title="Edit"
                   >
-                    <Edit size={15} />
+                    <Edit size={13} />
                   </button>
                   <button
                     onClick={() => handleDeleteClick(doc)}
-                    className="text-rose-600 hover:text-rose-800 p-1.5 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+                    className="text-rose-600 hover:text-rose-800 p-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
                     title="Delete"
                   >
-                    <Trash2 size={15} />
+                    <Trash2 size={13} />
                   </button>
                 </div>
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-y-3 gap-x-4 text-xs font-medium text-gray-600">
+              <div className="mt-3 grid grid-cols-2 gap-y-2 gap-x-3 text-[10px] font-medium text-gray-600">
                 <div>
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Email</p>
+                  <p className="text-[9px] uppercase font-bold tracking-wider text-gray-400">Email</p>
                   <p className="text-gray-900 truncate mt-0.5">{doc.user?.email}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Phone</p>
+                  <p className="text-[9px] uppercase font-bold tracking-wider text-gray-400">Phone</p>
                   <p className="text-gray-900 mt-0.5">{doc.user?.mobile}</p>
                 </div>
                 <div>

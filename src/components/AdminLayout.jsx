@@ -161,7 +161,7 @@ function TopHeader({ setSidebarOpen }) {
         </button>
 
         {/* Search */}
-        <div className="relative hidden sm:block w-72 md:w-96">
+        {/* <div className="relative hidden sm:block w-72 md:w-96">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
             <Search size={16} />
           </span>
@@ -170,7 +170,7 @@ function TopHeader({ setSidebarOpen }) {
             placeholder="Search patients, doctors..."
             className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 text-sm outline-hidden focus:border-brand-primary focus:bg-white focus:ring-2 focus:ring-brand-primary/20 transition-all"
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Right side: notifications + profile */}

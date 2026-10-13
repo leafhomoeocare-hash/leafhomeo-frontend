@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import DoctorLayout from "../../components/DoctorLayout";
-import { 
-  Search, 
-  Calendar, 
-  Clock, 
-  Check, 
-  X, 
-  Loader2, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  Search,
+  Calendar,
+  Clock,
+  Check,
+  X,
+  Loader2,
+  AlertCircle,
+  CheckCircle,
   XCircle,
   User,
   ArrowUpDown,
@@ -17,7 +17,8 @@ import {
   ArrowDown,
   ChevronLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Eye
 } from "lucide-react";
 import { acceptAppointment, rejectAppointment, getDoctorAppointments } from "../../api/doctorApi";
 import { getImageUrl } from "../../utils/imageHelper";
@@ -41,6 +42,10 @@ export default function AppointmentRequests() {
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
+
+  // Details Modal
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] = useState(null);
 
   useEffect(() => {
     fetchAppointments();
@@ -594,9 +599,6 @@ export default function AppointmentRequests() {
                             <span className="font-bold text-gray-900 block truncate">
                               {apt.patientName}
                             </span>
-                            <span className="text-[11px] text-gray-400 block truncate">
-                              {apt.reason || apt.symptoms || apt.patientPhone || apt.phone || "No details provided"}
-                            </span>
                           </div>
                         </div>
                       </td>
@@ -634,6 +636,18 @@ export default function AppointmentRequests() {
                       {/* Actions */}
                       <td className="py-3 px-3.5 whitespace-nowrap text-right w-48">
                         <div className="flex items-center justify-end gap-1.5 w-full">
+                          {/* View Details Button */}
+                          <button
+                            onClick={() => {
+                              setSelectedAppointmentForDetails(apt);
+                              setDetailsModalOpen(true);
+                            }}
+                            className="h-8 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                            title="View Details"
+                          >
+                            <Eye size={13} />
+                          </button>
+
                           {(apt.status || "").toLowerCase() === "pending" ? (
                             <>
                               <button
@@ -713,6 +727,65 @@ export default function AppointmentRequests() {
           </div>
         </div>
       </div>
+
+      {/* Appointment Details Modal */}
+      {detailsModalOpen && selectedAppointmentForDetails && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl border border-gray-100 overflow-hidden">
+            <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Appointment Details</h3>
+                <p className="text-xs text-gray-400 mt-0.5">Appointment ID: {selectedAppointmentForDetails.appointmentId}</p>
+              </div>
+              <button
+                onClick={() => setDetailsModalOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">Date</p>
+                  <p className="text-sm font-medium text-gray-900">{formatDate(selectedAppointmentForDetails.appointmentDateTime)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">Time</p>
+                  <p className="text-sm font-medium text-gray-900">{formatTime(selectedAppointmentForDetails.appointmentDateTime)}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-400 font-semibold">Patient Name</p>
+                <p className="text-sm font-medium text-gray-900">{selectedAppointmentForDetails.patientName}</p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-400 font-semibold">Reason / Symptoms</p>
+                <p className="text-sm font-medium text-gray-900">{selectedAppointmentForDetails.reason || selectedAppointmentForDetails.symptoms || "-"}</p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-400 font-semibold">Request Type</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {selectedAppointmentForDetails.requestType === "any_doctor"
+                    ? "Any Doctor"
+                    : selectedAppointmentForDetails.requestType === "specific_doctor"
+                    ? "Specific Doctor"
+                    : selectedAppointmentForDetails.requestType || "Standard"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-400 font-semibold">Status</p>
+                {getStatusBadge(selectedAppointmentForDetails.status)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </DoctorLayout>
   );
 }

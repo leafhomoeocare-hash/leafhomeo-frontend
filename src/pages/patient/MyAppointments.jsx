@@ -25,7 +25,8 @@ import {
   ArrowDown,
   ChevronLeft,
   ChevronRight,
-  ChevronDown
+  ChevronDown,
+  Eye
 } from "lucide-react";
 
 export default function MyAppointments() {
@@ -56,6 +57,8 @@ export default function MyAppointments() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedAppointmentForPayment, setSelectedAppointmentForPayment] = useState(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedAppointmentForDetails, setSelectedAppointmentForDetails] = useState(null);
 
   useEffect(() => {
     if (bookingSuccess) {
@@ -621,9 +624,6 @@ export default function MyAppointments() {
                               <span className="font-bold text-gray-900 block truncate">
                                 Dr. {apt.doctorName?.replace(/^Dr\.\s*/i, "")}
                               </span>
-                              <span className="text-[11px] text-gray-400 block truncate">
-                                {apt.reason || apt.symptoms || "General Consultation"}
-                              </span>
                             </div>
                           </div>
                         </td>
@@ -661,6 +661,18 @@ export default function MyAppointments() {
                         {/* Actions */}
                         <td className="py-3 px-3.5 whitespace-nowrap text-right w-48">
                           <div className="flex items-center justify-end gap-1.5 w-full">
+                            {/* View Details Button */}
+                            <button
+                              onClick={() => {
+                                setSelectedAppointmentForDetails(apt);
+                                setDetailsModalOpen(true);
+                              }}
+                              className="h-8 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                              title="View Details"
+                            >
+                              <Eye size={13} />
+                            </button>
+
                             {/* Pay Button */}
                             {isAccepted && (
                               <button
@@ -882,6 +894,70 @@ export default function MyAppointments() {
                   onSuccess={handlePaymentSuccess}
                   onCancel={() => setPaymentModalOpen(false)}
                 />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Appointment Details Modal */}
+        {detailsModalOpen && selectedAppointmentForDetails && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl border border-gray-100 overflow-hidden">
+              <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Appointment Details</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">Appointment ID: {selectedAppointmentForDetails.appointmentId}</p>
+                </div>
+                <button
+                  onClick={() => setDetailsModalOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-400 font-semibold">Date</p>
+                    <p className="text-sm font-medium text-gray-900">{formatDate(selectedAppointmentForDetails.appointmentDateTime)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400 font-semibold">Time</p>
+                    <p className="text-sm font-medium text-gray-900">{formatTime(selectedAppointmentForDetails.appointmentDateTime)}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">Doctor</p>
+                  <p className="text-sm font-medium text-gray-900">Dr. {selectedAppointmentForDetails.doctorName}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">Specialization</p>
+                  <p className="text-sm font-medium text-gray-900">{selectedAppointmentForDetails.specialization || "-"}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">Reason / Symptoms</p>
+                  <p className="text-sm font-medium text-gray-900">{selectedAppointmentForDetails.reason || "-"}</p>
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">Status</p>
+                  {getStatusBadge(selectedAppointmentForDetails.status)}
+                </div>
+
+                <div>
+                  <p className="text-xs text-gray-400 font-semibold">Request Type</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {selectedAppointmentForDetails.requestType === "any_doctor"
+                      ? "Any Doctor"
+                      : selectedAppointmentForDetails.requestType === "specific_doctor"
+                      ? "Specific Doctor"
+                      : selectedAppointmentForDetails.requestType || "Standard"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>

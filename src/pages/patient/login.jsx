@@ -62,19 +62,16 @@ const Login = () => {
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100/80 p-8 relative z-10 animate-scaleUp">
         {/* Header / Logo */}
         <div className="text-center mb-8">
-          <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+          <div className="w-32 h-auto mx-auto mb-4 flex items-center justify-center">
             <img
               src="/Leaf-LOGO-Kit/SVG/final leaf logo_App icon.svg"
               alt="Leaf Homeo Care"
-              className="w-full h-full object-contain drop-shadow-md rounded-2xl"
+              className="w-full h-auto object-contain drop-shadow-md"
             />
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">
-            Leaf Homeo Care
+            User Login
           </h1>
-          <p className="text-sm text-gray-500 mt-2 font-medium">
-            Patient Portal Login
-          </p>
         </div>
 
         {/* Error Message */}

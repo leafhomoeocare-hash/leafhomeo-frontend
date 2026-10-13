@@ -342,7 +342,7 @@ function DashboardContent() {
             <p className="text-sm text-gray-500 mt-1">Top-rated specialists ready to help you</p>
           </div>
           <button
-            onClick={() => navigate("/patient/doctors")}
+            onClick={() => navigate("/patient/doctors?showList=true")}
             className="text-sm font-bold text-brand-primary hover:underline cursor-pointer"
           >
             View All

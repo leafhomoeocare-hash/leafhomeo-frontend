@@ -598,7 +598,7 @@ export default function DoctorManagement() {
 
       {/* Search + Add row */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6 flex flex-col sm:flex-row gap-3">
-        {/* <div className="relative flex-1">
+        <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
@@ -615,7 +615,7 @@ export default function DoctorManagement() {
               <X size={16} />
             </button>
           )}
-        </div> */}
+        </div>
         <div className="flex gap-2">
           <button
             onClick={() => {

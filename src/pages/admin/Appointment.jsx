@@ -14,8 +14,7 @@ const COLUMNS = [
   { key: "payment", label: "Payment" },
   { key: "shipping", label: "Shipping" },
   { key: "tracking", label: "Tracking" },
-  { key: "notes", label: "Notes" },
-  { key: "chat", label: "Chat" },
+  { key: "actions", label: "Actions" },
 
 ];
 
@@ -249,7 +248,7 @@ export default function AppointmentManagement() {
       </div>
 
       {/* Search row */}
-      {/* <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-4 mb-6 flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -268,7 +267,7 @@ export default function AppointmentManagement() {
           <Search size={16} />
           Search
         </button>
-      </div> */}
+      </div>
 
       {/* Table card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
@@ -390,7 +389,6 @@ export default function AppointmentManagement() {
                         <ShippingBadge status={appt.shippingStatus || "draft"} />
                       )}
                     </td>
-                    <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap text-sm max-w-xs truncate" title={appt.notes}>{appt.notes || "-"}</td>
                     <td className="px-6 py-4.5 whitespace-nowrap">
                       {appt.doctor ? (
                         <button
@@ -497,10 +495,7 @@ export default function AppointmentManagement() {
                       )}
                     </div>
                   </div>
-                  <div className="col-span-2">
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Notes</p>
-                    <p className="text-gray-900 mt-0.5 line-clamp-2">{appt.notes || "-"}</p>
-                  </div>
+
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t border-gray-100">

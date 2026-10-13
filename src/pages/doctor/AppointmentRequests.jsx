@@ -731,8 +731,8 @@ export default function AppointmentRequests() {
       {/* Appointment Details Modal */}
       {detailsModalOpen && selectedAppointmentForDetails && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl border border-gray-100 overflow-hidden">
-            <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl border border-gray-100 overflow-hidden max-h-[90vh] flex flex-col">
+            <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between flex-shrink-0">
               <div>
                 <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Appointment Details</h3>
                 <p className="text-xs text-gray-400 mt-0.5">Appointment ID: {selectedAppointmentForDetails.appointmentId}</p>
@@ -745,7 +745,7 @@ export default function AppointmentRequests() {
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-gray-400 font-semibold">Date</p>
@@ -764,7 +764,7 @@ export default function AppointmentRequests() {
 
               <div>
                 <p className="text-xs text-gray-400 font-semibold">Reason / Symptoms</p>
-                <p className="text-sm font-medium text-gray-900">{selectedAppointmentForDetails.reason || selectedAppointmentForDetails.symptoms || "-"}</p>
+                <p className="text-sm font-medium text-gray-900 whitespace-pre-wrap break-words max-h-32 overflow-y-auto bg-gray-50 p-3 rounded-lg border border-gray-200">{selectedAppointmentForDetails.reason || selectedAppointmentForDetails.symptoms || "-"}</p>
               </div>
 
               <div>

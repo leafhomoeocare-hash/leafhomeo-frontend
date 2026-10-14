@@ -18,7 +18,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  Eye
+  Eye,
+  MessageSquare,
+  Video,
+  FileText
 } from "lucide-react";
 import { acceptAppointment, rejectAppointment, getDoctorAppointments } from "../../api/doctorApi";
 import { getImageUrl } from "../../utils/imageHelper";
@@ -731,56 +734,198 @@ export default function AppointmentRequests() {
       {/* Appointment Details Modal */}
       {detailsModalOpen && selectedAppointmentForDetails && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl border border-gray-100 overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between flex-shrink-0">
+          <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-xl border border-gray-100 flex flex-col animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10 flex-shrink-0">
               <div>
                 <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Appointment Details</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Appointment ID: {selectedAppointmentForDetails.appointmentId}</p>
+                <p className="text-xs text-gray-400 mt-0.5 font-semibold">Booking ID #{selectedAppointmentForDetails.appointmentId}</p>
               </div>
-              <button
-                onClick={() => setDetailsModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
-              >
-                <X size={18} />
+              <button onClick={() => setDetailsModalOpen(false)} className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
+                <X size={20} className="text-gray-500" />
               </button>
             </div>
 
-            <div className="p-6 space-y-4 overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
+            {/* Content */}
+            <div className="p-6 space-y-6 overflow-y-auto">
+              {/* Status Info Card */}
+              <div className="bg-gradient-to-r from-blue-50/30 to-purple-50/30 border border-blue-200/50 rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-100 rounded-xl">
+                    <AlertCircle size={20} className="text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">Appointment Status</h4>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {selectedAppointmentForDetails.status === 'pending' && (
+                        "Patient has requested this appointment. Please review the patient's information and accept or decline based on your availability."
+                      )}
+                      {selectedAppointmentForDetails.status === 'accepted' && (
+                        "You have accepted this appointment. Waiting for patient to complete the payment."
+                      )}
+                      {selectedAppointmentForDetails.status === 'payment_pending' && (
+                        "Payment is pending from the patient. Once payment is completed, the appointment will be confirmed."
+                      )}
+                      {selectedAppointmentForDetails.status === 'paid' && (
+                        "Payment completed successfully! The appointment is confirmed. You can now chat with the patient before the consultation."
+                      )}
+                      {selectedAppointmentForDetails.status === 'completed' && (
+                        "The consultation has been completed. You can review the consultation notes."
+                      )}
+                      {selectedAppointmentForDetails.status === 'cancelled' && (
+                        "This appointment has been cancelled."
+                      )}
+                      {selectedAppointmentForDetails.status === 'rejected' && (
+                        "You have declined this appointment request."
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Patient Info Card */}
+              <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex gap-4">
+                <img 
+                  src={getImageUrl(selectedAppointmentForDetails.patientImage) || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+                  alt="Patient" 
+                  className="w-16 h-16 rounded-2xl object-cover border border-gray-200 flex-shrink-0"
+                  onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; }}
+                />
+                <div className="min-w-0">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Patient</span>
+                  <h4 className="font-bold text-gray-900 mt-0.5 text-base truncate">{selectedAppointmentForDetails.patientName}</h4>
+                  {selectedAppointmentForDetails.patientEmail && (
+                    <p className="text-xs text-gray-500 mt-1 font-semibold truncate">{selectedAppointmentForDetails.patientEmail}</p>
+                  )}
+                  {selectedAppointmentForDetails.patientMobile && (
+                    <p className="text-xs text-gray-500 font-semibold">{selectedAppointmentForDetails.patientMobile}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Booking Info Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50/30 p-4 border border-gray-100/50 rounded-2xl">
                 <div>
-                  <p className="text-xs text-gray-400 font-semibold">Date</p>
-                  <p className="text-sm font-medium text-gray-900">{formatDate(selectedAppointmentForDetails.appointmentDateTime)}</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Date</p>
+                  <p className="text-xs text-gray-800 font-bold mt-1">{formatDate(selectedAppointmentForDetails.appointmentDateTime)}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400 font-semibold">Time</p>
-                  <p className="text-sm font-medium text-gray-900">{formatTime(selectedAppointmentForDetails.appointmentDateTime)}</p>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Time</p>
+                  <p className="text-xs text-gray-800 font-bold mt-1">{formatTime(selectedAppointmentForDetails.appointmentDateTime)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Request Type</p>
+                  <span className="inline-flex mt-1.5 items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 capitalize">
+                    {selectedAppointmentForDetails.requestType === "any_doctor" ? "Any Doctor" : selectedAppointmentForDetails.requestType === "specific_doctor" ? "Specific Doctor" : selectedAppointmentForDetails.requestType || "Standard"}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Status</p>
+                  <div className="mt-1">
+                    {getStatusBadge(selectedAppointmentForDetails.status)}
+                  </div>
                 </div>
               </div>
 
+              {/* Reason / Symptoms */}
               <div>
-                <p className="text-xs text-gray-400 font-semibold">Patient Name</p>
-                <p className="text-sm font-medium text-gray-900">{selectedAppointmentForDetails.patientName}</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-gray-400 font-semibold">Reason / Symptoms</p>
-                <p className="text-sm font-medium text-gray-900 whitespace-pre-wrap break-words max-h-32 overflow-y-auto bg-gray-50 p-3 rounded-lg border border-gray-200">{selectedAppointmentForDetails.reason || selectedAppointmentForDetails.symptoms || "-"}</p>
-              </div>
-
-              <div>
-                <p className="text-xs text-gray-400 font-semibold">Request Type</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {selectedAppointmentForDetails.requestType === "any_doctor"
-                    ? "Any Doctor"
-                    : selectedAppointmentForDetails.requestType === "specific_doctor"
-                    ? "Specific Doctor"
-                    : selectedAppointmentForDetails.requestType || "Standard"}
+                <p className="text-xs text-gray-400 font-semibold mb-2">Reason / Symptoms</p>
+                <p className="text-sm text-gray-900 whitespace-pre-wrap break-words bg-gray-50 p-4 rounded-xl border border-gray-200 leading-relaxed">
+                  {selectedAppointmentForDetails.reason || selectedAppointmentForDetails.symptoms || "No symptoms specified"}
                 </p>
               </div>
 
-              <div>
-                <p className="text-xs text-gray-400 font-semibold">Status</p>
-                {getStatusBadge(selectedAppointmentForDetails.status)}
+              {/* Actions */}
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
+                {/* Accept Button - Only for pending */}
+                {selectedAppointmentForDetails.status === 'pending' && (
+                  <button
+                    onClick={() => {
+                      setDetailsModalOpen(false);
+                      handleAccept(selectedAppointmentForDetails.id);
+                    }}
+                    disabled={acceptingId === selectedAppointmentForDetails.id}
+                    className="flex-1 min-w-[140px] h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {acceptingId === selectedAppointmentForDetails.id ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Accepting...
+                      </>
+                    ) : (
+                      <>
+                        <Check size={16} />
+                        Accept Appointment
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {/* Reject Button - Only for pending */}
+                {selectedAppointmentForDetails.status === 'pending' && (
+                  <button
+                    onClick={() => {
+                      setDetailsModalOpen(false);
+                      handleReject(selectedAppointmentForDetails.id);
+                    }}
+                    disabled={rejectingId === selectedAppointmentForDetails.id}
+                    className="flex-1 min-w-[140px] h-11 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl shadow-md shadow-rose-500/20 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {rejectingId === selectedAppointmentForDetails.id ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Rejecting...
+                      </>
+                    ) : (
+                      <>
+                        <X size={16} />
+                        Reject Appointment
+                      </>
+                    )}
+                  </button>
+                )}
+
+                {/* Chat Button - Only for paid */}
+                {selectedAppointmentForDetails.status === 'paid' && selectedAppointmentForDetails.patientUserId && (
+                  <button
+                    onClick={() => {
+                      setDetailsModalOpen(false);
+                      navigate(`/doctor/chat/${selectedAppointmentForDetails.patientUserId}`);
+                    }}
+                    className="flex-1 min-w-[140px] h-11 bg-brand-primary hover:bg-brand-hover text-white font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <MessageSquare size={16} />
+                    Chat with Patient
+                  </button>
+                )}
+
+                {/* Video Call Button - Only for paid/completed */}
+                {(selectedAppointmentForDetails.status === 'paid' || selectedAppointmentForDetails.status === 'completed') && selectedAppointmentForDetails.patientUserId && (
+                  <button
+                    onClick={() => {
+                      setDetailsModalOpen(false);
+                      navigate(`/doctor/video-call/${selectedAppointmentForDetails.id}`);
+                    }}
+                    className="flex-1 min-w-[140px] h-11 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md shadow-purple-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Video size={16} />
+                    Video Call
+                  </button>
+                )}
+
+                {/* Consultation Form - Only for paid */}
+                {selectedAppointmentForDetails.status === 'paid' && (
+                  <button
+                    onClick={() => {
+                      setDetailsModalOpen(false);
+                      navigate(`/doctor/consultation/${selectedAppointmentForDetails.id}`);
+                    }}
+                    className="flex-1 min-w-[140px] h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <FileText size={16} />
+                    Consultation Form
+                  </button>
+                )}
               </div>
             </div>
           </div>

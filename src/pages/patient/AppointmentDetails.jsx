@@ -72,16 +72,8 @@ export default function AppointmentDetails() {
         try {
           const response = await getAvailabilitySlots(selectedDoctor.id, dateStr);
           if (response.status === 1 && response.slots && response.slots.length > 0) {
-            // Filter slots that are at least 8 hours from now
-            const now = new Date();
-            const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-            
-            const validSlots = response.slots.filter(slot => {
-              const [hours, minutes] = slot.time.split(':').map(Number);
-              const slotTime = new Date(dateStr);
-              slotTime.setHours(hours, minutes, 0, 0);
-              return slot.available && slotTime >= minAllowedTime;
-            });
+            // Backend already applies 8-hour buffer, so just check for available slots
+            const validSlots = response.slots.filter(slot => slot.available);
             
             if (validSlots.length > 0) {
               dates.push({
@@ -110,17 +102,8 @@ export default function AppointmentDetails() {
       setError(null);
       const response = await getAvailabilitySlots(selectedDoctor.id, selectedDate);
       if (response.status === 1) {
-        // Filter slots based on 8-hour gap from current time
-        const now = new Date();
-        const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-        
-        const filteredSlots = (response.slots || []).filter(slot => {
-          const [hours, minutes] = slot.time.split(':').map(Number);
-          const slotTime = new Date(selectedDate);
-          slotTime.setHours(hours, minutes, 0, 0);
-          
-          return slot.available && slotTime >= minAllowedTime;
-        });
+        // Backend already applies 8-hour buffer logic, so use slots as-is
+        const filteredSlots = (response.slots || []).filter(slot => slot.available);
         
         setAvailableSlots(filteredSlots);
       } else {

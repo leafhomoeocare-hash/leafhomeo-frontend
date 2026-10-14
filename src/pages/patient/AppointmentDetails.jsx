@@ -54,7 +54,6 @@ export default function AppointmentDetails() {
       setLoadingDates(true);
       const dates = [];
       const today = new Date();
-      const minAllowedTime = new Date(today.getTime() + 8 * 60 * 60 * 1000);
       
       // Check next 30 days for available slots
       for (let i = 0; i < 30; i++) {
@@ -62,16 +61,21 @@ export default function AppointmentDetails() {
         date.setDate(today.getDate() + i);
         const dateStr = date.toISOString().split('T')[0];
         
-        // Check if this date is at least 8 hours from now
+        // Skip past dates
         const dateObj = new Date(dateStr);
-        if (dateObj < minAllowedTime) {
-          continue; // Skip dates that are less than 8 hours from now
+        const startOfDay = new Date(dateStr);
+        startOfDay.setHours(0, 0, 0, 0);
+        if (startOfDay < new Date(today.setHours(0, 0, 0, 0))) {
+          continue;
         }
         
         try {
           const response = await getAvailabilitySlots(selectedDoctor.id, dateStr);
           if (response.status === 1 && response.slots && response.slots.length > 0) {
             // Filter slots that are at least 8 hours from now
+            const now = new Date();
+            const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+            
             const validSlots = response.slots.filter(slot => {
               const [hours, minutes] = slot.time.split(':').map(Number);
               const slotTime = new Date(dateStr);

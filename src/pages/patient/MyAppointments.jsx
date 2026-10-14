@@ -1063,34 +1063,6 @@ export default function MyAppointments() {
                       Chat with Doctor
                     </button>
                   )}
-
-                  {/* Video Call Button - Only for paid/completed */}
-                  {(selectedAppointmentForDetails.status === 'paid' || selectedAppointmentForDetails.status === 'completed') && selectedAppointmentForDetails.doctorUserId && (
-                    <button
-                      onClick={() => {
-                        setDetailsModalOpen(false);
-                        navigate(`/patient/video-call/${selectedAppointmentForDetails.id}`);
-                      }}
-                      className="flex-1 min-w-[140px] h-11 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md shadow-purple-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <Video size={16} />
-                      Video Call
-                    </button>
-                  )}
-
-                  {/* Review Button - Only for completed */}
-                  {selectedAppointmentForDetails.status === 'completed' && !selectedAppointmentForDetails.hasReviewed && (
-                    <button
-                      onClick={() => {
-                        setDetailsModalOpen(false);
-                        handleOpenReviewModal(selectedAppointmentForDetails);
-                      }}
-                      className="flex-1 min-w-[140px] h-11 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md shadow-amber-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <Star size={16} />
-                      Leave Review
-                    </button>
-                  )}
                 </div>
               </div>
             </div>

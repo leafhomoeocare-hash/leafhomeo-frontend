@@ -899,20 +899,6 @@ export default function AppointmentRequests() {
                   </button>
                 )}
 
-                {/* Video Call Button - Only for paid/completed */}
-                {(selectedAppointmentForDetails.status === 'paid' || selectedAppointmentForDetails.status === 'completed') && selectedAppointmentForDetails.patientUserId && (
-                  <button
-                    onClick={() => {
-                      setDetailsModalOpen(false);
-                      navigate(`/doctor/video-call/${selectedAppointmentForDetails.id}`);
-                    }}
-                    className="flex-1 min-w-[140px] h-11 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl shadow-md shadow-purple-500/20 transition-all cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    <Video size={16} />
-                    Video Call
-                  </button>
-                )}
-
                 {/* Consultation Form - Only for paid */}
                 {selectedAppointmentForDetails.status === 'paid' && (
                   <button

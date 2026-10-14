@@ -79,21 +79,21 @@ function AppRouter() {
       <Route path="/admin/coupons" element={<ProtectedRoute allowedRole="admin"><AdminCoupons /></ProtectedRoute>} />
       <Route path="/admin/chat" element={<ProtectedRoute allowedRole="admin"><AdminChat /></ProtectedRoute>} />
       <Route path="/admin/chat-monitoring/:appointmentId" element={<ProtectedRoute allowedRole="admin"><AdminChatMonitoring /></ProtectedRoute>} />
-      <Route path="/patient/dashboard" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><PatientDashboard /></ProtectedRoute>} />
-      <Route path="/patient/book" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><PatientBookAppointment /></ProtectedRoute>} />
-      <Route path="/patient/doctors" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><DoctorSelection /></ProtectedRoute>} />
-      <Route path="/patient/doctors/:slug" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><DoctorDetails /></ProtectedRoute>} />
-      <Route path="/patient/book/doctor" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><AppointmentDetails /></ProtectedRoute>} />
-      <Route path="/patient/book/any-doctor" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><BookAnyDoctor /></ProtectedRoute>} />
-      <Route path="/patient/appointments" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><MyAppointments /></ProtectedRoute>} />
-      <Route path="/patient/profile" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><Profile /></ProtectedRoute>} />
-      <Route path="/patient/profile/edit" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><EditProfile /></ProtectedRoute>} />
-      <Route path="/patient/profile/change-password" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><ChangePassword /></ProtectedRoute>} />
+      <Route path="/patient/dashboard" element={<ProtectedRoute allowedRole="patient"><PatientDashboard /></ProtectedRoute>} />
+      <Route path="/patient/book" element={<ProtectedRoute allowedRole="patient"><PatientBookAppointment /></ProtectedRoute>} />
+      <Route path="/patient/doctors" element={<ProtectedRoute allowedRole="patient"><DoctorSelection /></ProtectedRoute>} />
+      <Route path="/patient/doctors/:slug" element={<ProtectedRoute allowedRole="patient"><DoctorDetails /></ProtectedRoute>} />
+      <Route path="/patient/book/doctor" element={<ProtectedRoute allowedRole="patient"><AppointmentDetails /></ProtectedRoute>} />
+      <Route path="/patient/book/any-doctor" element={<ProtectedRoute allowedRole="patient"><BookAnyDoctor /></ProtectedRoute>} />
+      <Route path="/patient/appointments" element={<ProtectedRoute allowedRole="patient"><MyAppointments /></ProtectedRoute>} />
+      <Route path="/patient/profile" element={<ProtectedRoute allowedRole="patient"><Profile /></ProtectedRoute>} />
+      <Route path="/patient/profile/edit" element={<ProtectedRoute allowedRole="patient"><EditProfile /></ProtectedRoute>} />
+      <Route path="/patient/profile/change-password" element={<ProtectedRoute allowedRole="patient"><ChangePassword /></ProtectedRoute>} />
       <Route path="/patient/complete-profile" element={<ProtectedRoute allowedRole="patient"><CompleteProfile /></ProtectedRoute>} />
-      <Route path="/patient/notifications" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><Notifications /></ProtectedRoute>} />
-      <Route path="/patient/privacy-policy" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><PrivacyPolicyView /></ProtectedRoute>} />
-      <Route path="/patient/terms-conditions" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><TermsConditionsView /></ProtectedRoute>} />
-      <Route path="/patient/blog" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><PatientBlog /></ProtectedRoute>} />
+      <Route path="/patient/notifications" element={<ProtectedRoute allowedRole="patient"><Notifications /></ProtectedRoute>} />
+      <Route path="/patient/privacy-policy" element={<ProtectedRoute allowedRole="patient"><PrivacyPolicyView /></ProtectedRoute>} />
+      <Route path="/patient/terms-conditions" element={<ProtectedRoute allowedRole="patient"><TermsConditionsView /></ProtectedRoute>} />
+      <Route path="/patient/blog" element={<ProtectedRoute allowedRole="patient"><PatientBlog /></ProtectedRoute>} />
       <Route path="/doctor/dashboard" element={<ProtectedRoute allowedRole="doctor"><DoctorDashboard /></ProtectedRoute>} />
       <Route path="/doctor/appointments" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointments /></ProtectedRoute>} />
       <Route path="/doctor/consultation/:consultationId" element={<ProtectedRoute allowedRole="doctor"><ConsultationForm /></ProtectedRoute>} />
@@ -106,9 +106,9 @@ function AppRouter() {
       <Route path="/doctor/profile/edit" element={<ProtectedRoute allowedRole="doctor"><DoctorEditProfile /></ProtectedRoute>} />
       <Route path="/doctor/profile/change-password" element={<ProtectedRoute allowedRole="doctor"><DoctorChangePassword /></ProtectedRoute>} />
       <Route path="/doctor/blog" element={<ProtectedRoute allowedRole="doctor"><DoctorBlog /></ProtectedRoute>} />
-      <Route path="/patient/video-call" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><PatientVideoCall /></ProtectedRoute>} />
+      <Route path="/patient/video-call" element={<ProtectedRoute allowedRole="patient"><PatientVideoCall /></ProtectedRoute>} />
       <Route path="/doctor/video-call" element={<ProtectedRoute allowedRole="doctor"><DoctorVideoCall /></ProtectedRoute>} />
-      <Route path="/patient/chat" element={<ProtectedRoute allowedRole="patient" requireCompleteProfile><Chat /></ProtectedRoute>} />
+      <Route path="/patient/chat" element={<ProtectedRoute allowedRole="patient"><Chat /></ProtectedRoute>} />
       <Route path="/doctor/chat" element={<ProtectedRoute allowedRole="doctor"><Chat /></ProtectedRoute>} />
     </Routes>
   );

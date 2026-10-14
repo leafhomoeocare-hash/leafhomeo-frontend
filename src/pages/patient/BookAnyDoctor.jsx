@@ -29,6 +29,23 @@ export default function BookAnyDoctor() {
       return;
     }
 
+    // Check if patient has address before booking
+    const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+    if (!user.houseNumber || !user.city || !user.state || !user.pincode) {
+      Swal.fire({
+        icon: "info",
+        title: "Complete Your Profile",
+        text: "Please complete your profile with address details before booking an appointment.",
+        confirmButtonColor: "#10b981",
+        confirmButtonText: "Complete Profile"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/patient/complete-profile");
+        }
+      });
+      return;
+    }
+
     try {
       setBookingLoading(true);
       setError(null);

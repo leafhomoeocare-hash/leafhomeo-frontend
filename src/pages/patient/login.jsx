@@ -37,12 +37,8 @@ const Login = () => {
         sessionStorage.setItem("token", response.data.token);
         sessionStorage.setItem("user", JSON.stringify(response.data));
 
-        // Check if profile is complete
-        if (response.data.IsCompleteProfile === false) {
-          navigate("/patient/complete-profile");
-        } else {
-          navigate("/patient/dashboard");
-        }
+        // Navigate to dashboard directly (complete profile check will be done during booking)
+        navigate("/patient/dashboard");
       } else {
         setError(response.message || "Login failed");
       }

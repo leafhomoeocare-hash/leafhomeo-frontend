@@ -79,11 +79,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
             <img
               src="/Leaf-LOGO-Kit/SVG/final leaf logo_App icon.svg"
               alt="Leaf Homeo"
-              className="h-9 w-9 object-contain rounded-lg"
+              className="h-9 w-auto object-contain"
             />
-            <span className="font-sans text-sm font-bold tracking-tight">
-              Leaf Homeo
-            </span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}

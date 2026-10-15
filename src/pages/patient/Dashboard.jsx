@@ -312,13 +312,19 @@ function DashboardContent() {
               </span>
               <span className="text-xs font-bold text-gray-700 bg-gray-100/80 border border-gray-200/50 px-3 py-1 rounded-lg">{consultationStats.pending || 0}</span>
             </div>
-            <div className="flex items-center justify-between p-3.5 bg-brand-light/30 border border-brand-primary/10 rounded-xl">
+            <div
+              onClick={() => navigate("/patient/appointments?filter=active")}
+              className="flex items-center justify-between p-3.5 bg-brand-light/30 border border-brand-primary/10 rounded-xl hover:bg-brand-light/50 transition-colors cursor-pointer"
+            >
               <span className="text-xs font-bold text-brand-dark flex items-center gap-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-brand-primary"></span> Active Treatment
               </span>
               <span className="text-xs font-bold text-brand-primary bg-white border border-brand-primary/20 px-3 py-1 rounded-lg">{consultationStats.active || 0}</span>
             </div>
-            <div className="flex items-center justify-between p-3.5 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+            <div
+              onClick={() => navigate("/patient/appointments?filter=completed")}
+              className="flex items-center justify-between p-3.5 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+            >
               <span className="text-xs font-bold text-gray-700 flex items-center gap-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-400"></span> Completed
               </span>

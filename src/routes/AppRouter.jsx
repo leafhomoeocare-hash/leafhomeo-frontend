@@ -11,6 +11,7 @@ import PatientDashboard from "../pages/patient/Dashboard";
 import PatientBookAppointment from "../pages/patient/BookAppointment";
 import AdminPatients from "../pages/admin/Patient";
 import AdminAppointments from "../pages/admin/Appointment";
+import AdminAppointmentDetailsPage from "../pages/admin/AppointmentDetailsPage";
 import AdminProfile from "../pages/admin/Profile";
 import AdminForgotPassword from "../pages/admin/ForgotPassword";
 import LegalDocuments from "../pages/admin/LegalDocuments";
@@ -18,6 +19,7 @@ import BlogManagement from "../pages/admin/Blog";
 import AdminCoupons from "../pages/admin/Coupons";
 import DoctorSelection from "../pages/patient/DoctorSelection";
 import AppointmentDetails from "../pages/patient/AppointmentDetails";
+import AppointmentDetailsPage from "../pages/patient/AppointmentDetailsPage";
 import BookAnyDoctor from "../pages/patient/BookAnyDoctor";
 import MyAppointments from "../pages/patient/MyAppointments";
 import Profile from "../pages/patient/Profile";
@@ -30,6 +32,7 @@ import TermsConditionsView from "../pages/patient/TermsConditions";
 import ProtectedRoute from "../components/ProtectedRoute";
 import DoctorDashboard from "../pages/doctor/Dashboard";
 import DoctorAppointments from "../pages/doctor/Appointments";
+import DoctorAppointmentDetailsPage from "../pages/doctor/AppointmentDetailsPage";
 import DoctorProfile from "../pages/doctor/Profile";
 import DoctorAppointmentRequests from "../pages/doctor/AppointmentRequests";
 import DoctorPatientDetails from "../pages/doctor/PatientDetails";
@@ -73,6 +76,7 @@ function AppRouter() {
       <Route path="/admin/doctors" element={<ProtectedRoute allowedRole="admin"><AdminDoctors /></ProtectedRoute>} />
       <Route path="/admin/patients" element={<ProtectedRoute allowedRole="admin"><AdminPatients /></ProtectedRoute>} />
       <Route path="/admin/appointments" element={<ProtectedRoute allowedRole="admin"><AdminAppointments /></ProtectedRoute>} />
+      <Route path="/admin/appointments/:id" element={<ProtectedRoute allowedRole="admin"><AdminAppointmentDetailsPage /></ProtectedRoute>} />
       <Route path="/admin/profile" element={<ProtectedRoute allowedRole="admin"><AdminProfile /></ProtectedRoute>} />
       <Route path="/admin/legal-documents" element={<ProtectedRoute allowedRole="admin"><LegalDocuments /></ProtectedRoute>} />
       <Route path="/admin/blogs" element={<ProtectedRoute allowedRole="admin"><BlogManagement /></ProtectedRoute>} />
@@ -86,6 +90,7 @@ function AppRouter() {
       <Route path="/patient/book/doctor" element={<ProtectedRoute allowedRole="patient"><AppointmentDetails /></ProtectedRoute>} />
       <Route path="/patient/book/any-doctor" element={<ProtectedRoute allowedRole="patient"><BookAnyDoctor /></ProtectedRoute>} />
       <Route path="/patient/appointments" element={<ProtectedRoute allowedRole="patient"><MyAppointments /></ProtectedRoute>} />
+      <Route path="/patient/appointments/:id" element={<ProtectedRoute allowedRole="patient"><AppointmentDetailsPage /></ProtectedRoute>} />
       <Route path="/patient/profile" element={<ProtectedRoute allowedRole="patient"><Profile /></ProtectedRoute>} />
       <Route path="/patient/profile/edit" element={<ProtectedRoute allowedRole="patient"><EditProfile /></ProtectedRoute>} />
       <Route path="/patient/profile/change-password" element={<ProtectedRoute allowedRole="patient"><ChangePassword /></ProtectedRoute>} />
@@ -96,6 +101,7 @@ function AppRouter() {
       <Route path="/patient/blog" element={<ProtectedRoute allowedRole="patient"><PatientBlog /></ProtectedRoute>} />
       <Route path="/doctor/dashboard" element={<ProtectedRoute allowedRole="doctor"><DoctorDashboard /></ProtectedRoute>} />
       <Route path="/doctor/appointments" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointments /></ProtectedRoute>} />
+      <Route path="/doctor/appointments/:id" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointmentDetailsPage /></ProtectedRoute>} />
       <Route path="/doctor/consultation/:consultationId" element={<ProtectedRoute allowedRole="doctor"><ConsultationForm /></ProtectedRoute>} />
       <Route path="/doctor/consultation-form" element={<ProtectedRoute allowedRole="doctor"><ConsultationForm /></ProtectedRoute>} />
       <Route path="/doctor/appointment-requests" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointmentRequests /></ProtectedRoute>} />

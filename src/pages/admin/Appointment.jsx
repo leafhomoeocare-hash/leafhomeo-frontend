@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, MoreVertical, Calendar, Clock, ChevronDown, User, Phone, Check, AlertCircle, X, MessageSquare } from "lucide-react";
+import { Search, MoreVertical, Calendar, Clock, ChevronDown, User, Phone, Check, AlertCircle, MessageSquare } from "lucide-react";
 import AdminLayout from "../../components/AdminLayout";
 import { getAppointments, updateShippingStatus } from "../../api/appointmentApi";
 import { getImageUrl } from "../../utils/imageHelper";
@@ -147,46 +147,23 @@ export default function AppointmentManagement() {
   const [totalPages, setTotalPages] = useState(1);
   const entriesPerPage = 10; // Fixed entries per page
 
-  const [selectedAppt, setSelectedAppt] = useState(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const [updatingShipping, setUpdatingShipping] = useState(false);
   const [confirmShippingChange, setConfirmShippingChange] = useState(null);
 
-  const handleOpenDetails = (appt) => {
-    setSelectedAppt(appt);
-    setDetailsOpen(true);
-  };
-
   const handleShippingStatusChange = async (appt, newStatus) => {
-    // Don't open confirmation if status hasn't changed
-    if (appt.shippingStatus === newStatus) {
-      return;
-    }
+    if (appt.shippingStatus === newStatus) return;
     setConfirmShippingChange({ appt, newStatus });
   };
 
   const confirmShippingStatusUpdate = async () => {
     if (!confirmShippingChange) return;
-
     const { appt, newStatus } = confirmShippingChange;
-    
     try {
       setUpdatingShipping(true);
-      
       const response = await updateShippingStatus(appt.id, newStatus);
-      
       if (response.status === 1) {
-        // Update local state
-        setAppointments(prev => prev.map(a => 
-          a.id === appt.id ? { ...a, shippingStatus: newStatus } : a
-        ));
-        
-        if (selectedAppt?.id === appt.id) {
-          setSelectedAppt(prev => ({ ...prev, shippingStatus: newStatus }));
-        }
-      } else {
-        throw new Error(response.message || "Failed to update shipping status");
-      }
+        setAppointments(prev => prev.map(a => a.id === appt.id ? { ...a, shippingStatus: newStatus } : a));
+      } else throw new Error(response.message || "Failed to update shipping status");
     } catch (error) {
       console.error("Failed to update shipping status:", error);
       alert("Failed to update shipping status: " + error.message);
@@ -194,6 +171,10 @@ export default function AppointmentManagement() {
       setUpdatingShipping(false);
       setConfirmShippingChange(null);
     }
+  };
+
+  const cancelShippingStatusUpdate = () => {
+    setConfirmShippingChange(null);
   };
 
   const cancelShippingStatusUpdate = () => {
@@ -319,7 +300,7 @@ export default function AppointmentManagement() {
                       <span className="font-semibold text-gray-900 text-xs">#{appt.appointmentId || appt.id}</span>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-2 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
+                      <div className="flex items-center gap-2 cursor-pointer hover:opacity-80" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>
                         {appt.patient?.image ? (
                           <img
                             src={getImageUrl(appt.patient.image)}
@@ -451,7 +432,7 @@ export default function AppointmentManagement() {
             return (
               <div key={appt.id} className="p-5 hover:bg-gray-50/50">
                 <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer hover:opacity-80" onClick={() => handleOpenDetails(appt)}>
+                  <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer hover:opacity-80" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>
                     {appt.patient?.image ? (
                       <img
                         src={getImageUrl(appt.patient.image)}
@@ -573,7 +554,6 @@ export default function AppointmentManagement() {
           </div>
         </div>
       </div>
-      <AppointmentDetailsModal open={detailsOpen} onClose={() => setDetailsOpen(false)} appointment={selectedAppt} />
       
       {/* Shipping Status Confirmation Modal */}
       {confirmShippingChange && (
@@ -585,7 +565,7 @@ export default function AppointmentManagement() {
             </p>
             <div className="flex gap-3 justify-end">
               <button
-                onClick={cancelShippingStatusUpdate}
+                onClick={() => setConfirmShippingChange(null)}
                 disabled={updatingShipping}
                 className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50"
               >
@@ -603,194 +583,5 @@ export default function AppointmentManagement() {
         </div>
       )}
     </AdminLayout>
-  );
-}
-
-function AppointmentDetailsModal({ open, onClose, appointment, updatingShipping, handleShippingStatusChange }) {
-  if (!open || !appointment) return null;
-
-  const dt = formatDateTime(appointment.appointmentDate);
-  const patientImg = getImageUrl(appointment.patient?.image)
-    || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-  const doctorImg = getImageUrl(appointment.doctor?.image)
-    || "https://cdn-icons-png.flaticon.com/512/387/387561.png";
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden shadow-xl border border-gray-100 flex flex-col animate-in fade-in zoom-in-95 duration-200">
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between z-10 flex-shrink-0">
-          <div>
-            <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Appointment Details</h3>
-            <p className="text-xs text-gray-400 mt-0.5 font-semibold">Booking ID #{appointment.id}</p>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer">
-            <X size={20} className="text-gray-500" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-6 overflow-y-auto">
-          {/* Patient & Doctor Avatars */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Patient Info Card */}
-            <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex gap-4">
-              <img 
-                src={patientImg} 
-                alt="Patient" 
-                className="w-16 h-16 rounded-2xl object-cover border border-gray-200 flex-shrink-0" 
-                onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"; }} 
-              />
-              <div className="min-w-0">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Patient</span>
-                <h4 className="font-bold text-gray-900 mt-0.5 text-base truncate">{appointment.patient?.name}</h4>
-                <p className="text-xs text-gray-500 mt-1 font-semibold truncate">{appointment.patient?.email}</p>
-                <p className="text-xs text-gray-500 font-semibold">{appointment.patient?.mobile}</p>
-                <div className="flex gap-4 mt-2 text-[11px] font-semibold text-gray-400">
-                  <span>Gender: <span className="text-gray-700 capitalize">{appointment.patient?.gender || "-"}</span></span>
-                  <span>DOB: <span className="text-gray-700">{appointment.patient?.dob || "-"}</span></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Doctor Info Card */}
-            <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex gap-4">
-              <img 
-                src={doctorImg} 
-                alt="Doctor" 
-                className="w-16 h-16 rounded-2xl object-cover border border-gray-200 flex-shrink-0" 
-                onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png"; }} 
-              />
-              <div className="min-w-0">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Doctor</span>
-                <h4 className="font-bold text-gray-900 mt-0.5 text-base truncate">{appointment.doctor?.name || "Not Assigned"}</h4>
-                {appointment.doctor ? (
-                  <>
-                    <p className="text-xs text-brand-primary font-bold mt-1 truncate">
-                      {Array.isArray(appointment.doctor.specialization) ? appointment.doctor.specialization.join(", ") : appointment.doctor.specialization}
-                    </p>
-                    <p className="text-xs text-gray-500 font-semibold">Qual: {appointment.doctor.qualification}</p>
-                    <p className="text-xs text-gray-500 font-semibold">Exp: {appointment.doctor.experience} Yrs</p>
-                  </>
-                ) : (
-                  <p className="text-xs text-gray-400 mt-1">Pending allocation</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Booking Info Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50/30 p-4 border border-gray-100/50 rounded-2xl">
-            <div>
-              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Date & Time</p>
-              <p className="text-xs text-gray-800 font-bold mt-1">{typeof dt === "object" ? `${dt.date} at ${dt.time}` : "-"}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Request Type</p>
-              <span className="inline-flex mt-1.5 items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 capitalize">
-                {(appointment.requestType || "").replace("_", " ")}
-              </span>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Booking Status</p>
-              <div className="mt-1">
-                <StatusBadge status={appointment.status} />
-              </div>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Consultation Fee</p>
-              <p className="text-xs text-gray-800 font-bold mt-1">₹{appointment.doctor?.consultationFee || "-"}</p>
-            </div>
-          </div>
-
-          {/* Reason for Appointment */}
-          <div className="space-y-1.5">
-            <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Reason / Notes</p>
-            <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 text-sm text-gray-700 leading-relaxed font-medium">
-              {appointment.notes || "No additional details provided."}
-            </div>
-          </div>
-
-          {/* Payment Card */}
-          <div className="border border-gray-100 rounded-2xl overflow-hidden">
-            <div className="bg-gray-50/70 px-4 py-3 border-b border-gray-100">
-              <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">Payment Transaction Details</h4>
-            </div>
-            <div className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Amount</p>
-                <p className="text-sm text-gray-900 font-bold mt-0.5">₹{appointment.payment?.amount || "0.00"}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Status</p>
-                <div className="mt-0.5">
-                  <PaymentBadge status={appointment.payment?.status || "pending"} />
-                </div>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Gateway</p>
-                <p className="text-xs text-gray-800 font-bold mt-0.5 capitalize">{appointment.payment?.gateway || "-"}</p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Transaction ID</p>
-                <p className="text-xs text-gray-800 font-semibold mt-0.5 break-all select-all">{appointment.payment?.transactionId || "-"}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Patient Address Card */}
-          <div className="border border-gray-100 rounded-2xl overflow-hidden">
-            <div className="bg-gray-50/70 px-4 py-3 border-b border-gray-100">
-              <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">Patient Mailing Address</h4>
-            </div>
-            <div className="p-4 text-xs font-semibold text-gray-600 space-y-1">
-              {appointment.patient?.houseNumber || appointment.patient?.addressLine1 ? (
-                <>
-                  <p className="text-gray-900"><span className="text-gray-400">House No / Area:</span> {appointment.patient.houseNumber || "-"}, {appointment.patient.addressLine1 || "-"}</p>
-                  {appointment.patient.addressLine2 && <p className="text-gray-900"><span className="text-gray-400">Line 2:</span> {appointment.patient.addressLine2}</p>}
-                  {appointment.patient.landmark && <p className="text-gray-900"><span className="text-gray-400">Landmark:</span> {appointment.patient.landmark}</p>}
-                  <p className="text-gray-900"><span className="text-gray-400">City / Pincode:</span> {appointment.patient.city || "-"} - {appointment.patient.pincode || "-"}</p>
-                  <p className="text-gray-900"><span className="text-gray-400">State / Country:</span> {appointment.patient.state || "-"}, {appointment.patient.country || "-"}</p>
-                </>
-              ) : (
-                <p className="text-gray-400 italic">No address details registered.</p>
-              )}
-            </div>
-          </div>
-
-          {/* Consultation / Prescription Card */}
-          {appointment.consultation && (
-            <div className="border border-gray-100 rounded-2xl overflow-hidden">
-              <div className="bg-gray-50/70 px-4 py-3 border-b border-gray-100">
-                <h4 className="text-xs font-extrabold text-gray-700 uppercase tracking-wider">Consultation & Prescription</h4>
-              </div>
-              <div className="p-4 space-y-3">
-                {appointment.consultation.chiefComplaints && (
-                  <div>
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Chief Complaints</p>
-                    <p className="text-sm text-gray-700 mt-1">{appointment.consultation.chiefComplaints}</p>
-                  </div>
-                )}
-                {appointment.consultation.perception && (
-                  <div>
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Perception / Prescription</p>
-                    <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">{appointment.consultation.perception}</p>
-                  </div>
-                )}
-                {appointment.consultation.callDuration && (
-                  <div>
-                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Call Duration</p>
-                    <p className="text-sm text-gray-700 mt-1">{appointment.consultation.callDuration}</p>
-                  </div>
-                )}
-                {!appointment.consultation.chiefComplaints && !appointment.consultation.perception && (
-                  <p className="text-gray-400 italic text-sm">No consultation details available.</p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
   );
 }

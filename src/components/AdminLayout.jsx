@@ -56,7 +56,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
             <img
               src="/Leaf-LOGO-Kit/PNG/Full Logo/final leaf logo_Full logo with space White.png"
               alt="Leaf Homeo"
-              className="h-9 w-auto object-contain"
+              className="h-7 w-auto object-contain"
             />
           </Link>
           <button

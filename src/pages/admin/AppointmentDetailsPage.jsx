@@ -225,13 +225,15 @@ export default function AdminAppointmentDetailsPage() {
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-xs sticky top-6">
               <h3 className="text-lg font-extrabold text-gray-900 mb-6">Appointment Progress</h3>
               <div className="space-y-4">
-                {steps.map((step) => {
+                {steps.map((step, index) => {
                   const stepStatus = getStepStatus(step.number);
                   const isCompleted = stepStatus === "completed";
                   const isPending = stepStatus === "pending";
+                  const isLast = index === steps.length - 1;
                   return (
-                    <div key={step.number} className="flex gap-3">
-                      <div className="flex-shrink-0">
+                    <div key={step.number} className="flex gap-3 relative">
+                      {!isLast && <div className="absolute left-[15px] top-8 bottom-0 w-0.5 bg-gray-200" />}
+                      <div className="flex-shrink-0 relative z-10">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCompleted ? "bg-emerald-500 text-white" : isPending ? "bg-gray-200 text-gray-500" : "bg-gray-100 text-gray-400"}`}>{isCompleted ? <Check size={16} /> : <span className="text-sm font-bold">{step.number}</span>}</div>
                       </div>
                       <div className="flex-1 pb-4 border-b border-gray-100 last:border-0">

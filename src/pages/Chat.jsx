@@ -145,31 +145,51 @@ export default function Chat() {
       setLoadingContacts(true);
       const res = await getContacts();
       if (res.status === 1) {
-        const contactsData = res.data || [];
-        setContacts(contactsData);
+        let contactsData = res.data || [];
 
         const targetId = selectIdAfterFetch || location.state?.selectUserId;
-        if (targetId) {
+
+        // If targetId is "admin", filter contacts to show only admin
+        if (targetId === "admin") {
+          contactsData = contactsData.filter(c => c.role === "admin");
+        } else if (targetId && targetId !== "admin") {
+          // If selecting a specific user (doctor), filter to show only that doctor
           const numericId = parseInt(targetId, 10);
-          const contactToSelect = contactsData.find(c => c.id === numericId);
-          if (contactToSelect) {
-            handleSelectContact(contactToSelect);
-            // Clear router state to prevent auto-selecting on refreshes
-            window.history.replaceState({}, document.title);
+          contactsData = contactsData.filter(c => c.id === numericId);
+        }
+
+        setContacts(contactsData);
+
+        if (targetId) {
+          if (targetId === "admin") {
+            // Find admin contact
+            const adminContact = contactsData.find(c => c.role === "admin");
+            if (adminContact) {
+              handleSelectContact(adminContact);
+              window.history.replaceState({}, document.title);
+            }
           } else {
-            // Target user is not in active contacts (first time chat / no direct appointment record yet)
-            // Fetch contact details from backend endpoint
-            try {
-              const contactRes = await getContactById(numericId);
-              if (contactRes.status === 1 && contactRes.data) {
-                const newContact = contactRes.data;
-                // Add to contacts list locally
-                setContacts(prev => [newContact, ...prev]);
-                handleSelectContact(newContact);
-                window.history.replaceState({}, document.title);
+            const numericId = parseInt(targetId, 10);
+            const contactToSelect = contactsData.find(c => c.id === numericId);
+            if (contactToSelect) {
+              handleSelectContact(contactToSelect);
+              // Clear router state to prevent auto-selecting on refreshes
+              window.history.replaceState({}, document.title);
+            } else {
+              // Target user is not in active contacts (first time chat / no direct appointment record yet)
+              // Fetch contact details from backend endpoint
+              try {
+                const contactRes = await getContactById(numericId);
+                if (contactRes.status === 1 && contactRes.data) {
+                  const newContact = contactRes.data;
+                  // Add to contacts list locally
+                  setContacts(prev => [newContact, ...prev]);
+                  handleSelectContact(newContact);
+                  window.history.replaceState({}, document.title);
+                }
+              } catch (err) {
+                console.error("Failed to load selectUserId contact details:", err);
               }
-            } catch (err) {
-              console.error("Failed to load selectUserId contact details:", err);
             }
           }
         }

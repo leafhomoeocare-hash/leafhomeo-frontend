@@ -58,9 +58,9 @@ const Login = () => {
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-gray-100/80 p-8 relative z-10 animate-scaleUp">
         {/* Header / Logo */}
         <div className="text-center mb-8">
-          <div className="w-40 h-auto mx-auto mb-4 flex items-center justify-center">
+          <div className="w-56 h-auto mx-auto mb-4 flex items-center justify-center">
             <img
-              src="/Leaf-LOGO-Kit/SVG/final leaf logo_App icon.svg"
+              src="/Leaf-LOGO-Kit/SVG/final leaf logo_Full Logo Color.svg"
               alt="Leaf Homeo Care"
               className="w-full h-auto object-contain drop-shadow-md"
             />

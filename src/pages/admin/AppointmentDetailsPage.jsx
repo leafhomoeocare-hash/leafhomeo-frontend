@@ -174,8 +174,47 @@ export default function AdminAppointmentDetailsPage() {
             </div>
             <div className="bg-gray-50/30 p-6 border border-gray-100/50 rounded-2xl">
               <div className="grid grid-cols-2 gap-4">
-                <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Shipping Status</p><div className="mt-1">{appointment.status === "completed" ? <select value={appointment.shippingStatus || "draft"} onChange={(e) => handleShippingStatusChange(e.target.value)} disabled={updatingShipping} className={`text-xs px-2.5 py-1 rounded-full font-semibold border focus:outline-none focus:border-green-500 disabled:opacity-50 appearance-none ${appointment.shippingStatus === 'prepared' ? 'bg-blue-50 text-blue-700 border-blue-200' : appointment.shippingStatus === 'ready_to_transit' ? 'bg-purple-50 text-purple-700 border-purple-200' : appointment.shippingStatus === 'in_transit' ? 'bg-orange-50 text-orange-700 border-orange-200' : 'bg-gray-50 text-gray-600 border-gray-200'}`}><option value={appointment.shippingStatus || "draft"}>{appointment.shippingStatus === 'ready_to_transit' ? 'Ready to Transit' : (appointment.shippingStatus || "Draft")}</option>{getAvailableShippingStatuses(appointment.shippingStatus || "draft").map(status => <option key={status} value={status}>{status === 'ready_to_transit' ? 'Ready to Transit' : status.replace('_', ' ')}</option>)</select> : getShippingBadge(appointment.shippingStatus || "draft")}</div></div>
-                <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Tracking</p><div className="mt-1">{appointment.trackingUrl ? <a href={appointment.trackingUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline font-semibold">Track Package</a> : <span className="text-xs text-gray-400">-</span>}</div></div>
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Shipping Status</p>
+                  <div className="mt-1">
+                    {appointment.status === "completed" ? (
+                      <select
+                        value={appointment.shippingStatus || "draft"}
+                        onChange={(e) => handleShippingStatusChange(e.target.value)}
+                        disabled={updatingShipping}
+                        className={`text-xs px-2.5 py-1 rounded-full font-semibold border focus:outline-none focus:border-green-500 disabled:opacity-50 appearance-none ${
+                          appointment.shippingStatus === 'prepared' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          appointment.shippingStatus === 'ready_to_transit' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                          appointment.shippingStatus === 'in_transit' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                          'bg-gray-50 text-gray-600 border-gray-200'
+                        }`}
+                      >
+                        <option value={appointment.shippingStatus || "draft"}>
+                          {appointment.shippingStatus === 'ready_to_transit' ? 'Ready to Transit' : (appointment.shippingStatus || "Draft")}
+                        </option>
+                        {getAvailableShippingStatuses(appointment.shippingStatus || "draft").map(status => (
+                          <option key={status} value={status}>
+                            {status === 'ready_to_transit' ? 'Ready to Transit' : status.replace('_', ' ')}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      getShippingBadge(appointment.shippingStatus || "draft")
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Tracking</p>
+                  <div className="mt-1">
+                    {appointment.trackingUrl ? (
+                      <a href={appointment.trackingUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-600 hover:underline font-semibold">
+                        Track Package
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-400">-</span>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">

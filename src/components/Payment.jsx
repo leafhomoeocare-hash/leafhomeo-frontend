@@ -62,7 +62,9 @@ const Payment = ({ appointmentId, amount, onSuccess, onCancel }) => {
           icon: "success",
           title: "Coupon Applied!",
           text: `You saved ${discountText} (₹${response.data.discountAmount})`,
-          confirmButtonColor: "#10B981"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         });
       } else {
         setCouponError(response.message || "Invalid coupon");

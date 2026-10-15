@@ -203,8 +203,12 @@ function BlogManagement() {
             icon: "success",
             title: "Deleted!",
             text: response.message || "Blog deleted successfully",
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+          }).then(() => {
+            fetchBlogs();
           });
-          fetchBlogs();
         } else {
           Swal.fire({
             icon: "error",

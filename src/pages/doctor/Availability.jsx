@@ -132,7 +132,9 @@ export default function Availability() {
               icon: "success",
               title: "Deleted!",
               text: "Time slot has been deleted from database.",
-              confirmButtonColor: "#00b100"
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true
             });
           } else {
             await Swal.fire({
@@ -330,14 +332,18 @@ export default function Availability() {
               title: "Saved with Duplicates",
               text: response.message || "Availability saved successfully",
               footer: `<small class="text-gray-500">Skipped: ${response.skippedSlots.join(', ')}</small>`,
-              confirmButtonColor: "#00b100"
+              timer: 3000,
+              showConfirmButton: false,
+              timerProgressBar: true
             });
           } else {
             Swal.fire({
               icon: "success",
               title: "Success",
               text: "Availability saved successfully",
-              confirmButtonColor: "#00b100"
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true
             });
           }
         } else {
@@ -364,7 +370,9 @@ export default function Availability() {
           icon: "success",
           title: "Success",
           text: "No new slots to save",
-          confirmButtonColor: "#00b100"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         });
       }
     } catch (error) {

@@ -497,9 +497,12 @@ export default function DoctorManagement() {
               icon: 'success',
               title: 'Deleted!',
               text: response.message || "Doctor deleted successfully",
-              confirmButtonColor: '#00B100',
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true
+            }).then(() => {
+              fetchDoctors();
             });
-            fetchDoctors();
           } else {
             Swal.fire({
               icon: 'error',

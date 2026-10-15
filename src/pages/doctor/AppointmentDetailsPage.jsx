@@ -61,7 +61,7 @@ export default function DoctorAppointmentDetailsPage() {
       const response = await acceptAppointment(appointment.id);
       if (response.status === 1) {
         setAppointment({ ...appointment, status: "accepted" });
-        Swal.fire({ icon: "success", title: "Accepted", text: "Appointment accepted successfully", confirmButtonColor: "#00b100" });
+        Swal.fire({ icon: "success", title: "Accepted", text: "Appointment accepted successfully", timer: 2000, showConfirmButton: false, timerProgressBar: true });
       } else Swal.fire({ icon: "error", title: "Error", text: response.message || "Failed to accept", confirmButtonColor: "#00b100" });
     } catch (error) {
       console.error("Error:", error);
@@ -75,7 +75,7 @@ export default function DoctorAppointmentDetailsPage() {
       const response = await rejectAppointment(appointment.id);
       if (response.status === 1) {
         setAppointment({ ...appointment, status: "rejected" });
-        Swal.fire({ icon: "success", title: "Rejected", text: "Appointment rejected successfully", confirmButtonColor: "#00b100" });
+        Swal.fire({ icon: "success", title: "Rejected", text: "Appointment rejected successfully", timer: 2000, showConfirmButton: false, timerProgressBar: true });
       } else Swal.fire({ icon: "error", title: "Error", text: response.message || "Failed to reject", confirmButtonColor: "#00b100" });
     } catch (error) {
       console.error("Error:", error);

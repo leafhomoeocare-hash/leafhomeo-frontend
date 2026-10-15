@@ -121,9 +121,12 @@ export default function AppointmentDetailsPage() {
           icon: "success",
           title: "Cancelled!",
           text: "Appointment cancelled successfully",
-          confirmButtonColor: "#10b981"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        }).then(() => {
+          navigate("/patient/appointments");
         });
-        navigate("/patient/appointments");
       } else {
         Swal.fire({
           icon: "error",
@@ -181,10 +184,13 @@ export default function AppointmentDetailsPage() {
           icon: "success",
           title: "Review Submitted!",
           text: "Thank you for your feedback.",
-          confirmButtonColor: "#10b981"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        }).then(() => {
+          setReviewModalOpen(false);
+          fetchAppointmentDetails();
         });
-        setReviewModalOpen(false);
-        await fetchAppointmentDetails();
       } else {
         Swal.fire({
           icon: "error",

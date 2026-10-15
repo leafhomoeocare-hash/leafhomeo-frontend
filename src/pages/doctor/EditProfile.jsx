@@ -87,9 +87,12 @@ export default function DoctorEditProfile() {
           icon: "success",
           title: "Success",
           text: "Profile updated successfully!",
-          confirmButtonColor: "#00b100"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        }).then(() => {
+          navigate("/doctor/profile");
         });
-        navigate("/doctor/profile");
       } else {
         Swal.fire({
           icon: "error",

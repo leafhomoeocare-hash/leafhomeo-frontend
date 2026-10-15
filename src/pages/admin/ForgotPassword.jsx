@@ -122,7 +122,9 @@ export default function AdminForgotPassword() {
           icon: 'success',
           title: 'Success',
           text: res.message,
-          confirmButtonColor: '#00B100',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         }).then(() => {
           navigate("/admin/login");
         });

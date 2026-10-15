@@ -133,7 +133,9 @@ export default function EditProfile() {
           icon: "success",
           title: "Success",
           text: "Profile updated successfully!",
-          confirmButtonColor: "#10b981"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         }).then(() => {
           navigate("/patient/profile");
         });

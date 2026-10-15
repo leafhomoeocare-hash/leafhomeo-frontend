@@ -120,7 +120,9 @@ export default function DoctorAppointments() {
           icon: "success",
           title: "Accepted",
           text: "Appointment accepted successfully",
-          confirmButtonColor: "#00b100"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         });
       } else {
         Swal.fire({
@@ -155,7 +157,9 @@ export default function DoctorAppointments() {
           icon: "success",
           title: "Rejected",
           text: "Appointment rejected successfully",
-          confirmButtonColor: "#00b100"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         });
       } else {
         Swal.fire({

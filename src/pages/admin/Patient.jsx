@@ -97,9 +97,12 @@ export default function PatientManagement() {
               icon: 'success',
               title: 'Deleted!',
               text: 'Patient deleted successfully',
-              confirmButtonColor: '#00B100',
+              timer: 2000,
+              showConfirmButton: false,
+              timerProgressBar: true
+            }).then(() => {
+              fetchPatients();
             });
-            fetchPatients();
           } else {
             Swal.fire({
               icon: 'error',

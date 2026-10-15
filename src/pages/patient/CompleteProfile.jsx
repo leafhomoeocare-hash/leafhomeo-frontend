@@ -119,16 +119,19 @@ export default function CompleteProfile() {
       const updateResponse = await updateProfile(formDataToSend);
 
       if (updateResponse.status === 1) {
+        // Update sessionStorage
+        const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+        user.IsCompleteProfile = true;
+        sessionStorage.setItem("user", JSON.stringify(user));
+
         Swal.fire({
           icon: "success",
           title: "Profile Completed!",
           text: "Your profile has been completed successfully",
-          confirmButtonColor: "#10b981"
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         }).then(() => {
-          // Update sessionStorage
-          const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-          user.IsCompleteProfile = true;
-          sessionStorage.setItem("user", JSON.stringify(user));
           navigate("/patient/dashboard");
         });
       } else {

@@ -243,10 +243,6 @@ function DashboardContent() {
                 </div>
               </div>
 
-              <p className="text-xs text-gray-600 font-medium leading-relaxed bg-[#FDFEFC] p-4 rounded-xl border border-gray-100 mt-4">
-                {upcomingAppointment.reason || "Please have your symptom tracker ready for today's review."}
-              </p>
-
               {(() => {
                 const appointmentTime = new Date(upcomingAppointment.appointmentDateTime);
                 const now = new Date();
@@ -307,7 +303,10 @@ function DashboardContent() {
           <h4 className="text-base font-extrabold text-gray-900 tracking-tight mb-5">Consultation Overview</h4>
 
           <div className="space-y-3 flex-grow">
-            <div className="flex items-center justify-between p-3.5 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+            <div
+              onClick={() => navigate("/patient/appointments?filter=pending")}
+              className="flex items-center justify-between p-3.5 bg-gray-50/50 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+            >
               <span className="text-xs font-bold text-gray-700 flex items-center gap-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Pending Slots
               </span>

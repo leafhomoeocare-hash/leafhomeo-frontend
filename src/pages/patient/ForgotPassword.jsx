@@ -113,7 +113,9 @@ const ForgotPassword = () => {
           icon: 'success',
           title: 'Password Reset Successful',
           text: 'Please login with your new password',
-          confirmButtonColor: '#00B100',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         }).then(() => {
           navigate("/login");
         });

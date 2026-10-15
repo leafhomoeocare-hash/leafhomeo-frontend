@@ -123,10 +123,13 @@ export default function Coupons() {
           icon: "success",
           title: editingCoupon ? "Coupon Updated" : "Coupon Created",
           text: response.message,
-          confirmButtonColor: "#10B981",
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        }).then(() => {
+          handleCloseModal();
+          fetchCoupons();
         });
-        handleCloseModal();
-        await fetchCoupons();
       } else {
         Swal.fire({
           icon: "error",
@@ -166,9 +169,12 @@ export default function Coupons() {
           icon: "success",
           title: "Deleted!",
           text: "Coupon has been deleted.",
-          confirmButtonColor: "#10B981",
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        }).then(() => {
+          fetchCoupons();
         });
-        await fetchCoupons();
       } else {
         Swal.fire({
           icon: "error",

@@ -122,9 +122,12 @@ export default function AppointmentRequests() {
             icon: "success",
             title: "Accepted!",
             text: "Appointment has been accepted successfully.",
-            confirmButtonColor: "#00b100"
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+          }).then(() => {
+            fetchAppointments();
           });
-          fetchAppointments();
         } else {
           Swal.fire({
             icon: "error",
@@ -171,9 +174,12 @@ export default function AppointmentRequests() {
             icon: "success",
             title: "Rejected!",
             text: "Appointment has been rejected.",
-            confirmButtonColor: "#00b100"
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+          }).then(() => {
+            fetchAppointments();
           });
-          fetchAppointments();
         } else {
           Swal.fire({
             icon: "error",

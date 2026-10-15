@@ -51,10 +51,13 @@ export default function AdminProfile() {
           icon: 'success',
           title: 'Success',
           text: 'Password changed successfully!',
-          confirmButtonColor: '#00B100',
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        }).then(() => {
+          setChangePasswordModalOpen(false);
+          setPasswordForm({ oldPassword: "", newPassword: "" });
         });
-        setChangePasswordModalOpen(false);
-        setPasswordForm({ oldPassword: "", newPassword: "" });
       } else {
         Swal.fire({
           icon: 'error',

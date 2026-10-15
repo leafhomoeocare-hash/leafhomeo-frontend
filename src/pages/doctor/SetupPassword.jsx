@@ -76,7 +76,9 @@ export default function SetupPassword() {
           icon: "success",
           title: "Password Set Successfully",
           text: "You can now login with your new password",
-          confirmButtonColor: "#00B100",
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
         }).then(() => {
           navigate("/doctor/login");
         });

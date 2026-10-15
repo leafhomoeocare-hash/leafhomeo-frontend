@@ -203,8 +203,12 @@ const ConsultationForm = () => {
           icon: "success",
           title: "Success",
           text: "Consultation updated successfully",
+          timer: 2000,
+          showConfirmButton: false,
+          timerProgressBar: true
+        }).then(() => {
+          navigate("/doctor/appointments");
         });
-        navigate("/doctor/appointments");
       }
     } catch (error) {
       console.error("Error updating consultation:", error);
@@ -233,6 +237,9 @@ const ConsultationForm = () => {
         icon: "success",
         title: "Draft Saved",
         text: "Your draft has been saved. You can continue later.",
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true
       });
     } catch (err) {
       console.error("Error saving draft:", err);

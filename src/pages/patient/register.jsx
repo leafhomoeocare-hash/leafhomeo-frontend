@@ -69,7 +69,9 @@ const Register = () => {
             icon: "info",
             title: "OTP Sent (Development Mode)",
             text: `Your OTP is: ${response.data.otp}`,
-            confirmButtonColor: "#10b981"
+            timer: 3000,
+            showConfirmButton: false,
+            timerProgressBar: true
           });
         }
       } else {

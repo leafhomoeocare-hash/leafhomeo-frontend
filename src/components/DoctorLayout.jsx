@@ -89,12 +89,12 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         }`}
       >
         {/* Brand Header */}
-        <div className="flex h-14 items-center justify-between px-4 border-b border-white/10">
+        <div className="flex h-20 items-center justify-between px-4 border-b border-white/10">
           <Link to="/doctor/dashboard" className="flex items-center gap-2 text-white decoration-transparent">
             <img
               src="/Leaf-LOGO-Kit/PNG/Full Logo/final leaf logo_Full logo with space White.png"
               alt="Leaf Homeo"
-              className="h-10 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
           </Link>
           <button

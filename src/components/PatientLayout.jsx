@@ -15,7 +15,9 @@ import {
   Users,
   HeartPulse,
   BookOpen,
-  CheckCheck
+  CheckCheck,
+  Folder,
+  MessageSquare
 } from "lucide-react";
 import { getNotifications, deleteNotification, getUser, markNotificationAsRead, markAllNotificationsAsRead } from "../api/authApi";
 import { useNotification } from "../context/NotificationContext";
@@ -38,6 +40,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/patient/dashboard" },
   { icon: Calendar, label: "Book Appointment", path: "/patient/book" },
   { icon: FileText, label: "My Appointments", path: "/patient/appointments" },
+  { icon: MessageSquare, label: "Support Chat", path: "/patient/chat", action: "support-chat" },
   { icon: Users, label: "Doctors", path: "/patient/doctors" },
   { icon: BookOpen, label: "Blog", path: "/patient/blog" },
   { icon: User, label: "Profile", path: "/patient/profile" },
@@ -50,6 +53,8 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const handleNavClick = (item) => {
     if (item.action === "book") {
     navigate(item.path);
+    } else if (item.action === "support-chat") {
+      navigate("/patient/chat", { state: { selectUserId: "admin" } });
     } else if (item.path === "/patient/doctors") {
       navigate(item.path + "?showList=true");
     } else {

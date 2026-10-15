@@ -92,7 +92,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
         <div className="flex h-14 items-center justify-between px-4 border-b border-white/10">
           <Link to="/doctor/dashboard" className="flex items-center gap-2 text-white decoration-transparent">
             <img
-              src="/Leaf-LOGO-Kit/SVG/final leaf logo_App icon inverted.svg"
+              src="/Leaf-LOGO-Kit/SVG/final leaf logo_Full Logo Color.svg"
               alt="Leaf Homeo"
               className="h-9 w-auto object-contain"
             />

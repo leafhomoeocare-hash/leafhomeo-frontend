@@ -168,23 +168,6 @@ function TopHeader({ setSidebarOpen }) {
             className="w-full h-10 rounded-xl border border-gray-200 bg-gray-50/50 pl-10 pr-4 text-sm outline-hidden focus:border-brand-primary focus:bg-white focus:ring-2 focus:ring-brand-primary/20 transition-all"
           />
         </div> */}
-
-        {/* Brand indicator for mobile */}
-        <div className="flex items-center gap-2 lg:hidden">
-          <img
-            src="/Leaf-LOGO-Kit/SVG/final leaf logo_Full Logo Color.svg"
-            alt="Leaf Homeo"
-            className="h-8 w-auto object-contain"
-          />
-        </div>
-
-        <div className="hidden lg:flex items-center gap-2">
-          <img
-            src="/Leaf-LOGO-Kit/SVG/final leaf logo_Full Logo Color.svg"
-            alt="Leaf Homeo"
-            className="h-8 w-auto object-contain"
-          />
-        </div>
       </div>
 
       {/* Right side: notifications + profile */}

@@ -13,6 +13,7 @@ import {
   X,
   User,
   Users,
+  HeartPulse,
   BookOpen,
   CheckCheck
 } from "lucide-react";
@@ -154,19 +155,13 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
 
         {/* Brand indicator for mobile */}
         <div className="flex items-center gap-2 lg:hidden">
-          <img
-            src="/Leaf-LOGO-Kit/SVG/final leaf logo_Full Logo Color.svg"
-            alt="Leaf Homeo"
-            className="h-8 w-auto object-contain"
-          />
+          <HeartPulse className="text-brand-primary" size={20} />
+          <span className="font-bold text-gray-800 text-sm">Patient Portal</span>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2">
-          <img
-            src="/Leaf-LOGO-Kit/SVG/final leaf logo_Full Logo Color.svg"
-            alt="Leaf Homeo"
-            className="h-8 w-auto object-contain"
-          />
+        <div className="hidden lg:flex items-center gap-2 text-xs font-semibold bg-brand-light text-brand-dark px-3 py-1 rounded-full border border-brand-primary/10">
+          <span className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-pulse" />
+          Patient Dashboard
         </div>
       </div>
 

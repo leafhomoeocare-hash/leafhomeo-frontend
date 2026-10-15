@@ -177,10 +177,6 @@ export default function AppointmentManagement() {
     setConfirmShippingChange(null);
   };
 
-  const cancelShippingStatusUpdate = () => {
-    setConfirmShippingChange(null);
-  };
-
   const getAvailableShippingStatuses = (currentStatus) => {
     const statusFlow = {
       draft: ['prepared'],

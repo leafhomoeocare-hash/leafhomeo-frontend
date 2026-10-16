@@ -322,8 +322,8 @@ export default function Chat() {
 
     try {
       // Fetch appointment-based chat history (last 3 appointments)
-      // Only show appointment conversations for doctors, hide for admin and patient
-      if (userRole === 'doctor') {
+      // Show appointment conversations for doctor and patient, but NOT for admin
+      if (userRole === 'doctor' || userRole === 'patient') {
         const res = await getChatHistoryByAppointments(contact.id);
         if (res.status === 1) {
           setAppointmentConversations(res.data || []);
@@ -345,7 +345,7 @@ export default function Chat() {
           setIsMobileChatOpen(false);
         }
       } else {
-        // For admin and patient, fetch normal chat history (not appointment-based)
+        // For admin, fetch normal chat history (not appointment-based)
         const res = await getChatHistory(contact.id);
         if (res.status === 1) {
           setMessages(res.data || []);
@@ -1119,7 +1119,7 @@ export default function Chat() {
                     </p>
                   </div>
                 ) : (
-                  userRole === 'doctor' && appointmentConversations.length > 0 ? (
+                  (userRole === 'doctor' || userRole === 'patient') && appointmentConversations.length > 0 ? (
                     appointmentConversations.map((conversation, convIndex) => (
                       <div key={conversation.appointment.id || 'legacy'} className="space-y-4 relative z-10 mb-8">
                         {/* Appointment Section Header */}

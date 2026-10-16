@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import AdminLayout from "../../components/AdminLayout";
 import { getAppointments, updateShippingStatus } from "../../api/appointmentApi";
 import { getImageUrl } from "../../utils/imageHelper";
-import { Calendar, Clock, Check, X, Loader2, AlertCircle, ArrowLeft, MessageSquare } from "lucide-react";
+import { Calendar, Clock, Check, X, Loader2, AlertCircle, ArrowLeft, MessageSquare, MapPin, FileText } from "lucide-react";
 
 export default function AdminAppointmentDetailsPage() {
   const navigate = useNavigate();
@@ -217,6 +217,72 @@ export default function AdminAppointmentDetailsPage() {
                 </div>
               </div>
             </div>
+
+            {/* Patient Shipping Address */}
+            {appointment.patient && (
+              <div className="bg-gradient-to-r from-blue-50/30 to-emerald-50/30 border border-blue-200/50 rounded-2xl p-6">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-100 rounded-xl">
+                    <MapPin size={20} className="text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">Shipping Address</h4>
+                    <div className="text-sm text-gray-700 leading-relaxed">
+                      {appointment.patient.houseNumber && (
+                        <p className="font-semibold">{appointment.patient.houseNumber}</p>
+                      )}
+                      {appointment.patient.addressLine1 && (
+                        <p>{appointment.patient.addressLine1}</p>
+                      )}
+                      {appointment.patient.addressLine2 && (
+                        <p>{appointment.patient.addressLine2}</p>
+                      )}
+                      {(appointment.patient.city || appointment.patient.state || appointment.patient.pincode) && (
+                        <p className="font-semibold mt-1">
+                          {appointment.patient.city && `${appointment.patient.city}, `}
+                          {appointment.patient.state && `${appointment.patient.state} `}
+                          {appointment.patient.pincode && `- ${appointment.patient.pincode}`}
+                        </p>
+                      )}
+                      {appointment.patient.country && (
+                        <p className="text-gray-500">{appointment.patient.country}</p>
+                      )}
+                      {appointment.patient.landmark && (
+                        <p className="text-xs text-gray-500 mt-1"><span className="font-semibold">Landmark:</span> {appointment.patient.landmark}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Consultation / Prescription Details */}
+            {appointment.consultation && (
+              <div className="bg-gradient-to-r from-purple-50/30 to-pink-50/30 border border-purple-200/50 rounded-2xl p-6">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-purple-100 rounded-xl">
+                    <FileText size={20} className="text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 text-sm mb-1">Prescription Details (for Medicine Preparation)</h4>
+                    <div className="space-y-3 text-sm text-gray-700">
+                      {appointment.consultation.chiefComplaints && (
+                        <div>
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Chief Complaints</p>
+                          <p className="leading-relaxed whitespace-pre-wrap">{appointment.consultation.chiefComplaints}</p>
+                        </div>
+                      )}
+                      {appointment.consultation.perception && (
+                        <div>
+                          <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Prescription / Treatment</p>
+                          <p className="leading-relaxed whitespace-pre-wrap">{appointment.consultation.perception}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
               {appointment.doctor && <button onClick={handleViewChat} className="flex-1 min-w-[140px] h-11 bg-brand-primary hover:bg-brand-hover text-white font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"><MessageSquare size={16} />View Chat</button>}
             </div>

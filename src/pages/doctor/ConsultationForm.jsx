@@ -38,11 +38,31 @@ const ConsultationForm = () => {
   });
 
   useEffect(() => {
-    if (consultationId) {
+    // Check for appointmentId in URL params first
+    const urlParams = new URLSearchParams(window.location.search);
+    const aptId = urlParams.get('appointmentId');
+    
+    if (aptId) {
+      setAppointmentId(aptId);
+      // Try to load draft first
+      const savedDraft = localStorage.getItem(`consultation_draft_${aptId}`);
+      if (savedDraft) {
+        try {
+          const parsedData = JSON.parse(savedDraft);
+          setFormData(parsedData);
+          setLoading(false);
+        } catch (err) {
+          console.error("Error parsing draft:", err);
+          setLoading(false);
+        }
+      } else {
+        // No draft, check if consultation exists
+        fetchConsultationByAppointmentId(aptId);
+      }
+    } else if (consultationId) {
       fetchConsultation();
     } else {
-      // If no consultationId, check for draft from localStorage
-      loadDraftIfExists();
+      setLoading(false);
     }
   }, [consultationId]);
 

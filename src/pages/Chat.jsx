@@ -345,9 +345,14 @@ export default function Chat() {
           setIsMobileChatOpen(false);
         }
       } else {
-        // For admin and patient, don't show appointment conversations
+        // For admin and patient, fetch normal chat history (not appointment-based)
+        const res = await getChatHistory(contact.id);
+        if (res.status === 1) {
+          setMessages(res.data || []);
+        } else {
+          setMessages([]);
+        }
         setAppointmentConversations([]);
-        setMessages([]);
         setCurrentAppointmentId(null);
       }
     } catch (err) {

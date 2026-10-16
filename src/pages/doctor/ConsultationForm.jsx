@@ -64,7 +64,64 @@ const ConsultationForm = () => {
     } else {
       setLoading(false);
     }
-  }, [consultationId]);
+  }, []);
+
+  const fetchConsultationByAppointmentId = async (aptId) => {
+    try {
+      setLoading(true);
+      const token = sessionStorage.getItem("token");
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/api/v1/appointment/consultation/by-appointment/${aptId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.data.status === 1) {
+        const data = response.data.data;
+        setConsultation(data);
+        setFormData({
+          appointmentId: data.appointmentId || aptId,
+          chiefComplaints: data.chiefComplaints || "",
+          appetite: data.appetite || "",
+          thirst: data.thirst || "",
+          desire: data.desire || "",
+          aversion: data.aversion || "",
+          habits: data.habits || "",
+          stool: data.stool || "",
+          urine: data.urine || "",
+          perspiration: data.perspiration || "",
+          menWomen: data.menWomen || "",
+          sleep: data.sleep || "",
+          dream: data.dream || "",
+          thermal: data.thermal || "",
+          amelioration: data.amelioration || "",
+          aggravation: data.aggravation || "",
+          otherComplaints: data.otherComplaints || "",
+          levelsOfHealth: data.levelsOfHealth || "",
+          perception: data.perception || "",
+          callDuration: data.callDuration || "",
+        });
+
+        // Parse existing screenshots
+        if (data.screenshots) {
+          try {
+            const parsedScreenshots = typeof data.screenshots === 'string' 
+              ? JSON.parse(data.screenshots) 
+              : data.screenshots;
+            setExistingScreenshots(Array.isArray(parsedScreenshots) ? parsedScreenshots : []);
+          } catch (e) {
+            console.error("Error parsing screenshots:", e);
+            setExistingScreenshots([]);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching consultation by appointment:", error);
+      // If consultation doesn't exist, it's okay - form will be in draft mode
+      setLoading(false);
+    }
+  };
 
   const loadDraftIfExists = () => {
     // Try to find draft from URL params or localStorage

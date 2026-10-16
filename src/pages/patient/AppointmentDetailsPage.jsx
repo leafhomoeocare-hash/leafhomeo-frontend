@@ -304,6 +304,7 @@ export default function AppointmentDetailsPage() {
           <button
             onClick={() => setTrackingModalOpen(true)}
             className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 cursor-pointer transition-colors"
+            title="Click to view tracking details"
           >
             <Truck className="w-3 h-3 text-emerald-500" />
             In Transit
@@ -352,8 +353,9 @@ export default function AppointmentDetailsPage() {
 
   const getStepStatus = (stepNumber) => {
     const status = (appointment?.status || "").toLowerCase();
+    const shippingStatus = (appointment?.shippingStatus || "").toLowerCase();
     if (status === "cancelled" || status === "rejected") return "cancelled";
-    
+
     if (stepNumber === 1) {
       return status === "pending" || status === "accepted" || status === "paid" || status === "completed" ? "completed" : "pending";
     }
@@ -365,6 +367,29 @@ export default function AppointmentDetailsPage() {
     }
     if (stepNumber === 4) {
       return status === "completed" ? "completed" : status === "paid" ? "pending" : "cancelled";
+    }
+    if (stepNumber === 5) {
+      if (status !== "completed") return "cancelled";
+      if (shippingStatus === "draft" || shippingStatus === "prepared" || shippingStatus === "ready_to_transit" || shippingStatus === "in_transit") return "completed";
+      return "pending";
+    }
+    if (stepNumber === 6) {
+      if (status !== "completed") return "cancelled";
+      if (shippingStatus === "prepared" || shippingStatus === "ready_to_transit" || shippingStatus === "in_transit") return "completed";
+      if (shippingStatus === "draft") return "pending";
+      return "cancelled";
+    }
+    if (stepNumber === 7) {
+      if (status !== "completed") return "cancelled";
+      if (shippingStatus === "ready_to_transit" || shippingStatus === "in_transit") return "completed";
+      if (shippingStatus === "draft" || shippingStatus === "prepared") return "pending";
+      return "cancelled";
+    }
+    if (stepNumber === 8) {
+      if (status !== "completed") return "cancelled";
+      if (shippingStatus === "in_transit") return "completed";
+      if (shippingStatus === "draft" || shippingStatus === "prepared" || shippingStatus === "ready_to_transit") return "pending";
+      return "cancelled";
     }
     return "pending";
   };
@@ -389,6 +414,26 @@ export default function AppointmentDetailsPage() {
       number: 4,
       title: "Join encrypted video room",
       description: "One-click secure video consultation and digital prescription."
+    },
+    {
+      number: 5,
+      title: "Medicine preparation starts",
+      description: "Your homeopathic medicine is being prepared by expert pharmacists based on the doctor's prescription."
+    },
+    {
+      number: 6,
+      title: "Medicine ready & quality check",
+      description: "Medicine has been prepared and is undergoing quality checks before packaging."
+    },
+    {
+      number: 7,
+      title: "Ready for transit",
+      description: "Medicine is packaged and ready to be handed over to courier partner for delivery."
+    },
+    {
+      number: 8,
+      title: "In transit to your doorstep",
+      description: "Your medicine is on the way! Track your shipment using the tracking details provided."
     }
   ];
 
@@ -453,6 +498,15 @@ export default function AppointmentDetailsPage() {
                 </div>
                 <div className="flex-1">
                   <h4 className="font-bold text-gray-900 text-sm mb-1">Appointment Status</h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    {getStatusBadge(appointment.status)}
+                    {appointment.shippingStatus && appointment.status === 'completed' && (
+                      <>
+                        <span className="text-gray-400">|</span>
+                        {getShippingStatusBadge(appointment.shippingStatus)}
+                      </>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-600 leading-relaxed">
                     {appointment.status === 'pending' && (
                       "Your appointment request has been submitted. Waiting for doctor to accept your request. The doctor will review and accept or decline based on availability."
@@ -467,7 +521,13 @@ export default function AppointmentDetailsPage() {
                       "Payment completed successfully! Your appointment is confirmed. You can now chat with the doctor before the consultation."
                     )}
                     {appointment.status === 'completed' && (
-                      "Your consultation has been completed. You can leave a review for the doctor."
+                      <>
+                        Your consultation has been completed. You can leave a review for the doctor.
+                        {appointment.shippingStatus === 'draft' && " Your medicine order has been created and is being prepared."}
+                        {appointment.shippingStatus === 'prepared' && " Your medicine has been prepared and is undergoing quality checks."}
+                        {appointment.shippingStatus === 'ready_to_transit' && " Your medicine is ready for transit and will be shipped soon."}
+                        {appointment.shippingStatus === 'in_transit' && " Your medicine is on the way! Click on the 'In Transit' status to track your shipment."}
+                      </>
                     )}
                     {appointment.status === 'cancelled' && (
                       "This appointment has been cancelled."
@@ -524,35 +584,6 @@ export default function AppointmentDetailsPage() {
                 <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Status</p>
                 <div className="mt-1">
                   {getStatusBadge(appointment.status)}
-                </div>
-              </div>
-            </div>
-
-            {/* Shipping Status Card */}
-            <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-6">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-blue-100 rounded-xl">
-                  <Truck size={20} className="text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-bold text-gray-900 text-sm mb-1">Medicine Shipping Status</h4>
-                  <div className="flex items-center gap-2 mb-2">
-                    {getShippingStatusBadge(appointment.shippingStatus)}
-                  </div>
-                  <p className="text-sm text-gray-600 leading-relaxed">
-                    {appointment.shippingStatus === 'draft' && (
-                      "Your medicine order has been created. Our team is preparing your homeopathic medicine based on the doctor's prescription."
-                    )}
-                    {appointment.shippingStatus === 'prepared' && (
-                      "Your medicine has been prepared by our expert pharmacists. It is undergoing quality checks before being packaged for shipment."
-                    )}
-                    {appointment.shippingStatus === 'ready_to_transit' && (
-                      "Your medicine is ready for transit! It has been packaged and will be handed over to the courier partner soon. You will receive tracking details once it's shipped."
-                    )}
-                    {appointment.shippingStatus === 'in_transit' && (
-                      "Your medicine is on the way! Click on the 'In Transit' status above to view your tracking details including tracking ID, courier name, and live tracking link."
-                    )}
-                  </p>
                 </div>
               </div>
             </div>
@@ -664,7 +695,16 @@ export default function AppointmentDetailsPage() {
                   const isCompleted = stepStatus === "completed";
                   const isPending = stepStatus === "pending";
                   const isCancelled = stepStatus === "cancelled";
-                  const isLast = index === steps.length - 1;
+
+                  // Only show shipping steps (5-8) if appointment is completed
+                  if (step.number >= 5 && appointment.status !== 'completed') {
+                    return null;
+                  }
+
+                  // Check if this is the last visible step
+                  const visibleSteps = steps.filter(s => s.number < 5 || appointment.status === 'completed');
+                  const currentIndex = visibleSteps.findIndex(s => s.number === step.number);
+                  const isLast = currentIndex === visibleSteps.length - 1;
 
                   return (
                     <div key={step.number} className="flex gap-3 relative">

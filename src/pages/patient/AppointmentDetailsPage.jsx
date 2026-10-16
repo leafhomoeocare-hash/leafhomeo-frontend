@@ -19,7 +19,10 @@ import {
   Star,
   Send,
   CreditCard,
-  ArrowLeft
+  ArrowLeft,
+  Truck,
+  Package,
+  ExternalLink
 } from "lucide-react";
 
 export default function AppointmentDetailsPage() {
@@ -36,6 +39,7 @@ export default function AppointmentDetailsPage() {
   const [reviewText, setReviewText] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 
   useEffect(() => {
     if (appointmentId) {
@@ -272,6 +276,48 @@ export default function AppointmentDetailsPage() {
     }
   };
 
+  const getShippingStatusBadge = (shippingStatus) => {
+    const s = (shippingStatus || "").toLowerCase();
+    switch (s) {
+      case "draft":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200">
+            Draft
+          </span>
+        );
+      case "prepared":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+            <Package className="w-3 h-3 text-blue-500" />
+            Prepared
+          </span>
+        );
+      case "ready_to_transit":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
+            <Truck className="w-3 h-3 text-purple-500" />
+            Ready to Transit
+          </span>
+        );
+      case "in_transit":
+        return (
+          <button
+            onClick={() => setTrackingModalOpen(true)}
+            className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 cursor-pointer transition-colors"
+          >
+            <Truck className="w-3 h-3 text-emerald-500" />
+            In Transit
+          </button>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-50 text-gray-700 border border-gray-200">
+            {shippingStatus}
+          </span>
+        );
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -478,6 +524,35 @@ export default function AppointmentDetailsPage() {
                 <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Status</p>
                 <div className="mt-1">
                   {getStatusBadge(appointment.status)}
+                </div>
+              </div>
+            </div>
+
+            {/* Shipping Status Card */}
+            <div className="bg-blue-50/30 border border-blue-100 rounded-2xl p-6">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-blue-100 rounded-xl">
+                  <Truck size={20} className="text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900 text-sm mb-1">Medicine Shipping Status</h4>
+                  <div className="flex items-center gap-2 mb-2">
+                    {getShippingStatusBadge(appointment.shippingStatus)}
+                  </div>
+                  <p className="text-sm text-gray-600 leading-relaxed">
+                    {appointment.shippingStatus === 'draft' && (
+                      "Your medicine order has been created. Our team is preparing your homeopathic medicine based on the doctor's prescription."
+                    )}
+                    {appointment.shippingStatus === 'prepared' && (
+                      "Your medicine has been prepared by our expert pharmacists. It is undergoing quality checks before being packaged for shipment."
+                    )}
+                    {appointment.shippingStatus === 'ready_to_transit' && (
+                      "Your medicine is ready for transit! It has been packaged and will be handed over to the courier partner soon. You will receive tracking details once it's shipped."
+                    )}
+                    {appointment.shippingStatus === 'in_transit' && (
+                      "Your medicine is on the way! Click on the 'In Transit' status above to view your tracking details including tracking ID, courier name, and live tracking link."
+                    )}
+                  </p>
                 </div>
               </div>
             </div>
@@ -738,6 +813,94 @@ export default function AppointmentDetailsPage() {
                   onSuccess={handlePaymentSuccess}
                   onCancel={() => setPaymentModalOpen(false)}
                 />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tracking Modal */}
+        {trackingModalOpen && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl border border-gray-100 overflow-hidden">
+              <div className="bg-gradient-to-r from-emerald-50 to-blue-50 border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Shipping Tracking Details</h3>
+                  <p className="text-xs text-gray-500 mt-0.5">Track your medicine delivery</p>
+                </div>
+                <button
+                  onClick={() => setTrackingModalOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                {/* Tracking ID */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Package size={16} className="text-brand-primary" />
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Tracking ID</p>
+                  </div>
+                  <p className="text-sm font-bold text-gray-900 font-mono">{appointment.trackerId || "Not available"}</p>
+                </div>
+
+                {/* Courier Name */}
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Truck size={16} className="text-brand-primary" />
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Courier Partner</p>
+                  </div>
+                  <p className="text-sm font-bold text-gray-900">{appointment.courierName || "Not available"}</p>
+                </div>
+
+                {/* Tracking URL */}
+                {appointment.trackingUrl && (
+                  <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ExternalLink size={16} className="text-emerald-600" />
+                      <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Live Tracking</p>
+                    </div>
+                    <a
+                      href={appointment.trackingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 hover:text-emerald-800 underline"
+                    >
+                      Track your shipment
+                      <ExternalLink size={14} />
+                    </a>
+                  </div>
+                )}
+
+                {/* Info Message */}
+                <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                  <AlertCircle size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-800 font-medium leading-relaxed">
+                    Your medicine is currently in transit. You can track your package in real-time using the tracking link above. Expected delivery depends on your location and courier service standards.
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-gray-50/80 border-t border-gray-100 px-6 py-3.5 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTrackingModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
+                >
+                  Close
+                </button>
+                {appointment.trackingUrl && (
+                  <a
+                    href={appointment.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 bg-brand-primary hover:bg-brand-hover text-white px-4 py-2 rounded-xl text-xs font-bold shadow-xs cursor-pointer transition-all"
+                  >
+                    <ExternalLink size={13} />
+                    Track Now
+                  </a>
+                )}
               </div>
             </div>
           </div>

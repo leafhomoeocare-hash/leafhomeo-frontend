@@ -12,7 +12,8 @@ import {
   Calendar,
   Edit,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  HelpCircle
 } from "lucide-react";
 
 export default function Profile() {
@@ -286,6 +287,16 @@ export default function Profile() {
             <div className="text-left">
               <p className="font-bold text-gray-900">Change Password</p>
               <p className="text-xs text-gray-500">Update your password</p>
+            </div>
+          </button>
+          <button
+            onClick={() => navigate("/patient/help-support")}
+            className="p-4 bg-white border-2 border-gray-100 rounded-xl hover:border-brand-primary transition-all flex items-center gap-3"
+          >
+            <HelpCircle className="h-5 w-5 text-brand-primary" />
+            <div className="text-left">
+              <p className="font-bold text-gray-900">Help & Support</p>
+              <p className="text-xs text-gray-500">Get help with any issues</p>
             </div>
           </button>
         </div>

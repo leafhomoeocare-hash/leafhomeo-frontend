@@ -54,6 +54,7 @@ import TermsAndConditions from "../pages/TermsAndConditions";
 import PrivacyPolicy from "../pages/PrivacyPolicy";
 import PatientBlog from "../pages/patient/Blog";
 import DoctorBlog from "../pages/doctor/Blog";
+import HelpAndSupport from "../pages/patient/HelpAndSupport";
 
 
 function AppRouter() {
@@ -99,6 +100,7 @@ function AppRouter() {
       <Route path="/patient/privacy-policy" element={<ProtectedRoute allowedRole="patient"><PrivacyPolicyView /></ProtectedRoute>} />
       <Route path="/patient/terms-conditions" element={<ProtectedRoute allowedRole="patient"><TermsConditionsView /></ProtectedRoute>} />
       <Route path="/patient/blog" element={<ProtectedRoute allowedRole="patient"><PatientBlog /></ProtectedRoute>} />
+      <Route path="/patient/help-support" element={<ProtectedRoute allowedRole="patient"><HelpAndSupport /></ProtectedRoute>} />
       <Route path="/doctor/dashboard" element={<ProtectedRoute allowedRole="doctor"><DoctorDashboard /></ProtectedRoute>} />
       <Route path="/doctor/appointments" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointments /></ProtectedRoute>} />
       <Route path="/doctor/appointments/:id" element={<ProtectedRoute allowedRole="doctor"><DoctorAppointmentDetailsPage /></ProtectedRoute>} />

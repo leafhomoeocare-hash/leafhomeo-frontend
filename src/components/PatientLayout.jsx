@@ -17,7 +17,7 @@ import {
   BookOpen,
   CheckCheck,
   Folder,
-  MessageSquare
+  HelpCircle
 } from "lucide-react";
 import { getNotifications, deleteNotification, getUser, markNotificationAsRead, markAllNotificationsAsRead } from "../api/authApi";
 import { useNotification } from "../context/NotificationContext";
@@ -40,7 +40,6 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/patient/dashboard" },
   { icon: Calendar, label: "Book Appointment", path: "/patient/book" },
   { icon: FileText, label: "My Appointments", path: "/patient/appointments" },
-  { icon: MessageSquare, label: "Support Chat", path: "/patient/chat", action: "support-chat" },
   { icon: Users, label: "Doctors", path: "/patient/doctors" },
   { icon: BookOpen, label: "Blog", path: "/patient/blog" },
   { icon: User, label: "Profile", path: "/patient/profile" },
@@ -51,11 +50,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const navigate = useNavigate();
 
   const handleNavClick = (item) => {
-    if (item.action === "book") {
-    navigate(item.path);
-    } else if (item.action === "support-chat") {
-      navigate("/patient/chat", { state: { selectUserId: "admin" } });
-    } else if (item.path === "/patient/doctors") {
+    if (item.path === "/patient/doctors") {
       navigate(item.path + "?showList=true");
     } else {
       navigate(item.path);
@@ -297,6 +292,13 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
               >
                 <Settings size={15} className="text-gray-400" />
                 Change Password
+              </button>
+              <button
+                onClick={() => { navigate("/patient/help-support"); setShowProfileMenu(false); }}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <HelpCircle size={15} className="text-gray-400" />
+                Help & Support
               </button>
               <button 
                 onClick={handleLogout}

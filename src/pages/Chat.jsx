@@ -1155,14 +1155,6 @@ export default function Chat() {
                                     })}
                                     {userRole === 'doctor' && conversation.appointment.status === 'completed' && (
                                       <button
-                                        onClick={() => navigate(`/doctor/consultation/${conversation.appointment.id}`)}
-                                        className="ml-2 text-brand-primary hover:underline font-bold"
-                                      >
-                                        Rx
-                                      </button>
-                                    )}
-                                    {userRole === 'doctor' && conversation.appointment.status === 'completed' && (
-                                      <button
                                         onClick={() => navigate(`/doctor/consultation-form?appointmentId=${conversation.appointment.id}`)}
                                         className="ml-2 text-brand-primary hover:underline font-bold"
                                       >

@@ -195,7 +195,7 @@ export default function DoctorAppointmentDetailsPage() {
               {canCallNow && <button onClick={() => navigate(`/doctor/video-call?appointmentId=${appointment.id}`)} className="flex-1 min-w-[140px] h-11 bg-brand-primary text-white hover:bg-brand-hover font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"><Video size={16} />Join Call</button>}
 
               {isCompleted && appointment.consultationId && <button onClick={() => navigate(`/doctor/consultation/${appointment.consultationId}`)} className="flex-1 min-w-[140px] h-11 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"><FileText size={16} />View Prescription</button>}
-              {hasDraft() && !isCompleted && <button onClick={() => navigate(`/doctor/consultation-form?appointmentId=${appointment.id}`)} className="flex-1 min-w-[140px] h-11 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"><FileText size={16} />Complete Draft</button>}
+              {hasDraft() && !isCompleted && <button onClick={() => navigate(`/doctor/consultation/${appointment.id}`)} className="flex-1 min-w-[140px] h-11 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"><FileText size={16} />Complete Draft</button>}
             </div>
           </div>
           <div className="lg:col-span-1">

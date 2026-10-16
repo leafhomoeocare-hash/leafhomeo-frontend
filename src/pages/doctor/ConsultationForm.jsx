@@ -38,14 +38,13 @@ const ConsultationForm = () => {
   });
 
   useEffect(() => {
-    // Check for appointmentId in URL params first
-    const urlParams = new URLSearchParams(window.location.search);
-    const aptId = urlParams.get('appointmentId');
+    // Use consultationId as both consultationId and appointmentId for new/unsaved consultations
+    const idToUse = consultationId;
     
-    if (aptId) {
-      setAppointmentId(aptId);
+    if (idToUse) {
+      setAppointmentId(idToUse);
       // Try to load draft first
-      const savedDraft = localStorage.getItem(`consultation_draft_${aptId}`);
+      const savedDraft = localStorage.getItem(`consultation_draft_${idToUse}`);
       if (savedDraft) {
         try {
           const parsedData = JSON.parse(savedDraft);
@@ -53,18 +52,17 @@ const ConsultationForm = () => {
           setLoading(false);
         } catch (err) {
           console.error("Error parsing draft:", err);
-          setLoading(false);
+          // Try to fetch by appointment ID if draft fails
+          fetchConsultationByAppointmentId(idToUse);
         }
       } else {
-        // No draft, check if consultation exists
-        fetchConsultationByAppointmentId(aptId);
+        // No draft, try to fetch consultation
+        fetchConsultationByAppointmentId(idToUse);
       }
-    } else if (consultationId) {
-      fetchConsultation();
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [consultationId]);
 
   const fetchConsultationByAppointmentId = async (aptId) => {
     try {

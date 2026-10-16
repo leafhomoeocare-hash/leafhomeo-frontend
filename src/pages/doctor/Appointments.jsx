@@ -683,7 +683,7 @@ export default function DoctorAppointments() {
                             {/* Rx Button */}
                             {(statusLower === 'paid' || statusLower === 'completed') && (
                               <button
-                                onClick={() => apt.consultationId ? navigate(`/doctor/consultation/${apt.consultationId}`) : navigate(`/doctor/consultation-form?appointmentId=${apt.id}`)}
+                                onClick={() => navigate(`/doctor/consultation/${apt.id}`)}
                                 className="h-8 px-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                               >
                                 <FileText size={13} />

@@ -113,10 +113,13 @@ const ConsultationForm = () => {
             setExistingScreenshots([]);
           }
         }
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error fetching consultation by appointment:", error);
       // If consultation doesn't exist, it's okay - form will be in draft mode
+      setConsultation(null);
+    } finally {
       setLoading(false);
     }
   };

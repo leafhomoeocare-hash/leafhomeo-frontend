@@ -680,10 +680,10 @@ export default function DoctorAppointments() {
                               </button>
                             )}
 
-                            {/* Consultation Form for Completed */}
-                            {isCompleted && apt.consultationId && (
+                            {/* Rx Button */}
+                            {(statusLower === 'paid' || statusLower === 'completed') && (
                               <button
-                                onClick={() => navigate(`/doctor/consultation/${apt.consultationId}`)}
+                                onClick={() => apt.consultationId ? navigate(`/doctor/consultation/${apt.consultationId}`) : navigate(`/doctor/consultation-form?appointmentId=${apt.id}`)}
                                 className="h-8 px-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                               >
                                 <FileText size={13} />
@@ -691,17 +691,7 @@ export default function DoctorAppointments() {
                               </button>
                             )}
 
-                            {/* Complete Draft Form (when draft exists) */}
-                            {hasDraft(apt.id) && !isCompleted && (
-                              <button
-                                onClick={() => navigate(`/doctor/consultation-form?appointmentId=${apt.id}`)}
-                                className="h-8 px-2.5 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
-                                title="Complete Draft Consultation Form"
-                              >
-                                <FileText size={13} />
-                                <span>Draft</span>
-                              </button>
-                            )}
+
                           </div>
                         </td>
                       </tr>

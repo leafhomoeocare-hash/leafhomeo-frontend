@@ -1158,7 +1158,7 @@ export default function Chat() {
                                         onClick={() => navigate(`/doctor/consultation-form?appointmentId=${conversation.appointment.id}`)}
                                         className="ml-2 text-brand-primary hover:underline font-bold"
                                       >
-                                        (Fill Rx)
+                                        Rx
                                       </button>
                                     )}
                                     {userRole === 'doctor' && conversation.appointment.status === 'completed' && (

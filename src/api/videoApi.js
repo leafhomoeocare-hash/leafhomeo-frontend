@@ -1,15 +1,4 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-API.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import API from "../utils/axios";
 
 export const getVideoToken = async (appointmentId) => {
   console.log("=== getVideoToken called ===");

@@ -1,19 +1,6 @@
-import axios from "axios";
+import API from "../utils/axios";
 
 console.log("Mera Backend URL hai:", import.meta.env.VITE_API_URL);
-
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-
-// Attach token automatically to every request made with this instance
-API.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("token");
-  if (token) {
-    config.headers.Authorization = `${token}`;
-  }
-  return config;
-});
 
 export const register = async (data) => {
   const response = await API.post("/api/v1/auth/register", data);

@@ -1,19 +1,4 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-});
-
-// Attach token automatically to every request
-API.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("token");
-  if (token) {
-    // Standardize token header format (some APIs expect raw token, others expect Bearer token.
-    // The authMiddleware in this codebase accepts Bearer prefix or raw token, so we can pass it raw or formatted)
-    config.headers.Authorization = token;
-  }
-  return config;
-});
+import API from "../utils/axios";
 
 export const getContacts = async () => {
   const response = await API.get("/api/v1/chat/contacts");

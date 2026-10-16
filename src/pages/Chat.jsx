@@ -322,25 +322,33 @@ export default function Chat() {
 
     try {
       // Fetch appointment-based chat history (last 3 appointments)
-      const res = await getChatHistoryByAppointments(contact.id);
-      if (res.status === 1) {
-        setAppointmentConversations(res.data || []);
-        // Set current appointment ID to the one marked as isCurrent
-        if (res.data && res.data.length > 0) {
-          const currentAppointment = res.data.find(conv => conv.appointment.isCurrent);
-          setCurrentAppointmentId(currentAppointment ? currentAppointment.appointment.id : res.data[0].appointment.id);
-          // Flatten messages for current view (show all messages from all appointments)
-          const allMessages = res.data.flatMap(conv => conv.messages);
-          setMessages(allMessages);
+      // Only show appointment conversations for doctors, hide for admin and patient
+      if (userRole === 'doctor') {
+        const res = await getChatHistoryByAppointments(contact.id);
+        if (res.status === 1) {
+          setAppointmentConversations(res.data || []);
+          // Set current appointment ID to the one marked as isCurrent
+          if (res.data && res.data.length > 0) {
+            const currentAppointment = res.data.find(conv => conv.appointment.isCurrent);
+            setCurrentAppointmentId(currentAppointment ? currentAppointment.appointment.id : res.data[0].appointment.id);
+            // Flatten messages for current view (show all messages from all appointments)
+            const allMessages = res.data.flatMap(conv => conv.messages);
+            setMessages(allMessages);
+          } else {
+            setMessages([]);
+            setCurrentAppointmentId(null);
+          }
         } else {
-          setMessages([]);
-          setCurrentAppointmentId(null);
+          // Show error message from backend
+          alert(res.message || "Failed to load chat");
+          setSelectedContact(null);
+          setIsMobileChatOpen(false);
         }
       } else {
-        // Show error message from backend
-        alert(res.message || "Failed to load chat");
-        setSelectedContact(null);
-        setIsMobileChatOpen(false);
+        // For admin and patient, don't show appointment conversations
+        setAppointmentConversations([]);
+        setMessages([]);
+        setCurrentAppointmentId(null);
       }
     } catch (err) {
       console.error("Failed to fetch chat history:", err);
@@ -1106,7 +1114,7 @@ export default function Chat() {
                     </p>
                   </div>
                 ) : (
-                  appointmentConversations.length > 0 ? (
+                  userRole === 'doctor' && appointmentConversations.length > 0 ? (
                     appointmentConversations.map((conversation, convIndex) => (
                       <div key={conversation.appointment.id || 'legacy'} className="space-y-4 relative z-10 mb-8">
                         {/* Appointment Section Header */}
@@ -1145,6 +1153,14 @@ export default function Chat() {
                                       hour: '2-digit',
                                       minute: '2-digit'
                                     })}
+                                    {userRole === 'doctor' && conversation.appointment.status === 'paid' && (
+                                      <button
+                                        onClick={() => navigate(`/doctor/consultation-form/${conversation.appointment.id}`)}
+                                        className="ml-2 text-brand-primary hover:underline font-bold"
+                                      >
+                                        (Open Consultation Form)
+                                      </button>
+                                    )}
                                   </div>
                                 )}
                               </div>

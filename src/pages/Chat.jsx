@@ -1153,6 +1153,14 @@ export default function Chat() {
                                       hour: '2-digit',
                                       minute: '2-digit'
                                     })}
+                                    {userRole === 'doctor' && conversation.appointment.status === 'completed' && (
+                                      <button
+                                        onClick={() => navigate(`/doctor/consultation/${conversation.appointment.id}`)}
+                                        className="ml-2 text-brand-primary hover:underline font-bold"
+                                      >
+                                        (Open Consultation Form)
+                                      </button>
+                                    )}
                                   </div>
                                 )}
                               </div>

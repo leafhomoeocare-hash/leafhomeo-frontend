@@ -1155,7 +1155,7 @@ export default function Chat() {
                                     })}
                                     {userRole === 'doctor' && conversation.appointment.status === 'paid' && (
                                       <button
-                                        onClick={() => navigate(`/doctor/consultation-form/${conversation.appointment.id}`)}
+                                        onClick={() => navigate(`/doctor/consultation-form?appointmentId=${conversation.appointment.id}`)}
                                         className="ml-2 text-brand-primary hover:underline font-bold"
                                       >
                                         (Open Consultation Form)

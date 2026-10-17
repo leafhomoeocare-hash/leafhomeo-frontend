@@ -156,12 +156,12 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
         {/* Brand indicator for mobile */}
         <div className="flex items-center gap-2 lg:hidden">
           <HeartPulse className="text-brand-primary" size={20} />
-          <span className="font-bold text-gray-800 text-sm">Patient Portal</span>
+          <span className="font-bold text-gray-800 text-sm">User Portal</span>
         </div>
 
         <div className="hidden lg:flex items-center gap-2 text-xs font-semibold bg-brand-light text-brand-dark px-3 py-1 rounded-full border border-brand-primary/10">
           <span className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-pulse" />
-          Patient Dashboard
+          User Dashboard
         </div>
       </div>
 
@@ -264,7 +264,7 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <span>{getUserInitials(user?.name, 'PT')}</span>
+                <span>{getUserInitials(user?.name, 'U')}</span>
               )}
             </div>
             <span className="text-xs text-gray-400 hidden sm:inline">▾</span>

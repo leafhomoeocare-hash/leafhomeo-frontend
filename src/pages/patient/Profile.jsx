@@ -13,6 +13,7 @@ import {
   Edit,
   Loader2,
   AlertCircle,
+  CheckCircle,
   HelpCircle
 } from "lucide-react";
 
@@ -153,7 +154,18 @@ export default function Profile() {
                     <Mail className="h-5 w-5 text-brand-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-semibold">Email Address</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs text-gray-400 font-semibold">Email Address</p>
+                      {profileData.isEmailVerified ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.2 rounded-full border border-emerald-200">
+                          <CheckCircle size={10} className="text-emerald-600" /> Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.2 rounded-full border border-amber-200">
+                          <AlertCircle size={10} className="text-amber-600" /> Unverified
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm font-medium text-gray-900">{profileData.email || "-"}</p>
                   </div>
                 </div>
@@ -163,7 +175,18 @@ export default function Profile() {
                     <Phone className="h-5 w-5 text-brand-primary" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 font-semibold">Mobile Number</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs text-gray-400 font-semibold">Mobile Number</p>
+                      {profileData.isPhoneVerified ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.2 rounded-full border border-emerald-200">
+                          <CheckCircle size={10} className="text-emerald-600" /> Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.2 rounded-full border border-amber-200">
+                          <AlertCircle size={10} className="text-amber-600" /> Unverified
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm font-medium text-gray-900">{profileData.mobile || "-"}</p>
                   </div>
                 </div>

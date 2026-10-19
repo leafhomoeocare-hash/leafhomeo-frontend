@@ -96,7 +96,28 @@ export const verifyPhoneOTP = async (data) => {
   return response.data;
 };
 
+export const sendEmailOTP = async (data) => {
+  const response = await API.post("/api/v1/auth/send-email-otp", data);
+  return response.data;
+};
+
+export const verifyEmailOTP = async (data) => {
+  const response = await API.post("/api/v1/auth/verify-email-otp", data);
+  return response.data;
+};
+
 export const getTermsConditions = async () => {
   const response = await API.get("/api/v1/auth/terms-conditions");
   return response.data;
 };
+
+export const updateEmail = async (data) => {
+  const response = await API.post("/api/v1/auth/update-email", data);
+  return response.data;
+};
+
+export const updateMobile = async (data) => {
+  const response = await API.post("/api/v1/auth/update-mobile", data);
+  return response.data;
+};
+

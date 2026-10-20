@@ -29,7 +29,8 @@ export default function BookAnyDoctor() {
       return;
     }
 
-    // Check if patient has address before booking
+    // Check if patient has address before booking (Bypassed)
+    /*
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
     if (!user.houseNumber || !user.city || !user.state || !user.pincode) {
       Swal.fire({
@@ -45,6 +46,7 @@ export default function BookAnyDoctor() {
       });
       return;
     }
+    */
 
     try {
       setBookingLoading(true);
@@ -103,28 +105,28 @@ export default function BookAnyDoctor() {
   const timeSlots = allTimeSlots.filter(time => {
     const now = new Date();
     const selectedDateObj = new Date(selectedDate);
-    
+
     // Check if selected date is today
     const isToday = selectedDate === today;
-    
+
     if (isToday) {
       // For today, check if slot is at least 8 hours from now
       const [hours, minutes] = time.split(':').map(Number);
       const slotTime = new Date(selectedDate);
       slotTime.setHours(hours, minutes, 0, 0);
-      
+
       // Calculate 8 hours from now
       const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-      
+
       return slotTime >= minAllowedTime;
     } else {
       // For future dates, check if it's at least 8 hours from now
       const [hours, minutes] = time.split(':').map(Number);
       const slotTime = new Date(selectedDate);
       slotTime.setHours(hours, minutes, 0, 0);
-      
+
       const minAllowedTime = new Date(now.getTime() + 8 * 60 * 60 * 1000);
-      
+
       return slotTime >= minAllowedTime;
     }
   });
@@ -189,7 +191,7 @@ export default function BookAnyDoctor() {
                 <Clock className="h-4 w-4 text-brand-primary" />
                 Select Preferred Time
               </label>
-              
+
               {timeSlots.length > 0 ? (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                   {timeSlots.map((time, index) => (
@@ -197,11 +199,10 @@ export default function BookAnyDoctor() {
                       key={index}
                       type="button"
                       onClick={() => setSelectedTime(time)}
-                      className={`p-3 rounded-xl border-2 text-sm font-bold transition-all ${
-                        selectedTime === time
-                          ? "border-brand-primary bg-brand-primary text-white shadow-lg shadow-brand-primary/30"
-                          : "border-gray-200 hover:border-brand-primary hover:bg-brand-light/30 text-gray-700"
-                      }`}
+                      className={`p-3 rounded-xl border-2 text-sm font-bold transition-all ${selectedTime === time
+                        ? "border-brand-primary bg-brand-primary text-white shadow-lg shadow-brand-primary/30"
+                        : "border-gray-200 hover:border-brand-primary hover:bg-brand-light/30 text-gray-700"
+                        }`}
                     >
                       {time}
                     </button>

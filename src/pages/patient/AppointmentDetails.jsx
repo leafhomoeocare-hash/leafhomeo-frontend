@@ -54,13 +54,13 @@ export default function AppointmentDetails() {
       setLoadingDates(true);
       const dates = [];
       const today = new Date();
-      
+
       // Check next 30 days for available slots
       for (let i = 0; i < 30; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
         const dateStr = date.toISOString().split('T')[0];
-        
+
         // Skip past dates
         const dateObj = new Date(dateStr);
         const startOfDay = new Date(dateStr);
@@ -68,13 +68,13 @@ export default function AppointmentDetails() {
         if (startOfDay < new Date(today.setHours(0, 0, 0, 0))) {
           continue;
         }
-        
+
         try {
           const response = await getAvailabilitySlots(selectedDoctor.id, dateStr);
           if (response.status === 1 && response.slots && response.slots.length > 0) {
             // Backend already applies 8-hour buffer, so just check for available slots
             const validSlots = response.slots.filter(slot => slot.available);
-            
+
             if (validSlots.length > 0) {
               dates.push({
                 date: dateStr,
@@ -86,7 +86,7 @@ export default function AppointmentDetails() {
           // Skip this date if error
         }
       }
-      
+
       setAvailableDates(dates);
     } catch (err) {
       console.error("Error fetching doctor availability:", err);
@@ -104,7 +104,7 @@ export default function AppointmentDetails() {
       if (response.status === 1) {
         // Backend already applies 8-hour buffer logic, so use slots as-is
         const filteredSlots = (response.slots || []).filter(slot => slot.available);
-        
+
         setAvailableSlots(filteredSlots);
       } else {
         setError(response.message || "Failed to fetch available slots");
@@ -144,7 +144,8 @@ export default function AppointmentDetails() {
       return;
     }
 
-    // Check if patient has address before booking
+    // Check if patient has address before booking (Bypassed)
+    /*
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
     if (!user.houseNumber || !user.city || !user.state || !user.pincode) {
       Swal.fire({
@@ -160,6 +161,7 @@ export default function AppointmentDetails() {
       });
       return;
     }
+    */
 
     try {
       setBookingLoading(true);
@@ -214,19 +216,19 @@ export default function AppointmentDetails() {
   const renderCalendarDays = () => {
     const year = currentMonth.getFullYear();
     const month = currentMonth.getMonth();
-    
+
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const startingDay = firstDay.getDay();
     const totalDays = lastDay.getDate();
-    
+
     const days = [];
-    
+
     // Empty cells for days before the first day of the month
     for (let i = 0; i < startingDay; i++) {
       days.push(<div key={`empty-${i}`} className="p-2"></div>);
     }
-    
+
     // Days of the month
     for (let day = 1; day <= totalDays; day++) {
       const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -234,7 +236,7 @@ export default function AppointmentDetails() {
       const isSelected = selectedDate === dateStr;
       const hasSlots = availableDates.find(d => d.date === dateStr)?.hasSlots;
       const isPastDate = new Date(dateStr) < new Date(today);
-      
+
       days.push(
         <button
           key={day}
@@ -247,17 +249,16 @@ export default function AppointmentDetails() {
             }
           }}
           disabled={isPastDate || !hasSlots}
-          className={`relative p-2 rounded-lg text-sm font-medium transition-all ${
-            isSelected
+          className={`relative p-2 rounded-lg text-sm font-medium transition-all ${isSelected
               ? "bg-brand-primary text-white"
               : hasSlots && !isPastDate
-              ? "bg-brand-light text-brand-dark border-2 border-brand-primary"
-              : isToday
-              ? "bg-gray-100 text-gray-900 border-2 border-gray-300"
-              : isPastDate || !hasSlots
-              ? "text-gray-300 cursor-not-allowed bg-gray-50"
-              : "hover:bg-gray-100 text-gray-700"
-          }`}
+                ? "bg-brand-light text-brand-dark border-2 border-brand-primary"
+                : isToday
+                  ? "bg-gray-100 text-gray-900 border-2 border-gray-300"
+                  : isPastDate || !hasSlots
+                    ? "text-gray-300 cursor-not-allowed bg-gray-50"
+                    : "hover:bg-gray-100 text-gray-700"
+            }`}
         >
           {day}
           {hasSlots && !isPastDate && (
@@ -266,7 +267,7 @@ export default function AppointmentDetails() {
         </button>
       );
     }
-    
+
     return days;
   };
 
@@ -300,7 +301,7 @@ export default function AppointmentDetails() {
               <p className="text-sm text-brand-primary font-semibold mt-1">
                 {Array.isArray(selectedDoctor.specialization) ? selectedDoctor.specialization.join(", ") : selectedDoctor.specialization}
               </p>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div>
                   <p className="text-xs text-gray-500 font-semibold">Qualification</p>
@@ -337,7 +338,7 @@ export default function AppointmentDetails() {
               <Calendar className="h-4 w-4 text-brand-primary" />
               Select Date
             </label>
-            
+
             {loadingDates ? (
               <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-2xl">
                 <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
@@ -375,7 +376,7 @@ export default function AppointmentDetails() {
                     </svg>
                   </button>
                 </div>
-                
+
                 <div className="grid grid-cols-7 gap-1 mb-2">
                   {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
                     <div key={day} className="text-center text-xs font-bold text-gray-500 py-2">
@@ -383,7 +384,7 @@ export default function AppointmentDetails() {
                     </div>
                   ))}
                 </div>
-                
+
                 <div className="grid grid-cols-7 gap-1">
                   {renderCalendarDays()}
                 </div>
@@ -398,7 +399,7 @@ export default function AppointmentDetails() {
                 <Clock className="h-4 w-4 text-brand-primary" />
                 Available Time Slots
               </label>
-              
+
               {loadingSlots ? (
                 <div className="flex items-center justify-center p-8 border-2 border-dashed border-gray-200 rounded-2xl">
                   <Loader2 className="h-6 w-6 animate-spin text-brand-primary" />
@@ -422,13 +423,12 @@ export default function AppointmentDetails() {
                       type="button"
                       onClick={() => slot.available && handleTimeSelect(slot.time)}
                       disabled={!slot.available}
-                      className={`p-3 rounded-xl border-2 text-sm font-bold transition-all ${
-                        selectedTime === slot.time
+                      className={`p-3 rounded-xl border-2 text-sm font-bold transition-all ${selectedTime === slot.time
                           ? "border-brand-primary bg-brand-primary text-white shadow-lg shadow-brand-primary/30"
                           : slot.available
-                          ? "border-gray-200 hover:border-brand-primary hover:bg-brand-light/30 text-gray-700"
-                          : "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-50"
-                      }`}
+                            ? "border-gray-200 hover:border-brand-primary hover:bg-brand-light/30 text-gray-700"
+                            : "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-50"
+                        }`}
                     >
                       {slot.time}
                     </button>

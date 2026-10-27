@@ -153,3 +153,8 @@ export const getPublicDoctorProfile = async (doctorId) => {
   const response = await API.get(`/api/v1/doctor/public/${doctorId}`);
   return response.data;
 };
+
+export const getPatientPastConsultations = async (patientId) => {
+  const response = await API.get(`/api/v1/appointment/patient-past-consultations/${patientId}`);
+  return response.data;
+};

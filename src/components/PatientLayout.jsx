@@ -131,8 +131,8 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-6 shadow-xs">
-      <div className="flex items-center gap-4">
+    <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-gray-100 bg-white px-4 sm:px-6 shadow-xs">
+      <div className="flex items-center gap-3 sm:gap-4">
         {/* Mobile menu trigger */}
         <button
           onClick={() => setSidebarOpen(true)}
@@ -155,8 +155,8 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
 
         {/* Brand indicator for mobile */}
         <div className="flex items-center gap-2 lg:hidden">
-          <HeartPulse className="text-brand-primary" size={20} />
-          <span className="font-bold text-gray-800 text-sm">User Portal</span>
+          <HeartPulse className="text-brand-primary" size={18} />
+          <span className="font-bold text-gray-800 text-xs sm:text-sm">User Portal</span>
         </div>
 
         <div className="hidden lg:flex items-center gap-2 text-xs font-semibold bg-brand-light text-brand-dark px-3 py-1 rounded-full border border-brand-primary/10">
@@ -166,7 +166,7 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
       </div>
 
       {/* Right side: notifications + profile */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
         <div className="relative">
           <button
             aria-label="Notifications"
@@ -177,16 +177,16 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
               }
               setShowNotifications(!showNotifications);
             }}
-            className="relative rounded-xl p-2.5 text-gray-500 hover:bg-gray-50 transition-colors"
+            className="relative rounded-xl p-2 sm:p-2.5 text-gray-500 hover:bg-gray-50 transition-colors"
           >
-            <Bell size={18} />
+            <Bell size={16} className="sm:w-[18px] sm:h-[18px]" />
             {notifications.filter(n => !n.isRead).length > 0 && (
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
+              <span className="absolute top-2 sm:top-2.5 right-2 sm:right-2.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-white" />
             )}
           </button>
 
           {showNotifications && (
-            <div className="absolute right-0 mt-2 w-80 rounded-xl border border-gray-100 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-fadeIn">
+            <div className="absolute right-0 mt-2 w-72 sm:w-80 rounded-xl border border-gray-100 bg-white p-2 shadow-xl ring-1 ring-black/5 animate-fadeIn">
               <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
@@ -256,7 +256,7 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 rounded-xl p-1.5 hover:bg-gray-50 transition-colors"
           >
-            <div className="h-9 w-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-secondary text-sm border border-brand-primary/10 overflow-hidden">
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-secondary text-xs sm:text-sm border border-brand-primary/10 overflow-hidden">
               {user?.image ? (
                 <img 
                   src={getImageUrl(user.image)} 
@@ -271,7 +271,7 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
           </button>
 
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-48 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl ring-1 ring-black/5 animate-fadeIn">
+            <div className="absolute right-0 mt-2 w-44 sm:w-48 rounded-xl border border-gray-100 bg-white p-1.5 shadow-xl ring-1 ring-black/5 animate-fadeIn">
               <button
                 onClick={() => { navigate("/patient/profile"); setShowProfileMenu(false); }}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"

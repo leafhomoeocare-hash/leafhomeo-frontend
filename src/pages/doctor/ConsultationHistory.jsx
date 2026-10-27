@@ -243,7 +243,15 @@ export default function ConsultationHistory() {
                 <p className="text-xs text-gray-400 font-semibold mb-1">This Month</p>
                 <p className="text-2xl font-extrabold text-gray-900">
                   {consultations.filter(c => {
-                    const date = new Date(c.appointmentDateTime);
+                    let date;
+                    const dt = c.appointmentDateTime;
+                    if (typeof dt === 'string' && dt.includes(' ')) {
+                      const [datePart] = dt.split(' ');
+                      const [year, month, day] = datePart.split('-').map(Number);
+                      date = new Date(year, month - 1, day);
+                    } else {
+                      date = new Date(dt);
+                    }
                     const now = new Date();
                     return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
                   }).length}

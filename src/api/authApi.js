@@ -120,4 +120,3 @@ export const updateMobile = async (data) => {
   const response = await API.post("/api/v1/auth/update-mobile", data);
   return response.data;
 };
-

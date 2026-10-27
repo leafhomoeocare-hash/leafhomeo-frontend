@@ -9,7 +9,18 @@ import { usePatientNotifications } from "../../components/PatientLayout";
 
 const formatTimeDifference = (dateString) => {
   const now = new Date();
-  const appointmentTime = new Date(dateString);
+  let appointmentTime;
+
+  // Handle string format "YYYY-MM-DD HH:mm:ss"
+  if (typeof dateString === 'string' && dateString.includes(' ')) {
+    const [datePart, timePart] = dateString.split(' ');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+    appointmentTime = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+  } else {
+    appointmentTime = new Date(dateString);
+  }
+
   const diffMs = appointmentTime - now;
 
   if (diffMs <= 0) return "Call ended";
@@ -216,7 +227,10 @@ function DashboardContent() {
 
           {upcomingAppointment ? (
             <>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100/60">
+              <div
+                onClick={() => navigate(`/patient/appointments/${upcomingAppointment.appointmentId || upcomingAppointment.id}`)}
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50 p-4 rounded-xl border border-gray-100/60 cursor-pointer hover:bg-gray-50 hover:border-brand-primary/30 transition-all"
+              >
                 <div className="flex items-center gap-3.5">
                   <div className="h-14 w-14 rounded-xl bg-gray-100 overflow-hidden border border-gray-200 shrink-0">
                     <img
@@ -236,15 +250,40 @@ function DashboardContent() {
                       {Array.isArray(upcomingAppointment.specialization) ? upcomingAppointment.specialization.join(", ") : (upcomingAppointment.specialization || "Homeopathy Consultant")}
                     </p>
                     <div className="flex items-center gap-3 text-[11px] text-gray-400 font-semibold mt-1">
-                      <span>📅 {new Date(upcomingAppointment.appointmentDateTime).toLocaleDateString(undefined, {timeZone: 'Asia/Kolkata'})}</span>
-                      <span>⏰ {new Date(upcomingAppointment.appointmentDateTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZone: 'Asia/Kolkata'})}</span>
+                      <span>📅 {(() => {
+                        const dt = upcomingAppointment.appointmentDateTime;
+                        if (typeof dt === 'string' && dt.includes(' ')) {
+                          const [datePart] = dt.split(' ');
+                          const [year, month, day] = datePart.split('-').map(Number);
+                          return new Date(year, month - 1, day).toLocaleDateString(undefined);
+                        }
+                        return new Date(dt).toLocaleDateString(undefined, {timeZone: 'Asia/Kolkata'});
+                      })()}</span>
+                      <span>⏰ {(() => {
+                        const dt = upcomingAppointment.appointmentDateTime;
+                        if (typeof dt === 'string' && dt.includes(' ')) {
+                          const timePart = dt.split(' ')[1];
+                          const [hours, minutes] = timePart.split(':').map(Number);
+                          return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                        }
+                        return new Date(dt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', timeZone: 'Asia/Kolkata'});
+                      })()}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {(() => {
-                const appointmentTime = new Date(upcomingAppointment.appointmentDateTime);
+                let appointmentTime;
+                const dt = upcomingAppointment.appointmentDateTime;
+                if (typeof dt === 'string' && dt.includes(' ')) {
+                  const [datePart, timePart] = dt.split(' ');
+                  const [year, month, day] = datePart.split('-').map(Number);
+                  const [hours, minutes, seconds] = timePart.split(':').map(Number);
+                  appointmentTime = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+                } else {
+                  appointmentTime = new Date(dt);
+                }
                 const now = new Date();
                 const timeDiff = appointmentTime - now;
                 const minutesBefore = 10;

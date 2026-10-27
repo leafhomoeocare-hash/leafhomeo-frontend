@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import DoctorLayout from "../../components/DoctorLayout";
-import { getDoctorAppointments, acceptAppointment, rejectAppointment } from "../../api/doctorApi";
+import { getDoctorAppointments, acceptAppointment, rejectAppointment, getPatientPastConsultations } from "../../api/doctorApi";
 import { getImageUrl } from "../../utils/imageHelper";
 import Swal from "sweetalert2";
-import { Calendar, Clock, Video, Check, X, Loader2, CheckCircle, XCircle, MessageSquare, FileText, ArrowLeft, AlertCircle } from "lucide-react";
+import { Calendar, Clock, Video, Check, X, Loader2, CheckCircle, XCircle, MessageSquare, FileText, ArrowLeft, AlertCircle, History, ExternalLink } from "lucide-react";
 
 export default function DoctorAppointmentDetailsPage() {
   const navigate = useNavigate();
@@ -14,6 +14,8 @@ export default function DoctorAppointmentDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [pastConsultations, setPastConsultations] = useState([]);
+  const [loadingPastConsultations, setLoadingPastConsultations] = useState(false);
 
   useEffect(() => {
     if (appointmentId) fetchAppointmentDetails();
@@ -24,6 +26,26 @@ export default function DoctorAppointmentDetailsPage() {
       else { setError("Appointment ID not provided"); setLoading(false); }
     }
   }, [appointmentId]);
+
+  useEffect(() => {
+    if (appointment?.patientId) {
+      fetchPastConsultations(appointment.patientId);
+    }
+  }, [appointment]);
+
+  const fetchPastConsultations = async (patientId) => {
+    try {
+      setLoadingPastConsultations(true);
+      const response = await getPatientPastConsultations(patientId);
+      if (response.status === 1) {
+        setPastConsultations(response.data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching past consultations:", err);
+    } finally {
+      setLoadingPastConsultations(false);
+    }
+  };
 
   const fetchAppointmentDetails = async () => {
     try {
@@ -95,6 +117,14 @@ export default function DoctorAppointmentDetailsPage() {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
+    // Handle string format "YYYY-MM-DD HH:mm:ss"
+    if (typeof dateString === 'string' && dateString.includes(' ')) {
+      const datePart = dateString.split(' ')[0];
+      const [year, month, day] = datePart.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      if (isNaN(date.getTime())) return "-";
+      return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    }
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "Asia/Kolkata" });
@@ -102,6 +132,12 @@ export default function DoctorAppointmentDetailsPage() {
 
   const formatTime = (dateString) => {
     if (!dateString) return "-";
+    // Handle string format "YYYY-MM-DD HH:mm:ss"
+    if (typeof dateString === 'string' && dateString.includes(' ')) {
+      const timePart = dateString.split(' ')[1];
+      const [hours, minutes] = timePart.split(':').map(Number);
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
     return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
@@ -110,10 +146,19 @@ export default function DoctorAppointmentDetailsPage() {
   const canJoinCall = () => {
     if (!appointment?.appointmentDateTime) return false;
     const now = new Date();
-    const appointmentTime = new Date(appointment.appointmentDateTime);
-    const nowUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
-    const appointmentUTC = Date.UTC(appointmentTime.getUTCFullYear(), appointmentTime.getUTCMonth(), appointmentTime.getUTCDate(), appointmentTime.getUTCHours(), appointmentTime.getUTCMinutes(), appointmentTime.getUTCSeconds());
-    const minutesDiff = (appointmentUTC - nowUTC) / (1000 * 60);
+    let appointmentTime;
+
+    // Handle string format "YYYY-MM-DD HH:mm:ss"
+    if (typeof appointment.appointmentDateTime === 'string' && appointment.appointmentDateTime.includes(' ')) {
+      const [datePart, timePart] = appointment.appointmentDateTime.split(' ');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes, seconds] = timePart.split(':').map(Number);
+      appointmentTime = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+    } else {
+      appointmentTime = new Date(appointment.appointmentDateTime);
+    }
+    const timeDiff = appointmentTime - now;
+    const minutesDiff = timeDiff / (1000 * 60);
     return minutesDiff <= 10 && minutesDiff >= -60;
   };
 
@@ -189,13 +234,49 @@ export default function DoctorAppointmentDetailsPage() {
               <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Status</p><div className="mt-1">{getStatusBadge(appointment.status)}</div></div>
             </div>
             <div><p className="text-sm text-gray-400 font-semibold mb-2">Reason / Symptoms</p><p className="text-sm text-gray-900 whitespace-pre-wrap break-words bg-gray-50 p-6 rounded-xl border border-gray-200 leading-relaxed">{appointment.reason || appointment.symptoms || "No symptoms specified"}</p></div>
+
+            {/* Past Consultations Section */}
+            <div className="bg-gradient-to-r from-emerald-50/30 to-teal-50/30 border border-emerald-200/50 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <History className="h-5 w-5 text-emerald-600" />
+                <h4 className="font-bold text-gray-900">Past Consultations with Patient</h4>
+              </div>
+              {loadingPastConsultations ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+                </div>
+              ) : pastConsultations.length === 0 ? (
+                <p className="text-sm text-gray-500">No past consultations found with this patient.</p>
+              ) : (
+                <div className="space-y-3">
+                  {pastConsultations.map((consultation) => (
+                    <button
+                      key={consultation.id}
+                      onClick={() => navigate(`/doctor/consultation/${consultation.appointmentId}`)}
+                      className="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-emerald-300 hover:shadow-md transition-all group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors">
+                          <FileText className="h-4 w-4 text-emerald-600" />
+                        </div>
+                        <div className="text-left">
+                          <p className="text-sm font-semibold text-gray-900">Consultation #{consultation.id}</p>
+                          <p className="text-xs text-gray-500">{formatDate(consultation.appointment?.appointmentDateTime)}</p>
+                        </div>
+                      </div>
+                      <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
               {appointment.patientUserId && <button onClick={() => navigate("/doctor/chat", { state: { selectUserId: appointment.patientUserId } })} className="flex-1 min-w-[140px] h-11 bg-brand-primary hover:bg-brand-hover text-white font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"><MessageSquare size={16} />Chat with Patient</button>}
               {isPending && <><button onClick={handleAccept} disabled={actionLoadingId === appointment.id} className="flex-1 min-w-[140px] h-11 bg-brand-primary text-white hover:bg-brand-hover font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50">{actionLoadingId === appointment.id ? <><Loader2 size={16} className="animate-spin" />Accepting...</> : <><Check size={16} />Accept</>}</button><button onClick={handleReject} disabled={actionLoadingId === appointment.id} className="flex-1 min-w-[140px] h-11 bg-white text-rose-600 hover:bg-rose-50 border border-rose-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50">{actionLoadingId === appointment.id ? <><Loader2 size={16} className="animate-spin" />Rejecting...</> : <><X size={16} />Reject</>}</button></>}
               {canCallNow && <button onClick={() => navigate(`/doctor/video-call?appointmentId=${appointment.id}`)} className="flex-1 min-w-[140px] h-11 bg-brand-primary text-white hover:bg-brand-hover font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"><Video size={16} />Join Call</button>}
 
 
-              {hasDraft() && !isCompleted && <button onClick={() => navigate(`/doctor/consultation/${appointment.id}`)} className="flex-1 min-w-[140px] h-11 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"><FileText size={16} />Complete Draft</button>}
+              {hasDraft() && !isCompleted && <button onClick={() => navigate(`/doctor/consultation/${appointment.id}`, { state: { mode: 'edit' } })} className="flex-1 min-w-[140px] h-11 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"><FileText size={16} />Complete Draft</button>}
             </div>
           </div>
           <div className="lg:col-span-1">

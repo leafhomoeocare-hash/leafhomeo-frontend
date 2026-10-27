@@ -35,6 +35,11 @@ export const getUpcomingAppointments = async () => {
   return response.data;
 };
 
+export const getAppointmentDetails = async (appointmentId) => {
+  const response = await API.post("/api/v1/appointment/appointment-details", { appointmentId });
+  return response.data;
+};
+
 export const cancelAppointment = async (appointmentId) => {
   const response = await API.post("/api/v1/appointment/cancel-appointment", { appointmentId });
   return response.data;

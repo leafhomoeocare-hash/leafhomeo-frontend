@@ -1150,20 +1150,30 @@ export default function Chat() {
                                 </div>
                                 {conversation.appointment.appointmentId !== 'LEGACY' && (
                                   <div className="text-xs text-slate-500 font-semibold mt-1">
-                                    {new Date(conversation.appointment.appointmentDateTime).toLocaleString("en-US", {
-                                      weekday: 'short',
-                                      year: 'numeric',
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
+                                    {(() => {
+                                      const dt = conversation.appointment.appointmentDateTime;
+                                      if (typeof dt === 'string' && dt.includes(' ')) {
+                                        const [datePart, timePart] = dt.split(' ');
+                                        const [year, month, day] = datePart.split('-').map(Number);
+                                        const [hours, minutes] = timePart.split(':').map(Number);
+                                        const date = new Date(year, month - 1, day);
+                                        return `${date.toLocaleDateString("en-US", {weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'})} ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+                                      }
+                                      return new Date(dt).toLocaleString("en-US", {
+                                        weekday: 'short',
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      });
+                                    })()}
                                     {userRole === 'doctor' && conversation.appointment.status === 'completed' && (
                                       <button
                                         onClick={() => navigate(`/doctor/consultation/${conversation.appointment.id}`)}
                                         className="ml-2 text-brand-primary hover:underline font-bold"
                                       >
-                                        (Open Consultation Form)
+                                        (View Consultation Form)
                                       </button>
                                     )}
                                   </div>

@@ -22,7 +22,17 @@ function formatTime(dateStr) {
 
 function formatTimeDifference(dateString) {
   const now = new Date();
-  const appointmentTime = new Date(dateString);
+  let appointmentTime;
+
+  if (typeof dateString === 'string' && dateString.includes(' ')) {
+    const [datePart, timePart] = dateString.split(' ');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+    appointmentTime = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+  } else {
+    appointmentTime = new Date(dateString);
+  }
+
   const diffMs = appointmentTime - now;
 
   if (diffMs <= 0) return "Call ended";
@@ -107,10 +117,20 @@ function DashboardContent() {
           const appointments = appointmentsResponse.data || [];
           const today = new Date().toDateString();
 
+          const parseDate = (dt) => {
+            if (typeof dt === 'string' && dt.includes(' ')) {
+              const [datePart, timePart] = dt.split(' ');
+              const [year, month, day] = datePart.split('-').map(Number);
+              const [hours, minutes, seconds] = timePart.split(':').map(Number);
+              return new Date(year, month - 1, day, hours, minutes, seconds || 0);
+            }
+            return new Date(dt);
+          };
+
           setStats({
             totalPatients: [...new Set(appointments.map(a => a.patientId))].length,
             todayAppointments: appointments.filter(a =>
-              new Date(a.appointmentDateTime).toDateString() === today
+              parseDate(a.appointmentDateTime).toDateString() === today
             ).length,
             completedAppointments: appointments.filter(a => a.status === "completed").length,
             pendingAppointments: appointments.filter(a => a.status === "pending").length,
@@ -118,8 +138,8 @@ function DashboardContent() {
 
           // Get next upcoming appointment
           const upcoming = appointments
-            .filter(a => (a.status === "accepted" || a.status === "paid") && new Date(a.appointmentDateTime) > new Date())
-            .sort((a, b) => new Date(a.appointmentDateTime) - new Date(b.appointmentDateTime))[0];
+            .filter(a => (a.status === "accepted" || a.status === "paid") && parseDate(a.appointmentDateTime) > new Date())
+            .sort((a, b) => parseDate(a.appointmentDateTime) - parseDate(b.appointmentDateTime))[0];
 
           if (upcoming) {
             setUpcomingAppointment(upcoming);
@@ -154,7 +174,17 @@ function DashboardContent() {
   // Check if call can be started (10 minutes before appointment)
   useEffect(() => {
     if (upcomingAppointment) {
-      const appointmentTime = new Date(upcomingAppointment.appointmentDateTime);
+      let appointmentTime;
+      const dt = upcomingAppointment.appointmentDateTime;
+      if (typeof dt === 'string' && dt.includes(' ')) {
+        const [datePart, timePart] = dt.split(' ');
+        const [year, month, day] = datePart.split('-').map(Number);
+        const [hours, minutes, seconds] = timePart.split(':').map(Number);
+        appointmentTime = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+      } else {
+        appointmentTime = new Date(dt);
+      }
+
       const now = new Date();
       const timeDiff = appointmentTime - now;
       const minutesBefore = 10;

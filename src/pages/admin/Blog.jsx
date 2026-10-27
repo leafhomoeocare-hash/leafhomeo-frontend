@@ -430,14 +430,14 @@ function BlogManagement() {
           </div>
 
           {/* Table Content */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="w-full overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 border-b border-gray-100">
                 <tr>
                   {COLUMNS.map((column) => (
                     <th
                       key={column.key}
-                      className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider"
+                      className="px-2.5 sm:px-4 py-2 sm:py-3 text-left text-[10px] sm:text-xs font-semibold text-gray-600 uppercase tracking-wider"
                     >
                       {column.label}
                     </th>
@@ -447,70 +447,70 @@ function BlogManagement() {
               <tbody className="divide-y divide-gray-100">
                 {loading ? (
                   <tr>
-                    <td colSpan={COLUMNS.length} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={COLUMNS.length} className="px-2.5 sm:px-4 py-6 sm:py-8 text-center text-gray-500 text-xs sm:text-sm">
                       Loading...
                     </td>
                   </tr>
                 ) : blogs.length === 0 ? (
                   <tr>
-                    <td colSpan={COLUMNS.length} className="px-4 py-8 text-center text-gray-500">
+                    <td colSpan={COLUMNS.length} className="px-2.5 sm:px-4 py-6 sm:py-8 text-center text-gray-500 text-xs sm:text-sm">
                       No blogs found
                     </td>
                   </tr>
                 ) : (
                   blogs.map((blog) => (
                     <tr key={blog.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-gray-900">{blog.title || "N/A"}</div>
+                      <td className="px-2.5 sm:px-4 py-2 sm:py-3">
+                        <div className="font-medium text-gray-900 text-xs sm:text-sm truncate max-w-[150px] sm:max-w-[200px]">{blog.title || "N/A"}</div>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full bg-brand-light flex items-center justify-center text-brand-dark font-bold text-xs">
+                      <td className="px-2.5 sm:px-4 py-2 sm:py-3">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-brand-light flex items-center justify-center text-brand-dark font-bold text-[10px] sm:text-xs">
                             {blog.author?.name?.[0] || "A"}
                           </div>
                           <div>
-                            <div className="text-sm font-medium text-gray-900">{blog.author?.name || "N/A"}</div>
-                            <div className="text-xs text-gray-500 capitalize">{blog.authorType || "admin"}</div>
+                            <div className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[100px] sm:max-w-[150px]">{blog.author?.name || "N/A"}</div>
+                            <div className="text-[10px] sm:text-xs text-gray-500 capitalize">{blog.authorType || "admin"}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-2.5 sm:px-4 py-2 sm:py-3">
                         <span
-                          className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${getBlogTypeBadgeColor(
+                          className={`inline-flex items-center px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium border ${getBlogTypeBadgeColor(
                             blog.blogType
                           )}`}
                         >
                           {blog.blogType || "all"}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-600">
-                          <Calendar size={14} />
+                      <td className="px-2.5 sm:px-4 py-2 sm:py-3">
+                        <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm text-gray-600">
+                          <Calendar size={12} className="sm:w-[14px] sm:h-[14px]" />
                           {formatDate(blog.createdAt)}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
+                      <td className="px-2.5 sm:px-4 py-2 sm:py-3">
+                        <div className="flex items-center gap-1 sm:gap-2">
                           <button
                             onClick={() => handleViewClick(blog)}
-                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="View"
                           >
-                            <Eye size={16} />
+                            <Eye size={12} className="sm:w-[16px] sm:h-[16px]" />
                           </button>
                           <button
                             onClick={() => handleEditClick(blog)}
-                            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="p-1.5 sm:p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Edit"
                           >
-                            <Edit size={16} />
+                            <Edit size={12} className="sm:w-[16px] sm:h-[16px]" />
                           </button>
                           <button
                             onClick={() => handleDeleteClick(blog)}
-                            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="p-1.5 sm:p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={12} className="sm:w-[16px] sm:h-[16px]" />
                           </button>
                         </div>
                       </td>
@@ -522,11 +522,11 @@ function BlogManagement() {
           </div>
 
           {/* Pagination */}
-          <div className="px-4 py-3 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-sm text-gray-500">
+          <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
+            <p className="text-xs sm:text-sm text-gray-500 text-center sm:text-left">
               Showing <span className="font-semibold text-gray-800">{startItem}</span> to <span className="font-semibold text-gray-800">{endItem}</span> of <span className="font-semibold text-gray-800">{totalRecords}</span> entries
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                 disabled={currentPage <= 1}

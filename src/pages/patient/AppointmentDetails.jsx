@@ -167,14 +167,13 @@ export default function AppointmentDetails() {
       setBookingLoading(true);
       setError(null);
 
-      // Create date in local timezone and convert to ISO with timezone offset
-      const appointmentDate = new Date(`${selectedDate}T${selectedTime}:00`);
-      const appointmentDateTimeISO = appointmentDate.toISOString();
+      // Send simple format - database timezone config will handle IST conversion
+      const appointmentDateTime = `${selectedDate} ${selectedTime}:00`;
 
       const bookingData = {
         doctorId: selectedDoctor.id,
         requestType: "specific_doctor",
-        appointmentDateTime: appointmentDateTimeISO,
+        appointmentDateTime: appointmentDateTime,
         reason: symptoms
       };
 

@@ -3,9 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import {
   User,
-  Mail,
-  Phone,
-  Calendar,
   Stethoscope,
   GraduationCap,
   Award,
@@ -191,53 +188,7 @@ export default function DoctorDetails() {
           </div>
 
           {/* Details Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {/* Personal Information */}
-            <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2">
-                <User className="h-5 w-5 text-brand-primary" />
-                Personal Information
-              </h3>
-              <div className="space-y-5">
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                    <User className="h-4 w-4 text-brand-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Full Name</p>
-                    <p className="text-sm font-medium text-gray-900 mt-0.5">{profileData.name || "-"}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                    <Mail className="h-4 w-4 text-brand-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Email Address</p>
-                    <p className="text-sm font-medium text-gray-900 mt-0.5">{profileData.email || "-"}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                    <Phone className="h-4 w-4 text-brand-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Mobile Number</p>
-                    <p className="text-sm font-medium text-gray-900 mt-0.5">{profileData.mobile || "-"}</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                    <Calendar className="h-4 w-4 text-brand-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Joined Date</p>
-                    <p className="text-sm font-medium text-gray-900 mt-0.5">{formatDate(profileData.joinedDate)}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             {/* Professional Information */}
             <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
               <h3 className="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2">
@@ -306,7 +257,7 @@ export default function DoctorDetails() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Duration</p>
-                    <p className="text-sm font-medium text-gray-900 mt-0.5">30 minutes</p>
+                    <p className="text-sm font-medium text-gray-900 mt-0.5">one session</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -324,7 +275,7 @@ export default function DoctorDetails() {
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Availability</p>
-                    <p className="text-sm font-medium text-green-600 mt-0.5">Available Today</p>
+                    <p className="text-sm font-medium text-green-600 mt-0.5">active</p>
                   </div>
                 </div>
               </div>

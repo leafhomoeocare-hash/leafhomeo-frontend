@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
-import { getMyAppointments, cancelAppointment } from "../../api/appointmentApi";
+import { getMyAppointments, cancelAppointment, getAppointmentDetails } from "../../api/appointmentApi";
 import { getImageUrl } from "../../utils/imageHelper";
 import Payment from "../../components/Payment";
 import Swal from "sweetalert2";
@@ -28,7 +28,8 @@ import {
 export default function AppointmentDetailsPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const appointmentId = location.state?.appointmentId;
+  const { id } = useParams();
+  const appointmentId = location.state?.appointmentId || id;
 
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -45,51 +46,17 @@ export default function AppointmentDetailsPage() {
     if (appointmentId) {
       fetchAppointmentDetails();
     } else {
-      // If no appointmentId in state, try to get it from URL params
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get('id');
-      if (id) {
-        fetchAppointmentDetailsById(id);
-      } else {
-        setError("Appointment ID not provided");
-        setLoading(false);
-      }
+      setError("Appointment ID not provided");
+      setLoading(false);
     }
   }, [appointmentId]);
 
   const fetchAppointmentDetails = async () => {
     try {
       setLoading(true);
-      const response = await getMyAppointments();
+      const response = await getAppointmentDetails(appointmentId);
       if (response.status === 1) {
-        const apt = response.data?.find(a => a.id === appointmentId);
-        if (apt) {
-          setAppointment(apt);
-        } else {
-          setError("Appointment not found");
-        }
-      } else {
-        setError(response.message || "Failed to fetch appointment");
-      }
-    } catch (err) {
-      console.error("Error fetching appointment:", err);
-      setError("Something went wrong. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAppointmentDetailsById = async (id) => {
-    try {
-      setLoading(true);
-      const response = await getMyAppointments();
-      if (response.status === 1) {
-        const apt = response.data?.find(a => a.id === parseInt(id));
-        if (apt) {
-          setAppointment(apt);
-        } else {
-          setError("Appointment not found");
-        }
+        setAppointment(response.data);
       } else {
         setError(response.message || "Failed to fetch appointment");
       }
@@ -177,7 +144,7 @@ export default function AppointmentDetailsPage() {
       });
 
       const response = await API.post("/api/v1/appointment/review", {
-        doctorId: appointment.doctorId,
+        doctorId: appointment.doctor?.id,
         appointmentId: appointment.id,
         rating: reviewRating,
         review: reviewText
@@ -321,6 +288,14 @@ export default function AppointmentDetailsPage() {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
+    // Handle string format "YYYY-MM-DD HH:mm:ss"
+    if (typeof dateString === 'string' && dateString.includes(' ')) {
+      const datePart = dateString.split(' ')[0];
+      const [year, month, day] = datePart.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      if (isNaN(date.getTime())) return "-";
+      return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    }
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString("en-US", {
@@ -333,6 +308,12 @@ export default function AppointmentDetailsPage() {
 
   const formatTime = (dateString) => {
     if (!dateString) return "-";
+    // Handle string format "YYYY-MM-DD HH:mm:ss"
+    if (typeof dateString === 'string' && dateString.includes(' ')) {
+      const timePart = dateString.split(' ')[1];
+      const [hours, minutes] = timePart.split(':').map(Number);
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
     return date.toLocaleTimeString("en-US", {
@@ -345,7 +326,17 @@ export default function AppointmentDetailsPage() {
   const canJoinCall = () => {
     if (!appointment?.appointmentDateTime) return false;
     const now = new Date();
-    const appointmentTime = new Date(appointment.appointmentDateTime);
+    let appointmentTime;
+
+    if (typeof appointment.appointmentDateTime === 'string' && appointment.appointmentDateTime.includes(' ')) {
+      const [datePart, timePart] = appointment.appointmentDateTime.split(' ');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes, seconds] = timePart.split(':').map(Number);
+      appointmentTime = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+    } else {
+      appointmentTime = new Date(appointment.appointmentDateTime);
+    }
+
     const timeDiff = appointmentTime - now;
     const minutesDiff = Math.ceil(timeDiff / (1000 * 60));
     return minutesDiff >= -30 && minutesDiff <= 10;
@@ -369,27 +360,24 @@ export default function AppointmentDetailsPage() {
       return status === "completed" ? "completed" : status === "paid" ? "pending" : "cancelled";
     }
     if (stepNumber === 5) {
-      if (status !== "completed") return "cancelled";
-      if (shippingStatus === "draft" || shippingStatus === "prepared" || shippingStatus === "ready_to_transit" || shippingStatus === "in_transit") return "completed";
+      if (shippingStatus === "prepared" || shippingStatus === "ready_to_transit" || shippingStatus === "in_transit") return "completed";
+      if (shippingStatus === "draft") return "pending";
       return "pending";
     }
     if (stepNumber === 6) {
-      if (status !== "completed") return "cancelled";
-      if (shippingStatus === "prepared" || shippingStatus === "ready_to_transit" || shippingStatus === "in_transit") return "completed";
-      if (shippingStatus === "draft") return "pending";
-      return "cancelled";
-    }
-    if (stepNumber === 7) {
-      if (status !== "completed") return "cancelled";
       if (shippingStatus === "ready_to_transit" || shippingStatus === "in_transit") return "completed";
       if (shippingStatus === "draft" || shippingStatus === "prepared") return "pending";
-      return "cancelled";
+      return "pending";
     }
-    if (stepNumber === 8) {
-      if (status !== "completed") return "cancelled";
+    if (stepNumber === 7) {
       if (shippingStatus === "in_transit") return "completed";
       if (shippingStatus === "draft" || shippingStatus === "prepared" || shippingStatus === "ready_to_transit") return "pending";
-      return "cancelled";
+      return "pending";
+    }
+    if (stepNumber === 8) {
+      if (shippingStatus === "in_transit") return "completed";
+      if (shippingStatus === "draft" || shippingStatus === "prepared" || shippingStatus === "ready_to_transit") return "pending";
+      return "pending";
     }
     return "pending";
   };
@@ -500,7 +488,7 @@ export default function AppointmentDetailsPage() {
                   <h4 className="font-bold text-gray-900 text-sm mb-1">Appointment Status</h4>
                   <div className="flex items-center gap-2 mb-2">
                     {getStatusBadge(appointment.status)}
-                    {appointment.shippingStatus && appointment.status === 'completed' && (
+                    {appointment.shippingStatus && appointment.shippingStatus !== 'draft' && (
                       <>
                         <span className="text-gray-400">|</span>
                         {getShippingStatusBadge(appointment.shippingStatus)}
@@ -523,10 +511,6 @@ export default function AppointmentDetailsPage() {
                     {appointment.status === 'completed' && (
                       <>
                         Your consultation has been completed. You can leave a review for the doctor.
-                        {appointment.shippingStatus === 'draft' && " Your medicine order has been created and is being prepared."}
-                        {appointment.shippingStatus === 'prepared' && " Your medicine has been prepared and is undergoing quality checks."}
-                        {appointment.shippingStatus === 'ready_to_transit' && " Your medicine is ready for transit and will be shipped soon."}
-                        {appointment.shippingStatus === 'in_transit' && " Your medicine is on the way! Click on the 'In Transit' status to track your shipment."}
                       </>
                     )}
                     {appointment.status === 'cancelled' && (
@@ -535,6 +519,15 @@ export default function AppointmentDetailsPage() {
                     {appointment.status === 'rejected' && (
                       "The doctor has declined this appointment request. You can book another appointment with a different doctor or time."
                     )}
+                    {appointment.shippingStatus && appointment.shippingStatus !== 'draft' && (
+                      <>
+                        <span className="font-semibold text-gray-900">
+                          {appointment.shippingStatus === 'prepared' && " Your medicine has been prepared and is undergoing quality checks."}
+                          {appointment.shippingStatus === 'ready_to_transit' && " Your medicine is ready for transit and will be shipped soon."}
+                          {appointment.shippingStatus === 'in_transit' && " Your medicine is on the way! Click on the 'In Transit' status to track your shipment."}
+                        </span>
+                      </>
+                    )}
                   </p>
                 </div>
               </div>
@@ -542,24 +535,24 @@ export default function AppointmentDetailsPage() {
 
             {/* Doctor Info Card */}
             <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-6 flex gap-4">
-              <img 
-                src={getImageUrl(appointment.doctorImage) || "https://cdn-icons-png.flaticon.com/512/387/387561.png"}
-                alt="Doctor" 
+              <img
+                src={getImageUrl(appointment.doctor?.image || appointment.doctorImage) || "https://cdn-icons-png.flaticon.com/512/387/387561.png"}
+                alt="Doctor"
                 className="w-20 h-20 rounded-2xl object-cover border border-gray-200 flex-shrink-0"
                 onError={(e) => { e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png"; }}
               />
               <div className="min-w-0 flex-1">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Doctor</span>
                 <h4 className="font-bold text-gray-900 mt-0.5 text-lg truncate">
-                  {appointment.doctorName ? `Dr. ${appointment.doctorName}` : "Doctor not assigned"}
+                  {appointment.doctor?.name || appointment.doctorName ? `Dr. ${appointment.doctor?.name || appointment.doctorName}` : "Doctor will be assigned"}
                 </h4>
-                {appointment.specialization && (
+                {(appointment.doctor?.specialization || appointment.specialization) && (
                   <p className="text-sm text-brand-primary font-bold mt-1 truncate">
-                    {appointment.specialization}
+                    {appointment.doctor?.specialization || appointment.specialization}
                   </p>
                 )}
-                {appointment.qualification && (
-                  <p className="text-sm text-gray-500 font-semibold">Qual: {appointment.qualification}</p>
+                {(appointment.doctor?.qualification || appointment.qualification) && (
+                  <p className="text-sm text-gray-500 font-semibold">Qual: {appointment.doctor?.qualification || appointment.qualification}</p>
                 )}
               </div>
             </div>
@@ -601,13 +594,13 @@ export default function AppointmentDetailsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Consultation Fee</p>
-                  <p className="text-2xl font-extrabold text-emerald-700 mt-1">₹{appointment.consultationFee || 500}</p>
+                  <p className="text-2xl font-extrabold text-emerald-700 mt-1">₹{appointment.doctor?.consultationFee || appointment.consultationFee || 500}</p>
                 </div>
                 <div>
                   <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Payment Status</p>
                   <span className={`inline-flex mt-1.5 items-center px-2.5 py-1 rounded-full text-sm font-semibold border ${
-                    appointment.paymentStatus === 'paid' 
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    appointment.paymentStatus === 'paid'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                       : 'bg-amber-50 text-amber-700 border-amber-200'
                   }`}>
                     {appointment.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
@@ -651,9 +644,9 @@ export default function AppointmentDetailsPage() {
               )}
 
               {/* Chat Button */}
-              {isPaid && !isCancelled && appointment.doctorUserId && (
+              {isPaid && !isCancelled && appointment.doctor && (
                 <button
-                  onClick={() => navigate(`/patient/chat`, { state: { selectUserId: appointment.doctorUserId } })}
+                  onClick={() => navigate(`/patient/chat`, { state: { selectUserId: appointment.doctor.userId } })}
                   className="flex-1 min-w-[140px] h-11 bg-brand-primary hover:bg-brand-hover text-white font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"
                 >
                   <MessageSquare size={16} />
@@ -696,13 +689,8 @@ export default function AppointmentDetailsPage() {
                   const isPending = stepStatus === "pending";
                   const isCancelled = stepStatus === "cancelled";
 
-                  // Only show shipping steps (5-8) if appointment is completed
-                  if (step.number >= 5 && appointment.status !== 'completed') {
-                    return null;
-                  }
-
                   // Check if this is the last visible step
-                  const visibleSteps = steps.filter(s => s.number < 5 || appointment.status === 'completed');
+                  const visibleSteps = steps;
                   const currentIndex = visibleSteps.findIndex(s => s.number === step.number);
                   const isLast = currentIndex === visibleSteps.length - 1;
 
@@ -756,7 +744,7 @@ export default function AppointmentDetailsPage() {
               <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Write a Review</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">Rate your experience with Dr. {appointment.doctorName}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Rate your experience with Dr. {appointment.doctor?.name || "the doctor"}</p>
                 </div>
                 <button
                   onClick={() => setReviewModalOpen(false)}
@@ -836,7 +824,7 @@ export default function AppointmentDetailsPage() {
               <div className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-extrabold text-gray-900 tracking-tight">Complete Payment</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">Appointment with Dr. {appointment.doctorName}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">Appointment with Dr. {appointment.doctor?.name || "the doctor"}</p>
                 </div>
                 <button
                   onClick={() => setPaymentModalOpen(false)}
@@ -849,7 +837,7 @@ export default function AppointmentDetailsPage() {
               <div className="p-6">
                 <Payment
                   appointmentId={appointment.id}
-                  amount={appointment.consultationFee || 500}
+                  amount={appointment.doctor?.consultationFee || appointment.consultationFee || 500}
                   onSuccess={handlePaymentSuccess}
                   onCancel={() => setPaymentModalOpen(false)}
                 />

@@ -170,37 +170,37 @@ export default function AdminDashboard() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+        <div className="w-full overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+          <table className="w-full text-xs sm:text-sm text-left min-w-[500px]">
             <thead className="bg-gray-50/50 border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4 font-semibold text-gray-500 uppercase tracking-wider text-xs">Patient</th>
-                <th className="px-6 py-4 font-semibold text-gray-500 uppercase tracking-wider text-xs">Doctor</th>
-                <th className="px-6 py-4 font-semibold text-gray-500 uppercase tracking-wider text-xs">Date</th>
-                <th className="px-6 py-4 font-semibold text-gray-500 uppercase tracking-wider text-xs">Status</th>
+                <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-gray-500 uppercase tracking-wider text-[10px] sm:text-xs">Patient</th>
+                <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-gray-500 uppercase tracking-wider text-[10px] sm:text-xs">Doctor</th>
+                <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-gray-500 uppercase tracking-wider text-[10px] sm:text-xs">Date</th>
+                <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold text-gray-500 uppercase tracking-wider text-[10px] sm:text-xs">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {appointments.map((a) => (
                 <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-full bg-brand-light flex items-center justify-center font-bold text-brand-dark text-xs">
+                  <td className="px-3 sm:px-6 py-2.5 sm:py-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] sm:text-xs">
                         {a.patientName[0]}
                       </div>
-                      <span className="font-semibold text-gray-900">{a.patientName}</span>
+                      <span className="font-semibold text-gray-900 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[150px]">{a.patientName}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-700">{a.doctorName}</td>
-                  <td className="px-6 py-4 text-gray-400 font-medium">{formatShortDate(a.date)}</td>
-                  <td className="px-6 py-4">
+                  <td className="px-3 sm:px-6 py-2.5 sm:py-4 text-gray-700 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[150px]">{a.doctorName}</td>
+                  <td className="px-3 sm:px-6 py-2.5 sm:py-4 text-gray-400 font-medium text-xs sm:text-sm">{formatShortDate(a.date)}</td>
+                  <td className="px-3 sm:px-6 py-2.5 sm:py-4">
                     <StatusBadge status={a.status} />
                   </td>
                 </tr>
               ))}
               {!loading && appointments.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-6 py-8 text-center text-gray-400 font-medium">
+                  <td colSpan={4} className="px-3 sm:px-6 py-6 sm:py-8 text-center text-gray-400 font-medium text-xs sm:text-sm">
                     No recent appointments found.
                   </td>
                 </tr>

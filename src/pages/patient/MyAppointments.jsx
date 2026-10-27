@@ -280,6 +280,14 @@ export default function MyAppointments() {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
+    // Handle string format "YYYY-MM-DD HH:mm:ss"
+    if (typeof dateString === 'string' && dateString.includes(' ')) {
+      const datePart = dateString.split(' ')[0];
+      const [year, month, day] = datePart.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      if (isNaN(date.getTime())) return "-";
+      return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+    }
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
     return date.toLocaleDateString("en-US", {
@@ -292,6 +300,12 @@ export default function MyAppointments() {
 
   const formatTime = (dateString) => {
     if (!dateString) return "-";
+    // Handle string format "YYYY-MM-DD HH:mm:ss"
+    if (typeof dateString === 'string' && dateString.includes(' ')) {
+      const timePart = dateString.split(' ')[1];
+      const [hours, minutes] = timePart.split(':').map(Number);
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    }
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return "-";
     return date.toLocaleTimeString("en-US", {
@@ -304,14 +318,24 @@ export default function MyAppointments() {
   const canJoinCall = (appointment) => {
     if (!appointment?.appointmentDateTime) return false;
     const now = new Date();
-    const appointmentTime = new Date(appointment.appointmentDateTime);
+    let appointmentTime;
+
+    if (typeof appointment.appointmentDateTime === 'string' && appointment.appointmentDateTime.includes(' ')) {
+      const [datePart, timePart] = appointment.appointmentDateTime.split(' ');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes, seconds] = timePart.split(':').map(Number);
+      appointmentTime = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+    } else {
+      appointmentTime = new Date(appointment.appointmentDateTime);
+    }
+
     const timeDiff = appointmentTime - now;
     const minutesDiff = Math.ceil(timeDiff / (1000 * 60));
     return minutesDiff >= -30 && minutesDiff <= 10;
   };
 
   const getInitials = (name) => {
-    if (!name) return "??";
+    if (!name) return "NA";
     return name
       .split(" ")
       .map((n) => n[0])
@@ -369,8 +393,17 @@ export default function MyAppointments() {
       let bVal = b[sortColumn];
 
       if (sortColumn === "appointmentDateTime") {
-        aVal = new Date(a.appointmentDateTime || 0).getTime();
-        bVal = new Date(b.appointmentDateTime || 0).getTime();
+        const parseDate = (dateStr) => {
+          if (typeof dateStr === 'string' && dateStr.includes(' ')) {
+            const [datePart, timePart] = dateStr.split(' ');
+            const [year, month, day] = datePart.split('-').map(Number);
+            const [hours, minutes, seconds] = timePart.split(':').map(Number);
+            return new Date(year, month - 1, day, hours, minutes, seconds || 0).getTime();
+          }
+          return new Date(dateStr || 0).getTime();
+        };
+        aVal = parseDate(a.appointmentDateTime);
+        bVal = parseDate(b.appointmentDateTime);
       } else if (sortColumn === "appointmentId") {
         aVal = (a.appointmentId || a.id || "").toString();
         bVal = (b.appointmentId || b.id || "").toString();
@@ -446,36 +479,36 @@ export default function MyAppointments() {
         )}
 
         {/* Filters and Controls */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-4 space-y-4">
-          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs p-3 sm:p-4 space-y-3 sm:space-y-4">
+          <div className="flex flex-col lg:flex-row gap-2 sm:gap-3 items-stretch lg:items-center justify-between">
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[240px]">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="relative flex-1 min-w-[200px] sm:min-w-[240px]">
+              <Search className="absolute left-3 sm:left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by doctor, ID, or reason..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-xs font-medium rounded-xl border border-gray-300 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-gray-800"
+                className="w-full pl-9 sm:pl-10 pr-4 py-1.5 sm:py-2 text-[11px] sm:text-xs font-medium rounded-xl border border-gray-300 focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary text-gray-800"
               />
               {searchTerm && (
                 <button
                   onClick={() => setSearchTerm("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X size={14} />
+                  <X size={12} className="sm:w-[14px] sm:h-[14px]" />
                 </button>
               )}
             </div>
 
             {/* Entries Per Page */}
-            <div className="flex items-center gap-2 self-end lg:self-center">
-              <span className="text-xs text-gray-500 font-medium">Show</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 self-end lg:self-center">
+              <span className="text-[11px] sm:text-xs text-gray-500 font-medium">Show</span>
               <div className="relative">
                 <select
                   value={entriesPerPage}
                   onChange={(e) => setEntriesPerPage(Number(e.target.value))}
-                  className="appearance-none bg-white border border-gray-300 rounded-xl px-3 py-1.5 pr-8 text-xs font-semibold text-gray-700 focus:outline-none focus:border-brand-primary cursor-pointer"
+                  className="appearance-none bg-white border border-gray-300 rounded-xl px-2.5 sm:px-3 py-1 sm:py-1.5 pr-7 sm:pr-8 text-[11px] sm:text-xs font-semibold text-gray-700 focus:outline-none focus:border-brand-primary cursor-pointer"
                 >
                   {[5, 10, 25, 50].map((n) => (
                     <option key={n} value={n}>
@@ -483,16 +516,16 @@ export default function MyAppointments() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 sm:h-3.5 sm:w-3.5 text-gray-400 pointer-events-none" />
               </div>
-              <span className="text-xs text-gray-500 font-medium">entries</span>
+              <span className="text-[11px] sm:text-xs text-gray-500 font-medium">entries</span>
             </div>
 
 
           </div>
 
           {/* Status Filter Badges */}
-          <div className="flex gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none border-t border-gray-100">
+          <div className="flex gap-1 sm:gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none border-t border-gray-100">
             {["all", "Pending", "Confirmed", "Paid", "Completed", "Cancelled"].map((status) => {
               const statusKey = status.toLowerCase();
               const isSelected = filter === statusKey;
@@ -500,7 +533,7 @@ export default function MyAppointments() {
                 <button
                   key={status}
                   onClick={() => setFilter(statusKey)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1 sm:gap-1.5 cursor-pointer ${
                     isSelected
                       ? status === "Cancelled"
                         ? "bg-rose-500 text-white shadow-xs"
@@ -510,7 +543,7 @@ export default function MyAppointments() {
                 >
                   {status}
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    className={`text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.2 rounded-full font-bold ${
                       isSelected ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"
                     }`}
                   >
@@ -524,13 +557,13 @@ export default function MyAppointments() {
 
         {/* Compact Table */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
-          <div className="w-full overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr className="bg-gray-50/80 border-b border-gray-200 text-[11px] uppercase tracking-wider text-gray-500 font-bold">
+                <tr className="bg-gray-50/80 border-b border-gray-200 text-[10px] sm:text-[11px] uppercase tracking-wider text-gray-500 font-bold">
                   <th
                     onClick={() => handleSort("appointmentId")}
-                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                    className="py-2.5 sm:py-3 px-2 sm:px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>ID</span>
@@ -539,7 +572,7 @@ export default function MyAppointments() {
                   </th>
                   <th
                     onClick={() => handleSort("doctorName")}
-                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                    className="py-2.5 sm:py-3 px-2 sm:px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>Doctor</span>
@@ -548,7 +581,7 @@ export default function MyAppointments() {
                   </th>
                   <th
                     onClick={() => handleSort("appointmentDateTime")}
-                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                    className="py-2.5 sm:py-3 px-2 sm:px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>Date & Time</span>
@@ -557,7 +590,7 @@ export default function MyAppointments() {
                   </th>
                   <th
                     onClick={() => handleSort("requestType")}
-                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                    className="py-2.5 sm:py-3 px-2 sm:px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group hidden sm:table-cell"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>Type</span>
@@ -566,25 +599,25 @@ export default function MyAppointments() {
                   </th>
                   <th
                     onClick={() => handleSort("status")}
-                    className="py-3 px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
+                    className="py-2.5 sm:py-3 px-2 sm:px-3.5 cursor-pointer hover:bg-gray-100/80 transition-colors select-none group"
                   >
                     <div className="flex items-center gap-1.5">
                       <span>Status</span>
                       {getSortIcon("status")}
                     </div>
                   </th>
-                  <th className="py-3 px-3.5 text-right font-bold w-48">
+                  <th className="py-2.5 sm:py-3 px-2 sm:px-3.5 text-right font-bold w-32 sm:w-48">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 text-xs">
+              <tbody className="divide-y divide-gray-100 text-[11px] sm:text-xs">
                 {currentAppointments.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-12 text-center text-gray-400 font-medium">
+                    <td colSpan={6} className="py-8 sm:py-12 text-center text-gray-400 font-medium">
                       <div className="flex flex-col items-center justify-center gap-2">
-                        <Calendar className="h-8 w-8 text-gray-300" />
-                        <p className="text-xs text-gray-500">No appointments match your criteria.</p>
+                        <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-gray-300" />
+                        <p className="text-[10px] sm:text-xs text-gray-500">No appointments match your criteria.</p>
                       </div>
                     </td>
                   </tr>
@@ -602,53 +635,53 @@ export default function MyAppointments() {
                         className="hover:bg-brand-light/30 transition-colors"
                       >
                         {/* ID */}
-                        <td className="py-3 px-3.5 font-mono text-gray-700 font-semibold whitespace-nowrap w-24">
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-3.5 font-mono text-gray-700 font-semibold whitespace-nowrap w-20 sm:w-24">
                           #{apt.appointmentId || apt.id}
                         </td>
 
                         {/* Doctor Info */}
-                        <td className="py-3 px-3.5">
-                          <div className="flex items-center gap-2.5 min-w-[170px]">
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-3.5">
+                          <div className="flex items-center gap-2 sm:gap-2.5 min-w-[140px] sm:min-w-[170px]">
                             {apt.doctorImage ? (
                               <img
                                 src={getImageUrl(apt.doctorImage)}
                                 alt={apt.doctorName}
-                                className="w-8 h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0"
+                                className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0"
                               />
                             ) : (
                               <div
-                                className={`w-8 h-8 rounded-lg ${getAvatarColor(
+                                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${getAvatarColor(
                                   apt.doctorName
-                                )} flex items-center justify-center text-white font-bold text-xs flex-shrink-0`}
+                                )} flex items-center justify-center text-white font-bold text-[10px] sm:text-xs flex-shrink-0`}
                               >
                                 {getInitials(apt.doctorName)}
                               </div>
                             )}
                             <div className="min-w-0">
-                              <span className="font-bold text-gray-900 block truncate">
-                                {apt.doctorName ? `Dr. ${apt.doctorName.replace(/^Dr\.\s*/i, "")}` : "Doctor not assigned"}
+                              <span className="font-bold text-gray-900 block truncate text-[11px] sm:text-xs">
+                                {apt.doctorName ? `Dr. ${apt.doctorName.replace(/^Dr\.\s*/i, "")}` : "Doctor will be assigned"}
                               </span>
                             </div>
                           </div>
                         </td>
 
                         {/* Date & Time */}
-                        <td className="py-3 px-3.5 whitespace-nowrap w-36">
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-3.5 whitespace-nowrap w-28 sm:w-36">
                           <div className="flex flex-col gap-0.5">
-                            <span className="font-semibold text-gray-800 flex items-center gap-1">
-                              <Calendar className="w-3 h-3 text-brand-primary inline" />
+                            <span className="font-semibold text-gray-800 flex items-center gap-1 text-[11px] sm:text-xs">
+                              <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-brand-primary inline" />
                               {formatDate(apt.appointmentDateTime)}
                             </span>
-                            <span className="text-[11px] text-gray-500 font-medium flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-gray-400 inline" />
+                            <span className="text-[10px] sm:text-[11px] text-gray-500 font-medium flex items-center gap-1">
+                              <Clock className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-gray-400 inline" />
                               {formatTime(apt.appointmentDateTime)}
                             </span>
                           </div>
                         </td>
 
-                        {/* Request Type */}
-                        <td className="py-3 px-3.5 whitespace-nowrap w-32">
-                          <span className="inline-flex px-2 py-0.5 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-700">
+                        {/* Request Type - Hidden on mobile */}
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-3.5 whitespace-nowrap w-28 sm:w-32 hidden sm:table-cell">
+                          <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-semibold bg-gray-100 text-gray-700">
                             {apt.requestType === "any_doctor"
                               ? "Any Doctor"
                               : apt.requestType === "specific_doctor"
@@ -658,30 +691,30 @@ export default function MyAppointments() {
                         </td>
 
                         {/* Status */}
-                        <td className="py-3 px-3.5 whitespace-nowrap w-28">
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-3.5 whitespace-nowrap w-24 sm:w-28">
                           {getStatusBadge(apt.status)}
                         </td>
 
                         {/* Actions */}
-                        <td className="py-3 px-3.5 whitespace-nowrap text-right w-48">
-                          <div className="flex items-center justify-end gap-1.5 w-full">
+                        <td className="py-2.5 sm:py-3 px-2 sm:px-3.5 whitespace-nowrap text-right w-32 sm:w-48">
+                          <div className="flex items-center justify-end gap-1 sm:gap-1.5 w-full">
                             {/* View Details Button */}
                             <button
                               onClick={() => navigate(`/patient/appointments/${apt.id}`, { state: { appointmentId: apt.id } })}
-                              className="h-8 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                              className="h-7 sm:h-8 px-2 sm:px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold text-[10px] sm:text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                               title="View Details"
                             >
-                              <Eye size={13} />
+                              <Eye size={11} className="sm:w-[13px] sm:h-[13px]" />
                             </button>
 
                             {/* Pay Button */}
                             {isAccepted && (
                               <button
                                 onClick={() => handleOpenPaymentModal(apt)}
-                                className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                                className="h-7 sm:h-8 px-2 sm:px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-[10px] sm:text-xs flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                               >
-                                <CreditCard size={13} />
-                                <span>Pay</span>
+                                <CreditCard size={11} className="sm:w-[13px] sm:h-[13px]" />
+                                <span className="hidden sm:inline">Pay</span>
                               </button>
                             )}
 
@@ -693,11 +726,11 @@ export default function MyAppointments() {
                                     state: { selectUserId: apt.doctorUserId }
                                   })
                                 }
-                                className="h-8 px-3 bg-white text-brand-dark hover:bg-emerald-50 text-xs border border-brand-primary font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                                className="h-7 sm:h-8 px-2 sm:px-3 bg-white text-brand-dark hover:bg-emerald-50 text-[10px] sm:text-xs border border-brand-primary font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                                 title="Chat with Doctor"
                               >
-                                <MessageSquare size={13} />
-                                <span>Chat</span>
+                                <MessageSquare size={11} className="sm:w-[13px] sm:h-[13px]" />
+                                <span className="hidden sm:inline">Chat</span>
                               </button>
                             )}
 
@@ -707,11 +740,11 @@ export default function MyAppointments() {
                                 onClick={() =>
                                   navigate(`/patient/video-call?appointmentId=${apt.id}`)
                                 }
-                                className="h-8 px-3 bg-brand-primary hover:bg-brand-hover text-white text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                                className="h-7 sm:h-8 px-2 sm:px-3 bg-brand-primary hover:bg-brand-hover text-white text-[10px] sm:text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                                 title="Join Video Call"
                               >
-                                <Video size={13} />
-                                <span>Call</span>
+                                <Video size={11} className="sm:w-[13px] sm:h-[13px]" />
+                                <span className="hidden sm:inline">Call</span>
                               </button>
                             )}
 
@@ -719,10 +752,10 @@ export default function MyAppointments() {
                             {isCompleted && !isCancelled && !apt.hasReviewed && (
                               <button
                                 onClick={() => handleOpenReviewModal(apt)}
-                                className="h-8 px-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
+                                className="h-7 sm:h-8 px-2 sm:px-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 text-[10px] sm:text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                               >
-                                <Star size={13} className="fill-amber-400 text-amber-400" />
-                                <span>Review</span>
+                                <Star size={11} className="sm:w-[13px] sm:h-[13px] fill-amber-400 text-amber-400" />
+                                <span className="hidden sm:inline">Review</span>
                               </button>
                             )}
                           </div>
@@ -736,8 +769,8 @@ export default function MyAppointments() {
           </div>
 
           {/* Pagination Footer */}
-          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
-            <span className="text-gray-500 font-medium">
+          <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-t border-gray-200 bg-gray-50/50 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3 text-[10px] sm:text-xs">
+            <span className="text-gray-500 font-medium text-center sm:text-left">
               Showing{" "}
               <span className="font-bold text-gray-800">
                 {totalEntries === 0 ? 0 : startIndex + 1}
@@ -749,27 +782,27 @@ export default function MyAppointments() {
               of <span className="font-bold text-gray-800">{totalEntries}</span> entries
             </span>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                 disabled={currentPage <= 1}
-                className="px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer text-[10px] sm:text-xs"
               >
-                <ChevronLeft size={14} />
-                <span>Prev</span>
+                <ChevronLeft size={12} className="sm:w-[14px] sm:h-[14px]" />
+                <span className="hidden sm:inline">Prev</span>
               </button>
 
-              <span className="px-3 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-700">
+              <span className="px-2 sm:px-3 py-1 bg-white border border-gray-200 rounded-lg font-bold text-gray-700 text-[10px] sm:text-xs">
                 {currentPage} / {totalPages}
               </span>
 
               <button
                 onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                 disabled={currentPage >= totalPages}
-                className="px-2.5 py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+                className="px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border border-gray-300 bg-white font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer text-[10px] sm:text-xs"
               >
-                <span>Next</span>
-                <ChevronRight size={14} />
+                <span className="hidden sm:inline">Next</span>
+                <ChevronRight size={12} className="sm:w-[14px] sm:h-[14px]" />
               </button>
             </div>
           </div>

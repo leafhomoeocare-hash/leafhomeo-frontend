@@ -277,148 +277,150 @@ export default function AppointmentManagement() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
         {/* Table - desktop/tablet */}
         <div className="hidden md:block">
-          <table className="w-full text-xs text-left">
-            <thead className="bg-gray-50/50 border-b border-gray-100">
-              <tr className="text-left text-gray-500 uppercase tracking-wider text-[10px]">
-                {COLUMNS.map((col) => (
-                  <th key={col.key} className="px-4 py-3 font-semibold whitespace-nowrap">
-                    {col.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {appointments.map((appt) => {
-                const dt = formatDateTime(appt.appointmentDate);
-                return (
-                  <tr key={appt.id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <span className="font-semibold text-gray-900 text-xs">#{appt.appointmentId || appt.id}</span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <div className="flex items-center gap-2 cursor-pointer hover:opacity-80" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>
-                        {appt.patient?.image ? (
-                          <img
-                            src={getImageUrl(appt.patient.image)}
-                            alt={appt.patient.name}
-                            className="w-7 h-7 rounded-lg object-cover flex-shrink-0 border border-gray-100"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-7 h-7 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] border border-brand-primary/10 flex-shrink-0">
-                            {appt.patient?.name?.[0] || "P"}
-                          </div>
-                        )}
-                        <div>
-                          <span className="font-semibold text-gray-900 block text-xs hover:underline truncate max-w-[150px]">{appt.patient?.name}</span>
-                          <span className="text-[10px] text-gray-400 truncate max-w-[150px]">{appt.patient?.email || "-"}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                      {typeof dt === "object" ? (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="flex items-center gap-1 font-semibold text-gray-800 text-xs">
-                            <Calendar size={11} className="text-brand-primary" />
-                            {dt.date}
-                          </span>
-                          <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
-                            <Clock size={10} />
-                            {dt.time}
-                          </span>
-                        </div>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        {appt.doctor?.image ? (
-                          <img
-                            src={getImageUrl(appt.doctor.image)}
-                            alt={appt.doctor.name}
-                            className="w-7 h-7 rounded-lg object-cover flex-shrink-0 border border-gray-100"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
-                            }}
-                          />
-                        ) : (
-                          <div className="w-7 h-7 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] border border-brand-primary/10 flex-shrink-0">
-                            {appt.doctor?.name?.replace("Dr. ", "")?.[0] || "D"}
-                          </div>
-                        )}
-                        <span className="font-semibold text-gray-900 text-xs truncate max-w-[120px]">{appt.doctor?.name || "Not Assigned"}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <StatusBadge status={appt.status} />
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      <PaymentBadge status={appt.payment?.status || "pending"} />
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap">
-                      {appt.trackingUrl ? (
-                        <a
-                          href={appt.trackingUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] text-blue-600 hover:underline font-semibold"
-                        >
-                          Track Package
-                        </a>
-                      ) : (
-                        <span className="text-[10px] text-gray-400">-</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4.5 whitespace-nowrap">
-                      {appt.status === "completed" ? (
-                        <select
-                          value={appt.shippingStatus || "draft"}
-                          onChange={(e) => handleShippingStatusChange(appt, e.target.value)}
-                          disabled={updatingShipping}
-                          className={`text-xs px-2.5 py-1 rounded-full font-semibold border focus:outline-none focus:border-green-500 disabled:opacity-50 appearance-none ${SHIPPING_STYLES[appt.shippingStatus || "draft"] || SHIPPING_STYLES.draft}`}
-                        >
-                          <option value={appt.shippingStatus || "draft"}>{appt.shippingStatus === 'ready_to_transit' ? 'Ready to Transit' : (appt.shippingStatus || "Draft")}</option>
-                          {getAvailableShippingStatuses(appt.shippingStatus || "draft").map(status => (
-                            <option key={status} value={status}>
-                              {status === 'ready_to_transit' ? 'Ready to Transit' : status.replace('_', ' ')}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <ShippingBadge status={appt.shippingStatus || "draft"} />
-                      )}
-                    </td>
-                    <td className="px-6 py-4.5 whitespace-nowrap">
-                      {appt.doctor ? (
-                        <button
-                          onClick={() => handleViewChat(appt)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          <MessageSquare size={14} />
-                          View Chat
-                        </button>
-                      ) : (
-                        <span className="text-xs text-gray-400">-</span>
-                      )}
-                    </td>
-
-                  </tr>
-                );
-              })}
-              {!loading && appointments.length === 0 && (
-                <tr>
-                  <td colSpan={COLUMNS.length + 1} className="px-6 py-12 text-center text-gray-400 font-medium">
-                    No appointments match your search.
-                  </td>
+          <div className="w-full overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+            <table className="w-full text-xs text-left min-w-[800px]">
+              <thead className="bg-gray-50/50 border-b border-gray-100">
+                <tr className="text-left text-gray-500 uppercase tracking-wider text-[10px]">
+                  {COLUMNS.map((col) => (
+                    <th key={col.key} className="px-3 sm:px-4 py-2.5 sm:py-3 font-semibold whitespace-nowrap">
+                      {col.label}
+                    </th>
+                  ))}
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {appointments.map((appt) => {
+                  const dt = formatDateTime(appt.appointmentDate);
+                  return (
+                    <tr key={appt.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">
+                        <span className="font-semibold text-gray-900 text-xs">#{appt.appointmentId || appt.id}</span>
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2 cursor-pointer hover:opacity-80" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>
+                          {appt.patient?.image ? (
+                            <img
+                              src={getImageUrl(appt.patient.image)}
+                              alt={appt.patient.name}
+                              className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-cover flex-shrink-0 border border-gray-100"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] border border-brand-primary/10 flex-shrink-0">
+                              {appt.patient?.name?.[0] || "P"}
+                            </div>
+                          )}
+                          <div>
+                            <span className="font-semibold text-gray-900 block text-xs hover:underline truncate max-w-[120px] sm:max-w-[150px]">{appt.patient?.name}</span>
+                            <span className="text-[10px] text-gray-400 truncate max-w-[120px] sm:max-w-[150px]">{appt.patient?.email || "-"}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-600 whitespace-nowrap">
+                        {typeof dt === "object" ? (
+                          <div className="flex flex-col gap-0.5">
+                            <span className="flex items-center gap-1 font-semibold text-gray-800 text-xs">
+                              <Calendar size={10} className="sm:w-[11px] sm:h-[11px] text-brand-primary" />
+                              {dt.date}
+                            </span>
+                            <span className="flex items-center gap-1 text-[10px] text-gray-400 font-medium">
+                              <Clock size={9} className="sm:w-[10px] sm:h-[10px]" />
+                              {dt.time}
+                            </span>
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3 text-gray-700 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          {appt.doctor?.image ? (
+                            <img
+                              src={getImageUrl(appt.doctor.image)}
+                              alt={appt.doctor.name}
+                              className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-cover flex-shrink-0 border border-gray-100"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://cdn-icons-png.flaticon.com/512/387/387561.png";
+                              }}
+                            />
+                          ) : (
+                            <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] border border-brand-primary/10 flex-shrink-0">
+                              {appt.doctor?.name?.replace("Dr. ", "")?.[0] || "D"}
+                            </div>
+                          )}
+                          <span className="font-semibold text-gray-900 text-xs truncate max-w-[100px] sm:max-w-[120px]">{appt.doctor?.name || "Not Assigned"}</span>
+                        </div>
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">
+                        <StatusBadge status={appt.status} />
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">
+                        <PaymentBadge status={appt.payment?.status || "pending"} />
+                      </td>
+                      <td className="px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">
+                        {appt.trackingUrl ? (
+                          <a
+                            href={appt.trackingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-blue-600 hover:underline font-semibold"
+                          >
+                            Track Package
+                          </a>
+                        ) : (
+                          <span className="text-[10px] text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-4 sm:px-6 py-2.5 sm:py-4.5 whitespace-nowrap">
+                        {appt.status === "completed" ? (
+                          <select
+                            value={appt.shippingStatus || "draft"}
+                            onChange={(e) => handleShippingStatusChange(appt, e.target.value)}
+                            disabled={updatingShipping}
+                            className={`text-xs px-2 sm:px-2.5 py-1 rounded-full font-semibold border focus:outline-none focus:border-green-500 disabled:opacity-50 appearance-none ${SHIPPING_STYLES[appt.shippingStatus || "draft"] || SHIPPING_STYLES.draft}`}
+                          >
+                            <option value={appt.shippingStatus || "draft"}>{appt.shippingStatus === 'ready_to_transit' ? 'Ready to Transit' : (appt.shippingStatus || "Draft")}</option>
+                            {getAvailableShippingStatuses(appt.shippingStatus || "draft").map(status => (
+                              <option key={status} value={status}>
+                                {status === 'ready_to_transit' ? 'Ready to Transit' : status.replace('_', ' ')}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <ShippingBadge status={appt.shippingStatus || "draft"} />
+                        )}
+                      </td>
+                      <td className="px-4 sm:px-6 py-2.5 sm:py-4.5 whitespace-nowrap">
+                        {appt.doctor ? (
+                          <button
+                            onClick={() => handleViewChat(appt)}
+                            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 bg-green-600 text-white text-xs font-semibold rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            <MessageSquare size={12} className="sm:w-[14px] sm:h-[14px]" />
+                            <span className="hidden sm:inline">View Chat</span>
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400">-</span>
+                        )}
+                      </td>
+
+                    </tr>
+                  );
+                })}
+                {!loading && appointments.length === 0 && (
+                  <tr>
+                    <td colSpan={COLUMNS.length + 1} className="px-4 sm:px-6 py-8 sm:py-12 text-center text-gray-400 font-medium">
+                      No appointments match your search.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Cards - mobile only */}

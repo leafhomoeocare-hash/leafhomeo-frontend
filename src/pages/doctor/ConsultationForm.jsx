@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Save, Loader2, FileText, Activity, User, Calendar, Clock, Upload, X, Image as ImageIcon } from "lucide-react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { ArrowLeft, Save, Loader2, FileText, User, Calendar, Clock, Upload, X, Image as ImageIcon } from "lucide-react";
 import DoctorLayout from "../../components/DoctorLayout";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -8,6 +8,8 @@ import Swal from "sweetalert2";
 const ConsultationForm = () => {
   const { consultationId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isEditMode = location.state?.mode === 'edit' || new URLSearchParams(location.search).get('mode') === 'edit';
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [consultation, setConsultation] = useState(null);
@@ -38,27 +40,11 @@ const ConsultationForm = () => {
   });
 
   useEffect(() => {
-    // Use consultationId as both consultationId and appointmentId for new/unsaved consultations
     const idToUse = consultationId;
     
     if (idToUse) {
       setAppointmentId(idToUse);
-      // Try to load draft first
-      const savedDraft = localStorage.getItem(`consultation_draft_${idToUse}`);
-      if (savedDraft) {
-        try {
-          const parsedData = JSON.parse(savedDraft);
-          setFormData(parsedData);
-          setLoading(false);
-        } catch (err) {
-          console.error("Error parsing draft:", err);
-          // Try to fetch by appointment ID if draft fails
-          fetchConsultationByAppointmentId(idToUse);
-        }
-      } else {
-        // No draft, try to fetch consultation
-        fetchConsultationByAppointmentId(idToUse);
-      }
+      fetchConsultationByAppointmentId(idToUse);
     } else {
       setLoading(false);
     }
@@ -101,11 +87,10 @@ const ConsultationForm = () => {
           callDuration: data.callDuration || "",
         });
 
-        // Parse existing screenshots
         if (data.screenshots) {
           try {
-            const parsedScreenshots = typeof data.screenshots === 'string' 
-              ? JSON.parse(data.screenshots) 
+            const parsedScreenshots = typeof data.screenshots === 'string'
+              ? JSON.parse(data.screenshots)
               : data.screenshots;
             setExistingScreenshots(Array.isArray(parsedScreenshots) ? parsedScreenshots : []);
           } catch (e) {
@@ -117,97 +102,7 @@ const ConsultationForm = () => {
       }
     } catch (error) {
       console.error("Error fetching consultation by appointment:", error);
-      // If consultation doesn't exist, it's okay - form will be in draft mode
       setConsultation(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadDraftIfExists = () => {
-    // Try to find draft from URL params or localStorage
-    const urlParams = new URLSearchParams(window.location.search);
-    const aptId = urlParams.get('appointmentId');
-    
-    if (aptId) {
-      const savedDraft = localStorage.getItem(`consultation_draft_${aptId}`);
-      if (savedDraft) {
-        try {
-          const parsedData = JSON.parse(savedDraft);
-          setAppointmentId(aptId);
-          setFormData(parsedData);
-          setLoading(false);
-          console.log("Loaded draft from localStorage:", parsedData);
-        } catch (err) {
-          console.error("Error parsing draft:", err);
-          setLoading(false);
-        }
-      } else {
-        setLoading(false);
-      }
-    } else {
-      setLoading(false);
-    }
-  };
-
-  const fetchConsultation = async () => {
-    try {
-      setLoading(true);
-      const token = sessionStorage.getItem("token");
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/v1/appointment/consultation/${consultationId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      if (response.data.status === 1) {
-        const data = response.data.data;
-        setConsultation(data);
-        setAppointmentId(data.appointmentId);
-        setFormData({
-          appointmentId: data.appointmentId || "",
-          chiefComplaints: data.chiefComplaints || "",
-          appetite: data.appetite || "",
-          thirst: data.thirst || "",
-          desire: data.desire || "",
-          aversion: data.aversion || "",
-          habits: data.habits || "",
-          stool: data.stool || "",
-          urine: data.urine || "",
-          perspiration: data.perspiration || "",
-          menWomen: data.menWomen || "",
-          sleep: data.sleep || "",
-          dream: data.dream || "",
-          thermal: data.thermal || "",
-          amelioration: data.amelioration || "",
-          aggravation: data.aggravation || "",
-          otherComplaints: data.otherComplaints || "",
-          levelsOfHealth: data.levelsOfHealth || "",
-          perception: data.perception || "",
-          callDuration: data.callDuration || "",
-        });
-
-        // Parse existing screenshots
-        if (data.screenshots) {
-          try {
-            const parsedScreenshots = typeof data.screenshots === 'string' 
-              ? JSON.parse(data.screenshots) 
-              : data.screenshots;
-            setExistingScreenshots(Array.isArray(parsedScreenshots) ? parsedScreenshots : []);
-          } catch (e) {
-            console.error("Error parsing screenshots:", e);
-            setExistingScreenshots([]);
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching consultation:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to load consultation data",
-      });
     } finally {
       setLoading(false);
     }
@@ -253,12 +148,10 @@ const ConsultationForm = () => {
         }
       });
 
-      // Add new screenshots
       screenshots.forEach((file) => {
         formDataToSend.append("screenshots", file);
       });
 
-      // Include existing screenshots that weren't removed
       formDataToSend.append("existingScreenshots", JSON.stringify(existingScreenshots));
 
       const response = await axios.post(
@@ -273,7 +166,6 @@ const ConsultationForm = () => {
       );
 
       if (response.data.status === 1) {
-        // Clear draft from localStorage if it exists
         if (appointmentId) {
           localStorage.removeItem(`consultation_draft_${appointmentId}`);
         }
@@ -352,12 +244,11 @@ const ConsultationForm = () => {
               <ArrowLeft size={24} />
             </button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800">Consultation Form</h1>
-              <p className="text-sm text-gray-500 mt-1">Review and update consultation details</p>
-              {!consultationId && appointmentId && (
-                <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-semibold mt-2 border border-amber-200">
-                  <FileText size={12} />
-                  Draft Mode
+              <h1 className="text-2xl font-bold text-gray-800">{isEditMode ? "Consultation Form" : "Consultation Details"}</h1>
+              <p className="text-sm text-gray-500 mt-1">{isEditMode ? "Review and update consultation details" : "View consultation information"}</p>
+              {!isEditMode && appointmentId && (
+                <span className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold mt-2 border border-gray-200">
+                  Read Only
                 </span>
               )}
             </div>
@@ -377,11 +268,10 @@ const ConsultationForm = () => {
               <div className="flex items-center gap-2">
                 <ImageIcon className="h-5 w-5 text-indigo-600" />
                 <h2 className="text-lg font-semibold text-gray-800">Screenshots</h2>
-                <span className="text-xs text-gray-500 ml-2">(Max 5)</span>
+                {isEditMode && <span className="text-xs text-gray-500 ml-2">(Max 5)</span>}
               </div>
             </div>
             <div className="p-6">
-              {/* Existing Screenshots */}
               {existingScreenshots.length > 0 && (
                 <div className="mb-6">
                   <p className="text-sm font-semibold text-gray-700 mb-3">Existing Screenshots</p>
@@ -393,67 +283,73 @@ const ConsultationForm = () => {
                           alt={`Screenshot ${index + 1}`}
                           className="w-full h-32 object-cover rounded-lg border border-gray-200"
                         />
-                        <button
-                          type="button"
-                          onClick={() => removeExistingScreenshot(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                        >
-                          <X size={14} />
-                        </button>
+                        {isEditMode && (
+                          <button
+                            type="button"
+                            onClick={() => removeExistingScreenshot(index)}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* New Screenshots Upload */}
-              <div>
-                <p className="text-sm font-semibold text-gray-700 mb-3">Upload New Screenshots</p>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-500 transition-colors">
-                  <input
-                    type="file"
-                    id="screenshots"
-                    multiple
-                    accept="image/*"
-                    onChange={handleScreenshotChange}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="screenshots"
-                    className="cursor-pointer flex flex-col items-center gap-2"
-                  >
-                    <Upload className="h-8 w-8 text-gray-400" />
-                    <span className="text-sm text-gray-600">
-                      {screenshots.length > 0
-                        ? `${screenshots.length} file(s) selected`
-                        : "Click to upload screenshots"}
-                    </span>
-                    <span className="text-xs text-gray-400">PNG, JPG up to 5 files</span>
-                  </label>
-                </div>
-
-                {/* Preview New Screenshots */}
-                {screenshots.length > 0 && (
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {screenshots.map((file, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={`New Screenshot ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeNewScreenshot(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                        >
-                          <X size={14} />
-                        </button>
-                      </div>
-                    ))}
+              {isEditMode && (
+                <div>
+                  <p className="text-sm font-semibold text-gray-700 mb-3">Upload New Screenshots</p>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-indigo-500 transition-colors">
+                    <input
+                      type="file"
+                      id="screenshots"
+                      multiple
+                      accept="image/*"
+                      onChange={handleScreenshotChange}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="screenshots"
+                      className="cursor-pointer flex flex-col items-center gap-2"
+                    >
+                      <Upload className="h-8 w-8 text-gray-400" />
+                      <span className="text-sm text-gray-600">
+                        {screenshots.length > 0
+                          ? `${screenshots.length} file(s) selected`
+                          : "Click to upload screenshots"}
+                      </span>
+                      <span className="text-xs text-gray-400">PNG, JPG up to 5 files</span>
+                    </label>
                   </div>
-                )}
-              </div>
+
+                  {screenshots.length > 0 && (
+                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                      {screenshots.map((file, index) => (
+                        <div key={index} className="relative group">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={`New Screenshot ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeNewScreenshot(index)}
+                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {!isEditMode && existingScreenshots.length === 0 && (
+                <p className="text-gray-500 text-sm">No screenshots available</p>
+              )}
             </div>
           </div>
 
@@ -466,14 +362,20 @@ const ConsultationForm = () => {
               </div>
             </div>
             <div className="p-6">
-              <textarea
-                name="chiefComplaints"
-                value={formData.chiefComplaints}
-                onChange={handleChange}
-                rows={4}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                placeholder="Enter chief complaints and associate symptoms..."
-              />
+              {isEditMode ? (
+                <textarea
+                  name="chiefComplaints"
+                  value={formData.chiefComplaints}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-gray-700 placeholder-gray-400 resize-none"
+                  placeholder="Enter chief complaints and associate symptoms..."
+                />
+              ) : (
+                <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 whitespace-pre-wrap">
+                  {formData.chiefComplaints || "Not specified"}
+                </div>
+              )}
             </div>
           </div>
 
@@ -487,160 +389,40 @@ const ConsultationForm = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Appetite</label>
-                  <textarea
-                    name="appetite"
-                    value={formData.appetite}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter appetite details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Thirst</label>
-                  <textarea
-                    name="thirst"
-                    value={formData.thirst}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter thirst details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Desire</label>
-                  <textarea
-                    name="desire"
-                    value={formData.desire}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter desire details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Aversion</label>
-                  <textarea
-                    name="aversion"
-                    value={formData.aversion}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter aversion details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Habits</label>
-                  <textarea
-                    name="habits"
-                    value={formData.habits}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter habits details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Stool</label>
-                  <textarea
-                    name="stool"
-                    value={formData.stool}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter stool details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Urine</label>
-                  <textarea
-                    name="urine"
-                    value={formData.urine}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter urine details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Perspiration</label>
-                  <textarea
-                    name="perspiration"
-                    value={formData.perspiration}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter perspiration details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Men/Women</label>
-                  <textarea
-                    name="menWomen"
-                    value={formData.menWomen}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter men/women specific details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Sleep</label>
-                  <textarea
-                    name="sleep"
-                    value={formData.sleep}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter sleep details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Dream</label>
-                  <textarea
-                    name="dream"
-                    value={formData.dream}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter dream details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Thermal</label>
-                  <textarea
-                    name="thermal"
-                    value={formData.thermal}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter thermal details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Amelioration</label>
-                  <textarea
-                    name="amelioration"
-                    value={formData.amelioration}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter amelioration details..."
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Aggravation</label>
-                  <textarea
-                    name="aggravation"
-                    value={formData.aggravation}
-                    onChange={handleChange}
- rows={3}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                    placeholder="Enter aggravation details..."
-                  />
-                </div>
+                {[
+                  { name: 'appetite', label: 'Appetite' },
+                  { name: 'thirst', label: 'Thirst' },
+                  { name: 'desire', label: 'Desire' },
+                  { name: 'aversion', label: 'Aversion' },
+                  { name: 'habits', label: 'Habits' },
+                  { name: 'stool', label: 'Stool' },
+                  { name: 'urine', label: 'Urine' },
+                  { name: 'perspiration', label: 'Perspiration' },
+                  { name: 'menWomen', label: 'Men/Women' },
+                  { name: 'sleep', label: 'Sleep' },
+                  { name: 'dream', label: 'Dream' },
+                  { name: 'thermal', label: 'Thermal' },
+                  { name: 'amelioration', label: 'Amelioration' },
+                  { name: 'aggravation', label: 'Aggravation' },
+                ].map((field) => (
+                  <div key={field.name}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">{field.label}</label>
+                    {isEditMode ? (
+                      <textarea
+                        name={field.name}
+                        value={formData[field.name]}
+                        onChange={handleChange}
+                        rows={3}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500/20 text-gray-700 placeholder-gray-400 resize-none"
+                        placeholder={`Enter ${field.label.toLowerCase()} details...`}
+                      />
+                    ) : (
+                      <div className="w-full p-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 whitespace-pre-wrap">
+                        {formData[field.name] || "Not specified"}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -649,19 +431,25 @@ const ConsultationForm = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-purple-50 to-pink-50 px-6 py-4 border-b border-gray-200">
               <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-purple-600" />
+                <FileText className="h-5 w-5 text-purple-600" />
                 <h2 className="text-lg font-semibold text-gray-800">Other Complaints</h2>
               </div>
             </div>
             <div className="p-6">
-              <textarea
-                name="otherComplaints"
-                value={formData.otherComplaints}
-                onChange={handleChange}
-                rows={3}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                placeholder="Enter other complaints..."
-              />
+              {isEditMode ? (
+                <textarea
+                  name="otherComplaints"
+                  value={formData.otherComplaints}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-gray-700 placeholder-gray-400 resize-none"
+                  placeholder="Enter other complaints..."
+                />
+              ) : (
+                <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 whitespace-pre-wrap">
+                  {formData.otherComplaints || "Not specified"}
+                </div>
+              )}
             </div>
           </div>
 
@@ -669,39 +457,51 @@ const ConsultationForm = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-orange-50 to-amber-50 px-6 py-4 border-b border-gray-200">
               <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-orange-600" />
+                <FileText className="h-5 w-5 text-orange-600" />
                 <h2 className="text-lg font-semibold text-gray-800">Levels of Health</h2>
               </div>
             </div>
             <div className="p-6">
-              <textarea
-                name="levelsOfHealth"
-                value={formData.levelsOfHealth}
-                onChange={handleChange}
-                rows={3}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                placeholder="Enter levels of health..."
-              />
+              {isEditMode ? (
+                <textarea
+                  name="levelsOfHealth"
+                  value={formData.levelsOfHealth}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 text-gray-700 placeholder-gray-400 resize-none"
+                  placeholder="Enter levels of health..."
+                />
+              ) : (
+                <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 whitespace-pre-wrap">
+                  {formData.levelsOfHealth || "Not specified"}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Perception/Prescription Section */}
+          {/* Perception & Prescription Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-red-50 to-rose-50 px-6 py-4 border-b border-gray-200">
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-red-600" />
-                <h2 className="text-lg font-semibold text-gray-800">Perception / Prescription</h2>
+                <h2 className="text-lg font-semibold text-gray-800">Perception & Prescription</h2>
               </div>
             </div>
             <div className="p-6">
-              <textarea
-                name="perception"
-                value={formData.perception}
-                onChange={handleChange}
-                rows={6}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-700 placeholder-gray-400 resize-none"
-                placeholder="Enter perception and prescription details..."
-              />
+              {isEditMode ? (
+                <textarea
+                  name="perception"
+                  value={formData.perception}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-gray-700 placeholder-gray-400 resize-none"
+                  placeholder="Enter perception and prescription details..."
+                />
+              ) : (
+                <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 whitespace-pre-wrap">
+                  {formData.perception || "Not specified"}
+                </div>
+              )}
             </div>
           </div>
 
@@ -714,14 +514,20 @@ const ConsultationForm = () => {
               </div>
             </div>
             <div className="p-6">
-              <input
-                type="text"
-                name="callDuration"
-                value={formData.callDuration}
-                onChange={handleChange}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-gray-700 placeholder-gray-400"
-                placeholder="Enter call duration..."
-              />
+              {isEditMode ? (
+                <input
+                  type="text"
+                  name="callDuration"
+                  value={formData.callDuration}
+                  onChange={handleChange}
+                  className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 text-gray-700 placeholder-gray-400"
+                  placeholder="Enter call duration..."
+                />
+              ) : (
+                <div className="w-full p-4 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
+                  {formData.callDuration || "Not recorded"}
+                </div>
+              )}
             </div>
           </div>
 
@@ -732,32 +538,36 @@ const ConsultationForm = () => {
               onClick={() => navigate("/doctor/appointments")}
               className="px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-all"
             >
-              Cancel
+              {isEditMode ? "Cancel" : "Back"}
             </button>
-            <button
-              type="button"
-              onClick={handleSaveDraft}
-              className="px-8 py-3 border-2 border-amber-400 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-all"
-            >
-              Save Draft
-            </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-500/30"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save size={18} />
-                  Save Changes
-                </>
-              )}
-            </button>
+            {isEditMode && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleSaveDraft}
+                  className="px-8 py-3 border-2 border-amber-400 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-all"
+                >
+                  Save Draft
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-500/30"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} />
+                      Save Changes
+                    </>
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </form>
       </div>

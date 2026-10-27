@@ -220,67 +220,69 @@ export default function PatientManagement() {
         </div>
 
         {/* Table - desktop/tablet */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50/50 border-b border-gray-100">
-              <tr className="text-left text-gray-500 uppercase tracking-wider text-xs">
-                {COLUMNS.map((col) => (
-                  <th key={col.key} className="px-6 py-4 font-semibold whitespace-nowrap">
-                    {col.label}
-                  </th>
-                ))}
-                <th className="px-6 py-4 font-semibold whitespace-nowrap text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {patients.map((patient) => (
-                <tr key={patient.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4.5 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-xs border border-brand-primary/10 flex-shrink-0">
-                        {patient.user?.name?.[0] || "P"}
+        <div className="hidden md:block">
+          <div className="w-full overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
+            <table className="w-full text-xs sm:text-sm text-left min-w-[700px]">
+              <thead className="bg-gray-50/50 border-b border-gray-100">
+                <tr className="text-left text-gray-500 uppercase tracking-wider text-[10px] sm:text-xs">
+                  {COLUMNS.map((col) => (
+                    <th key={col.key} className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold whitespace-nowrap">
+                      {col.label}
+                    </th>
+                  ))}
+                  <th className="px-3 sm:px-6 py-2.5 sm:py-4 font-semibold whitespace-nowrap text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {patients.map((patient) => (
+                  <tr key={patient.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-3 sm:px-6 py-2.5 sm:py-4.5 whitespace-nowrap">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-brand-light flex items-center justify-center font-bold text-brand-dark text-[10px] sm:text-xs border border-brand-primary/10 flex-shrink-0">
+                          {patient.user?.name?.[0] || "P"}
+                        </div>
+                        <span className="font-semibold text-gray-900 text-xs sm:text-sm truncate">{patient.user?.name}</span>
                       </div>
-                      <span className="font-semibold text-gray-900">{patient.user?.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{patient.user?.email}</td>
-                  <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">{patient.user?.mobile}</td>
-                  <td className="px-6 py-4.5 text-gray-700 font-semibold whitespace-nowrap capitalize">{patient.gender || "-"}</td>
-                  <td className="px-6 py-4.5 text-gray-600 whitespace-nowrap font-medium">
-                    {[patient.city, patient.country].filter(Boolean).join(", ") || "-"}
-                  </td>
-                  <td className="px-6 py-4.5 text-gray-400 font-semibold whitespace-nowrap">{formatDate(patient.createdAt)}</td>
-                  <td className="px-6 py-4.5 text-right whitespace-nowrap">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleViewPatient(patient)}
-                        disabled={actionLoading}
-                        className="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="View Details"
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeletePatient(patient.id)}
-                        disabled={actionLoading}
-                        className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {!loading && patients.length === 0 && (
-                <tr>
-                  <td colSpan={COLUMNS.length + 1} className="px-6 py-12 text-center text-gray-400 font-medium">
-                    No patients match your search.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    </td>
+                    <td className="px-3 sm:px-6 py-2.5 sm:py-4.5 text-gray-600 whitespace-nowrap font-medium text-xs sm:text-sm truncate max-w-[120px] sm:max-w-[200px]">{patient.user?.email}</td>
+                    <td className="px-3 sm:px-6 py-2.5 sm:py-4.5 text-gray-600 whitespace-nowrap font-medium text-xs sm:text-sm">{patient.user?.mobile}</td>
+                    <td className="px-3 sm:px-6 py-2.5 sm:py-4.5 text-gray-700 font-semibold whitespace-nowrap capitalize text-xs sm:text-sm">{patient.gender || "-"}</td>
+                    <td className="px-3 sm:px-6 py-2.5 sm:py-4.5 text-gray-600 whitespace-nowrap font-medium text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[150px]">
+                      {[patient.city, patient.country].filter(Boolean).join(", ") || "-"}
+                    </td>
+                    <td className="px-3 sm:px-6 py-2.5 sm:py-4.5 text-gray-400 font-semibold whitespace-nowrap text-xs sm:text-sm">{formatDate(patient.createdAt)}</td>
+                    <td className="px-3 sm:px-6 py-2.5 sm:py-4.5 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+                        <button
+                          onClick={() => handleViewPatient(patient)}
+                          disabled={actionLoading}
+                          className="text-blue-500 hover:bg-blue-50 p-1 sm:p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="View Details"
+                        >
+                          <Eye size={12} className="sm:w-[16px] sm:h-[16px]" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePatient(patient.id)}
+                          disabled={actionLoading}
+                          className="text-red-500 hover:bg-red-50 p-1 sm:p-1.5 rounded-lg transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Delete"
+                        >
+                          <Trash2 size={12} className="sm:w-[16px] sm:h-[16px]" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {!loading && patients.length === 0 && (
+                  <tr>
+                    <td colSpan={COLUMNS.length + 1} className="px-3 sm:px-6 py-6 sm:py-12 text-center text-gray-400 font-medium text-xs sm:text-sm">
+                      No patients match your search.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Cards - mobile only */}

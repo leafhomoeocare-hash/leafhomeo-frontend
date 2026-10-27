@@ -556,8 +556,8 @@ export default function MyAppointments() {
         </div>
 
         {/* Compact Table */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
-          <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-xs">
+          <div className="w-full overflow-x-auto rounded-2xl">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="bg-gray-50/80 border-b border-gray-200 text-[10px] sm:text-[11px] uppercase tracking-wider text-gray-500 font-bold">

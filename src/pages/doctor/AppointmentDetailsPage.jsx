@@ -248,12 +248,12 @@ export default function DoctorAppointmentDetailsPage() {
               ) : pastConsultations.length === 0 ? (
                 <p className="text-sm text-gray-500">No past consultations found with this patient.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {pastConsultations.map((consultation) => (
-                    <button
+                    <a
                       key={consultation.id}
-                      onClick={() => navigate(`/doctor/consultation/${consultation.appointmentId}`)}
-                      className="w-full flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:border-emerald-300 hover:shadow-md transition-all group"
+                      href={`/doctor/consultation/${consultation.appointmentId}`}
+                      className="w-full flex items-center justify-between p-3 bg-white border border-gray-200 rounded-xl hover:border-emerald-300 hover:shadow-md transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-2 bg-emerald-100 rounded-lg group-hover:bg-emerald-200 transition-colors">
@@ -265,7 +265,7 @@ export default function DoctorAppointmentDetailsPage() {
                         </div>
                       </div>
                       <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-emerald-600 transition-colors" />
-                    </button>
+                    </a>
                   ))}
                 </div>
               )}
@@ -273,7 +273,7 @@ export default function DoctorAppointmentDetailsPage() {
             <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-100">
               {appointment.patientUserId && <button onClick={() => navigate("/doctor/chat", { state: { selectUserId: appointment.patientUserId } })} className="flex-1 min-w-[140px] h-11 bg-brand-primary hover:bg-brand-hover text-white font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"><MessageSquare size={16} />Chat with Patient</button>}
               {isPending && <><button onClick={handleAccept} disabled={actionLoadingId === appointment.id} className="flex-1 min-w-[140px] h-11 bg-brand-primary text-white hover:bg-brand-hover font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50">{actionLoadingId === appointment.id ? <><Loader2 size={16} className="animate-spin" />Accepting...</> : <><Check size={16} />Accept</>}</button><button onClick={handleReject} disabled={actionLoadingId === appointment.id} className="flex-1 min-w-[140px] h-11 bg-white text-rose-600 hover:bg-rose-50 border border-rose-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50">{actionLoadingId === appointment.id ? <><Loader2 size={16} className="animate-spin" />Rejecting...</> : <><X size={16} />Reject</>}</button></>}
-              {canCallNow && <button onClick={() => navigate(`/doctor/video-call?appointmentId=${appointment.id}`)} className="flex-1 min-w-[140px] h-11 bg-brand-primary text-white hover:bg-brand-hover font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"><Video size={16} />Join Call</button>}
+              {canCallNow && <button onClick={() => window.open(`/doctor/video-call?appointmentId=${appointment.id}`, '_blank')} className="flex-1 min-w-[140px] h-11 bg-brand-primary text-white hover:bg-brand-hover font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center gap-2"><Video size={16} />Join Call</button>}
 
 
               {hasDraft() && !isCompleted && <button onClick={() => navigate(`/doctor/consultation/${appointment.id}`, { state: { mode: 'edit' } })} className="flex-1 min-w-[140px] h-11 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 font-bold rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs"><FileText size={16} />Complete Draft</button>}

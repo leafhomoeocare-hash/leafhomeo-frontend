@@ -44,7 +44,7 @@ export default function MyAppointments() {
   
   // Sorting & Pagination
   const [sortColumn, setSortColumn] = useState("appointmentDateTime");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
 
@@ -223,7 +223,7 @@ export default function MyAppointments() {
     Swal.fire({
       icon: "success",
       title: "Payment Successful!",
-      text: "Your appointment has been confirmed.",
+      text: "Your appointment has been booked.",
       confirmButtonColor: "#10b981"
     });
   };
@@ -240,11 +240,10 @@ export default function MyAppointments() {
           </span>
         );
       case "accepted":
-      case "confirmed":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <CheckCircle className="w-3 h-3 text-emerald-500" />
-            {s === "accepted" ? "Accepted" : "Confirmed"}
+            Accepted
           </span>
         );
       case "paid":
@@ -360,7 +359,14 @@ export default function MyAppointments() {
 
   const getStatusCount = (status) => {
     if (status === "all") return appointments.length;
-    return appointments.filter(app => (app.status || "").toLowerCase() === status.toLowerCase()).length;
+    const statusLower = status.toLowerCase();
+    return appointments.filter(app => {
+      const appStatus = (app.status || "").toLowerCase();
+      if (statusLower === "accepted") {
+        return appStatus === "accepted" || appStatus === "confirmed";
+      }
+      return appStatus === statusLower;
+    }).length;
   };
 
   // Sorting Handler
@@ -383,7 +389,11 @@ export default function MyAppointments() {
         (apt.appointmentId || "").toString().toLowerCase().includes(term) ||
         (apt.reason || apt.symptoms || "").toLowerCase().includes(term);
 
-      const matchesFilter = filter === "all" || (apt.status || "").toLowerCase() === filter.toLowerCase();
+      const appStatus = (apt.status || "").toLowerCase();
+      let matchesFilter = filter === "all" || appStatus === filter.toLowerCase();
+      if (filter === "accepted") {
+        matchesFilter = appStatus === "accepted" || appStatus === "confirmed";
+      }
       return matchesSearch && matchesFilter;
     });
 
@@ -526,7 +536,7 @@ export default function MyAppointments() {
 
           {/* Status Filter Badges */}
           <div className="flex gap-1 sm:gap-1.5 overflow-x-auto pb-1 pt-1 scrollbar-none border-t border-gray-100">
-            {["all", "Pending", "Confirmed", "Paid", "Completed", "Cancelled"].map((status) => {
+            {["all", "Pending", "Accepted", "Paid", "Completed", "Cancelled"].map((status) => {
               const statusKey = status.toLowerCase();
               const isSelected = filter === statusKey;
               return (
@@ -624,7 +634,7 @@ export default function MyAppointments() {
                 ) : (
                   currentAppointments.map((apt) => {
                     const statusLower = (apt.status || "").toLowerCase();
-                    const isAccepted = statusLower === "accepted" || statusLower === "confirmed";
+                    const isAccepted = statusLower === "accepted";
                     const isPaid = statusLower === "paid";
                     const isCompleted = statusLower === "completed";
                     const isCancelled = statusLower === "cancelled" || statusLower === "rejected";

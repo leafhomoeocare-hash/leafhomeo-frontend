@@ -26,7 +26,7 @@ import Profile from "../pages/patient/Profile";
 import EditProfile from "../pages/patient/EditProfile";
 import ChangePassword from "../pages/patient/ChangePassword";
 import CompleteProfile from "../pages/patient/CompleteProfile";
-import Notifications from "../pages/patient/Notifications";
+
 import PrivacyPolicyView from "../pages/patient/PrivacyPolicy";
 import TermsConditionsView from "../pages/patient/TermsConditions";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -96,7 +96,7 @@ function AppRouter() {
       <Route path="/patient/profile/edit" element={<ProtectedRoute allowedRole="patient"><EditProfile /></ProtectedRoute>} />
       <Route path="/patient/profile/change-password" element={<ProtectedRoute allowedRole="patient"><ChangePassword /></ProtectedRoute>} />
       <Route path="/patient/complete-profile" element={<ProtectedRoute allowedRole="patient"><CompleteProfile /></ProtectedRoute>} />
-      <Route path="/patient/notifications" element={<ProtectedRoute allowedRole="patient"><Notifications /></ProtectedRoute>} />
+
       <Route path="/patient/privacy-policy" element={<ProtectedRoute allowedRole="patient"><PrivacyPolicyView /></ProtectedRoute>} />
       <Route path="/patient/terms-conditions" element={<ProtectedRoute allowedRole="patient"><TermsConditionsView /></ProtectedRoute>} />
       <Route path="/patient/blog" element={<ProtectedRoute allowedRole="patient"><PatientBlog /></ProtectedRoute>} />

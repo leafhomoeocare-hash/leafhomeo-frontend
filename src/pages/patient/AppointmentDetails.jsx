@@ -144,14 +144,13 @@ export default function AppointmentDetails() {
       return;
     }
 
-    // Check if patient has address before booking (Bypassed)
-    /*
+    // Check if patient profile is complete before booking
     const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-    if (!user.houseNumber || !user.city || !user.state || !user.pincode) {
+    if (!user.IsCompleteProfile) {
       Swal.fire({
         icon: "info",
         title: "Complete Your Profile",
-        text: "Please complete your profile with address details before booking an appointment.",
+        text: "Please complete your profile before booking an appointment.",
         confirmButtonColor: "#10b981",
         confirmButtonText: "Complete Profile"
       }).then((result) => {
@@ -161,7 +160,6 @@ export default function AppointmentDetails() {
       });
       return;
     }
-    */
 
     try {
       setBookingLoading(true);

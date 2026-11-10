@@ -170,7 +170,27 @@ export default function AdminAppointmentDetailsPage() {
               <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Date</p><p className="text-sm text-gray-800 font-bold mt-1">{dt.date}</p></div>
               <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Time</p><p className="text-sm text-gray-800 font-bold mt-1">{dt.time}</p></div>
               <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Status</p><div className="mt-1">{getStatusBadge(appointment.status)}</div></div>
-              <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Payment</p><div className="mt-1">{getPaymentBadge(appointment.payment?.status || "pending")}</div></div>
+              <div><p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Payment</p><div className="mt-1 flex flex-col gap-1">{getPaymentBadge(appointment.payment?.status || "pending")}<p className="text-xs font-bold text-gray-900">₹{appointment.payment?.amount || appointment.doctor?.consultationFee || '-'}</p></div></div>
+            </div>
+
+            {/* Payment Details Card */}
+            <div className="bg-emerald-50/30 border border-emerald-100 rounded-2xl p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Consultation Fee</p>
+                  <p className="text-2xl font-extrabold text-emerald-700 mt-1">₹{appointment.doctor?.consultationFee || appointment.payment?.amount || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Payment Status</p>
+                  <span className={`inline-flex mt-1.5 items-center px-2.5 py-1 rounded-full text-sm font-semibold border ${
+                    appointment.payment?.status === 'paid'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}>
+                    {appointment.payment?.status || 'Pending'}
+                  </span>
+                </div>
+              </div>
             </div>
             <div className="bg-gray-50/30 p-6 border border-gray-100/50 rounded-2xl">
               <div className="grid grid-cols-2 gap-4">

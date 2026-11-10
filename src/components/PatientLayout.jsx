@@ -238,14 +238,6 @@ function TopHeader({ setSidebarOpen, notifications, setNotifications, handleNoti
                   </div>
                 )}
               </div>
-              <div className="border-t border-gray-100 px-3 py-2">
-                <button
-                  onClick={() => { navigate("/patient/notifications"); setShowNotifications(false); }}
-                  className="w-full text-center text-xs font-bold text-brand-primary hover:underline"
-                >
-                  View All Notifications
-                </button>
-              </div>
             </div>
           )}
         </div>

@@ -39,6 +39,7 @@ export default function AppointmentDetailsPage() {
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [trackingModalOpen, setTrackingModalOpen] = useState(false);
 
@@ -56,7 +57,13 @@ export default function AppointmentDetailsPage() {
       setLoading(true);
       const response = await getAppointmentDetails(appointmentId);
       if (response.status === 1) {
+        console.log("Appointment data:", response.data);
+        console.log("hasReviewed:", response.data.hasReviewed);
         setAppointment(response.data);
+        // Check if review already exists
+        if (response.data.hasReviewed) {
+          setHasReviewed(true);
+        }
       } else {
         setError(response.message || "Failed to fetch appointment");
       }
@@ -160,6 +167,7 @@ export default function AppointmentDetailsPage() {
           timerProgressBar: true
         }).then(() => {
           setReviewModalOpen(false);
+          setHasReviewed(true);
           fetchAppointmentDetails();
         });
       } else {
@@ -189,7 +197,7 @@ export default function AppointmentDetailsPage() {
     Swal.fire({
       icon: "success",
       title: "Payment Successful!",
-      text: "Your appointment has been confirmed.",
+      text: "Your appointment has been booked.",
       confirmButtonColor: "#10b981"
     });
   };
@@ -205,11 +213,10 @@ export default function AppointmentDetailsPage() {
           </span>
         );
       case "accepted":
-      case "confirmed":
         return (
           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
             <CheckCircle className="w-3 h-3 text-emerald-500" />
-            {s === "accepted" ? "Accepted" : "Confirmed"}
+            Accepted
           </span>
         );
       case "paid":
@@ -455,7 +462,7 @@ export default function AppointmentDetailsPage() {
   }
 
   const statusLower = (appointment.status || "").toLowerCase();
-  const isAccepted = statusLower === "accepted" || statusLower === "confirmed";
+  const isAccepted = statusLower === "accepted";
   const isPaid = statusLower === "paid";
   const isCompleted = statusLower === "completed";
   const isCancelled = statusLower === "cancelled" || statusLower === "rejected";
@@ -506,7 +513,7 @@ export default function AppointmentDetailsPage() {
                       "Payment is pending. Please complete the payment to confirm your appointment with the doctor."
                     )}
                     {appointment.status === 'paid' && (
-                      "Payment completed successfully! Your appointment is confirmed. You can now chat with the doctor before the consultation."
+                      "Payment completed successfully! You can now chat with the doctor before the consultation."
                     )}
                     {appointment.status === 'completed' && (
                       <>

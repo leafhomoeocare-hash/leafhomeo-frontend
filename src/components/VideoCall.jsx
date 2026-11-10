@@ -180,6 +180,25 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       });
       setLocalTracks([]);
 
+      // Force stop all media tracks in the page
+      if (window.stream) {
+        window.stream.getTracks().forEach(track => {
+          track.stop();
+        });
+        window.stream = null;
+      }
+
+      // Stop all active media tracks from any previous connections
+      if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        try {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const videoDevices = devices.filter(device => device.kind === 'videoinput');
+          console.log('Found video devices:', videoDevices.length);
+        } catch (e) {
+          console.log('Error enumerating devices:', e);
+        }
+      }
+
       // Use Twilio's createLocalTracks as per their documentation
       const tracks = await TwilioVideo.createLocalTracks({
         audio: true,
@@ -199,7 +218,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       if (localVideoTrack && previewVideoRef.current) {
         previewVideoRef.current.innerHTML = '';
         const mediaElement = localVideoTrack.attach();
-        mediaElement.className = 'w-full h-full object-cover';
+        mediaElement.className = 'w-full h-full object-contain';
         mediaElement.muted = true;
         mediaElement.playsInline = true;
         mediaElement.autoplay = true;
@@ -222,7 +241,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       } else if (err.name === 'NotFoundError') {
         setPermissionError('No camera or microphone found. Please connect a camera and microphone and try again.');
       } else if (err.name === 'NotReadableError') {
-        setPermissionError('Camera or microphone is already in use by another application. Please close other apps and try again.');
+        setPermissionError('Camera or microphone is already in use. Solutions: 1) Close Zoom/Teams/Skype/other video apps 2) Close all browser tabs with camera 3) Check Windows Camera Settings > Privacy > Camera > Allow apps to access camera 4) Restart browser. Click "Retry" after fixing.');
       } else if (err.name === 'OverconstrainedError') {
         setPermissionError('Camera does not support the requested resolution. Trying with default settings...');
         // Retry with default settings
@@ -463,7 +482,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     if (container) {
       container.innerHTML = '';
       const mediaElement = track.attach();
-      mediaElement.className = 'w-full h-full object-cover';
+      mediaElement.className = 'w-full h-full object-contain';
       if (track.kind === 'audio') {
         mediaElement.className = 'hidden';
       }
@@ -531,9 +550,9 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       if (container) {
         // Clear existing content
         container.innerHTML = '';
-        
+
         const mediaElement = track.attach();
-        mediaElement.className = 'w-full h-full object-cover';
+        mediaElement.className = 'w-full h-full object-contain';
         container.appendChild(mediaElement);
         console.log("Video track attached successfully");
       } else {
@@ -673,7 +692,6 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     setIntentionalEnd(true);
 
     // Notify backend that this user ended the call
-    // Backend will complete appointment only when both parties have ended
     try {
       const response = await endVideoCall(appointmentId);
       if (response.status === 1) {
@@ -681,7 +699,11 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         if (response.message.includes('completed')) {
           alert('Appointment completed successfully!');
         } else {
-          alert('Call ended. Waiting for other participant to end the call to complete the appointment.');
+          if (userType === 'patient') {
+            alert('Call ended. The doctor is still available in the meeting.');
+          } else {
+            alert('Call ended. Patient disconnected. Appointment completed.');
+          }
         }
       }
     } catch (err) {
@@ -691,9 +713,12 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
     await cleanupRoom(true); // true = intentional end
     setCallState('ended');
 
-    // Only call onEndCall if it was intentional
-    if (onEndCall) {
+    // Patient end kare to sirf screen close ho, doctor ke liye onEndCall call mat karo
+    if (userType === 'doctor' && onEndCall) {
       onEndCall();
+    } else if (userType === 'patient') {
+      // Patient end kare to sirf close kar do, navigation nahi
+      window.close();
     }
   };
 
@@ -855,7 +880,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
       if (localVideoTrack && localVideoRef.current) {
         localVideoRef.current.innerHTML = '';
         const mediaElement = localVideoTrack.attach();
-        mediaElement.className = 'w-full h-full object-cover';
+        mediaElement.className = 'w-full h-full object-contain';
         mediaElement.muted = true; // Mute local audio to prevent feedback
         localVideoRef.current.appendChild(mediaElement);
         console.log("Local video track attached");
@@ -884,7 +909,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
             console.log("Attaching pending video track for participant:", participant.sid);
             videoContainer.innerHTML = '';
             const mediaElement = track.attach();
-            mediaElement.className = 'w-full h-full object-cover';
+            mediaElement.className = 'w-full h-full object-contain';
             videoContainer.appendChild(mediaElement);
           } else if (track.kind === 'audio' && audioContainer && audioContainer.children.length === 0) {
             console.log("Attaching pending audio track for participant:", participant.sid);
@@ -904,7 +929,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
             console.log("Attaching video track for participant:", participant.sid);
             videoContainer.innerHTML = '';
             const mediaElement = publication.track.attach();
-            mediaElement.className = 'w-full h-full object-cover';
+            mediaElement.className = 'w-full h-full object-contain';
             videoContainer.appendChild(mediaElement);
           } else if (publication.track.kind === 'audio' && audioContainer && audioContainer.children.length === 0) {
             console.log("Attaching audio track for participant:", participant.sid);
@@ -932,7 +957,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
           {/* Content */}
           <div className="p-8">
             {/* Video Preview */}
-            <div className="relative bg-gray-900 rounded-2xl overflow-hidden mb-6 aspect-video">
+            <div className="relative bg-black rounded-2xl overflow-hidden mb-6 aspect-video">
               <div
                 ref={previewVideoRef}
                 className="w-full h-full"
@@ -949,9 +974,18 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
-                  <div>
+                  <div className="flex-1">
                     <p className="text-red-800 font-medium text-sm">Permission Required</p>
                     <p className="text-red-600 text-sm mt-1">{permissionError}</p>
+                    <button
+                      onClick={() => {
+                        setPermissionError(null);
+                        checkPermissionsAndShowPreview();
+                      }}
+                      className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+                    >
+                      Retry
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1006,7 +1040,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
           {/* Content */}
           <div className="p-8 text-center">
             {/* Video Preview */}
-            <div className="relative bg-gray-900 rounded-2xl overflow-hidden mb-6 aspect-video">
+            <div className="relative bg-black rounded-2xl overflow-hidden mb-6 aspect-video">
               <div ref={localVideoRef} className="w-full h-full"></div>
               <div ref={localAudioRef}></div>
               
@@ -1194,11 +1228,11 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         <div className={`relative p-4 flex-1 min-h-0 ${showConsultationForm && userType === 'doctor' ? '' : 'w-full'}`}>
         {hasRemoteParticipants ? (
           // Remote participant big screen, local video picture-in-picture
-          <div className="h-full w-full relative bg-slate-900 rounded-2xl overflow-hidden shadow-xl">
+          <div className="h-full w-full relative bg-black rounded-2xl overflow-hidden shadow-xl">
             {/* Remote Participant - Big Screen */}
             {remoteParticipants.map((participant) => (
-              <div key={participant.sid} className="absolute inset-0">
-                <div 
+              <div key={participant.sid} className="absolute inset-0 bg-black">
+                <div
                   ref={(el) => participantVideoRefs.current[participant.sid] = el}
                   className="w-full h-full"
                 ></div>
@@ -1216,7 +1250,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
             ))}
 
             {/* Local Video - Picture-in-Picture (Small) */}
-            <div className="absolute bottom-4 right-4 w-48 h-36 bg-slate-800 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20">
+            <div className="absolute bottom-4 right-4 w-48 h-36 bg-black rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20">
               {isVideoEnabled ? (
                 <div ref={localVideoRef} className="w-full h-full"></div>
               ) : (
@@ -1259,7 +1293,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
           </div>
         ) : (
           // Full screen local video when waiting (no one has joined yet)
-          <div className="h-full w-full relative bg-slate-900 rounded-2xl overflow-hidden shadow-xl">
+          <div className="h-full w-full relative bg-black rounded-2xl overflow-hidden shadow-xl">
             {isVideoEnabled ? (
               <div ref={localVideoRef} className="w-full h-full"></div>
             ) : (
@@ -1587,13 +1621,6 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
                 >
                   {submittingForm ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  onClick={handleLaterSubmit}
-                  disabled={submittingForm}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                >
-                  Later
                 </button>
                 <button
                   onClick={handleSubmitForm}

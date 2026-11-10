@@ -54,7 +54,16 @@ const SHIPPING_STYLES = {
 
 function formatDateTime(dateStr) {
   if (!dateStr) return "-";
-  const d = new Date(dateStr);
+  // Handle string format "YYYY-MM-DD HH:mm:ss"
+  let d;
+  if (typeof dateStr === 'string' && dateStr.includes(' ')) {
+    const [datePart, timePart] = dateStr.split(' ');
+    const [year, month, day] = datePart.split('-').map(Number);
+    const [hours, minutes, seconds] = timePart.split(':').map(Number);
+    d = new Date(year, month - 1, day, hours, minutes, seconds || 0);
+  } else {
+    d = new Date(dateStr);
+  }
   if (isNaN(d.getTime())) return "-";
   const date = d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
   const time = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
@@ -277,8 +286,8 @@ export default function AppointmentManagement() {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
         {/* Table - desktop/tablet */}
         <div className="hidden md:block">
-          <div className="w-full overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0">
-            <table className="w-full text-xs text-left min-w-[800px]">
+          <div className="w-full overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0 custom-scrollbar">
+            <table className="w-full text-xs text-left min-w-[900px]">
               <thead className="bg-gray-50/50 border-b border-gray-100">
                 <tr className="text-left text-gray-500 uppercase tracking-wider text-[10px]">
                   {COLUMNS.map((col) => (
@@ -294,10 +303,10 @@ export default function AppointmentManagement() {
                   return (
                     <tr key={appt.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">
-                        <span className="font-semibold text-gray-900 text-xs">#{appt.appointmentId || appt.id}</span>
+                        <span className="font-semibold text-gray-900 text-xs text-blue-600 hover:text-blue-800 hover:underline cursor-pointer" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>#{appt.appointmentId || appt.id}</span>
                       </td>
                       <td className="px-3 sm:px-4 py-2.5 sm:py-3 whitespace-nowrap">
-                        <div className="flex items-center gap-2 cursor-pointer hover:opacity-80" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>
+                        <div className="flex items-center gap-2">
                           {appt.patient?.image ? (
                             <img
                               src={getImageUrl(appt.patient.image)}
@@ -314,7 +323,7 @@ export default function AppointmentManagement() {
                             </div>
                           )}
                           <div>
-                            <span className="font-semibold text-gray-900 block text-xs hover:underline truncate max-w-[120px] sm:max-w-[150px]">{appt.patient?.name}</span>
+                            <span className="font-semibold text-gray-900 block text-xs truncate max-w-[120px] sm:max-w-[150px]">{appt.patient?.name}</span>
                             <span className="text-[10px] text-gray-400 truncate max-w-[120px] sm:max-w-[150px]">{appt.patient?.email || "-"}</span>
                           </div>
                         </div>
@@ -430,7 +439,7 @@ export default function AppointmentManagement() {
             return (
               <div key={appt.id} className="p-5 hover:bg-gray-50/50">
                 <div className="flex items-start justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer hover:opacity-80" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
                     {appt.patient?.image ? (
                       <img
                         src={getImageUrl(appt.patient.image)}
@@ -447,7 +456,7 @@ export default function AppointmentManagement() {
                       </div>
                     )}
                     <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate hover:underline">{appt.patient?.name}</p>
+                      <p className="font-semibold text-gray-900 truncate">{appt.patient?.name}</p>
                       <p className="text-xs text-gray-400 truncate">{appt.patient?.email || "-"}</p>
                     </div>
                   </div>
@@ -455,6 +464,10 @@ export default function AppointmentManagement() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-y-3 gap-x-4 text-xs font-medium text-gray-600 mb-4">
+                  <div>
+                    <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400">Appointment ID</p>
+                    <p className="text-gray-900 mt-0.5 text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-semibold" onClick={() => navigate(`/admin/appointments/${appt.id}`, { state: { appointmentId: appt.id } })}>#{appt.appointmentId || appt.id}</p>
+                  </div>
                   <div>
                     <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400 flex items-center gap-1">
                       <Phone size={11} /> Phone

@@ -39,7 +39,7 @@ export default function DoctorAppointments() {
 
   // Sorting & Pagination
   const [sortColumn, setSortColumn] = useState("appointmentDateTime");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
 
@@ -360,6 +360,19 @@ export default function DoctorAppointments() {
         };
         aVal = parseDate(a.appointmentDateTime);
         bVal = parseDate(b.appointmentDateTime);
+
+        // Upcoming appointments first, then past. Upcoming sorted by chosen
+        // order; past always newest-first.
+        const now = Date.now();
+        const aFuture = aVal >= now;
+        const bFuture = bVal >= now;
+        if (aFuture !== bFuture) return aFuture ? -1 : 1;
+        const effectiveOrder = !aFuture
+          ? (sortOrder === "asc" ? "desc" : "asc")
+          : sortOrder;
+        if (aVal < bVal) return effectiveOrder === "asc" ? -1 : 1;
+        if (aVal > bVal) return effectiveOrder === "asc" ? 1 : -1;
+        return 0;
       } else if (sortColumn === "appointmentId") {
         aVal = (a.appointmentId || a.id || "").toString();
         bVal = (b.appointmentId || b.id || "").toString();

@@ -5,6 +5,7 @@ import { Video, Star, Calendar, Package, MessageSquare, ArrowRight, ArrowLeft, C
 import { getUpcomingAppointments, getPatientAppointments } from "../../api/appointmentApi";
 import { getExpertDoctors } from "../../api/doctorApi";
 import { getImageUrl } from "../../utils/imageHelper";
+import { openVideoCallInNewTab } from "../../api/videoApi";
 import { usePatientNotifications } from "../../components/PatientLayout";
 
 const formatTimeDifference = (dateString) => {
@@ -300,7 +301,7 @@ function DashboardContent() {
                             console.error("Appointment ID is missing!");
                             return;
                           }
-                          navigate(`/patient/video-call?appointmentId=${upcomingAppointment.appointmentId}`);
+                          openVideoCallInNewTab(`/patient/video-call?appointmentId=${upcomingAppointment.appointmentId}`);
                         }}
                         className="flex-1 bg-brand-primary hover:bg-brand-hover text-white py-3 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
                       >

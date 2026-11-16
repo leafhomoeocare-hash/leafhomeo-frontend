@@ -24,6 +24,7 @@ import {
 import DoctorLayout from "../../components/DoctorLayout";
 import { getDoctorAppointments, acceptAppointment, rejectAppointment } from "../../api/doctorApi";
 import { getImageUrl } from "../../utils/imageHelper";
+import { openVideoCallInNewTab } from "../../api/videoApi";
 import Swal from "sweetalert2";
 
 export default function DoctorAppointments() {
@@ -687,7 +688,7 @@ export default function DoctorAppointments() {
                               <button
                                 onClick={() => {
                                   if (!apt.id) return;
-                                  navigate(`/doctor/video-call?appointmentId=${apt.id}`);
+                                  openVideoCallInNewTab(`/doctor/video-call?appointmentId=${apt.id}`);
                                 }}
                                 className="h-7 sm:h-8 px-2 sm:px-2.5 bg-brand-primary text-white hover:bg-brand-hover text-[10px] sm:text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                               >

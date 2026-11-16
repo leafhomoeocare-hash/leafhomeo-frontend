@@ -436,13 +436,12 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         setParticipantCount(room.participants.size);
         removeParticipant(participant);
         
-        // If no one else is in the room, show a message but don't auto-end or redirect
-        // Let the user decide when to end the call
+        // If no one else is in the room, stay in the meeting (waiting screen shows)
+        // so the remaining participant can continue / the other can rejoin.
+        // Only the user who presses "End Call" leaves.
         if (room.participants.size === 0) {
-          console.log("All participants left, waiting for user to end call");
-          setCallState('ended');
-          // Show message that other party left
-          setError('The other participant has left the call. Please end the call to complete the appointment.');
+          console.log("All participants left, staying in meeting (waiting state)");
+          setCallState('in-call');
         }
       });
 

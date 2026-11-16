@@ -19,6 +19,19 @@ export const getVideoToken = async (appointmentId) => {
   }
 };
 
+// Open video call in a new tab. sessionStorage is per-tab, so auth is handed
+// off via localStorage one-time key (restored in main.jsx on app load).
+export const openVideoCallInNewTab = (path) => {
+  localStorage.setItem(
+    "vc_auth_handoff",
+    JSON.stringify({
+      token: sessionStorage.getItem("token"),
+      user: sessionStorage.getItem("user"),
+    })
+  );
+  window.open(path, "_blank");
+};
+
 export const endVideoCall = async (appointmentId) => {
   try {
     const response = await API.post("/api/v1/appointment/end-video-call", {

@@ -5,6 +5,7 @@ import { Users, Calendar, Clock, CheckCircle, Stethoscope, Video, Star, ArrowRig
 import { getUser } from "../../api/authApi";
 import { getDoctorAppointments } from "../../api/doctorApi";
 import { useDoctorNotifications } from "../../components/DoctorLayout";
+import { openVideoCallInNewTab } from "../../api/videoApi";
 
 function formatShortDate(dateStr) {
   if (!dateStr) return "-";
@@ -365,7 +366,7 @@ function DashboardContent() {
               <div className="flex gap-3">
                 {canStartCall ? (
                   <button
-                    onClick={() => navigate(`/doctor/video-call?appointmentId=${upcomingAppointment.id}`)}
+                    onClick={() => openVideoCallInNewTab(`/doctor/video-call?appointmentId=${upcomingAppointment.id}`)}
                     className="px-6 py-3 bg-brand-primary hover:bg-brand-hover text-white text-sm font-bold rounded-xl flex items-center gap-2 transition-all shadow-xs cursor-pointer"
                   >
                     <Video className="h-4 w-4" /> Start Call

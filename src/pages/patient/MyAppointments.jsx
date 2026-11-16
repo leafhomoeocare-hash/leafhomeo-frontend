@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import PatientLayout from "../../components/PatientLayout";
 import { getMyAppointments, cancelAppointment } from "../../api/appointmentApi";
 import { getImageUrl } from "../../utils/imageHelper";
+import { openVideoCallInNewTab } from "../../api/videoApi";
 import Payment from "../../components/Payment";
 import Swal from "sweetalert2";
 import axios from "axios";
@@ -748,7 +749,7 @@ export default function MyAppointments() {
                             {isPaid && !isCancelled && canJoinCall(apt) && (
                               <button
                                 onClick={() =>
-                                  navigate(`/patient/video-call?appointmentId=${apt.id}`)
+                                  openVideoCallInNewTab(`/patient/video-call?appointmentId=${apt.id}`)
                                 }
                                 className="h-7 sm:h-8 px-2 sm:px-3 bg-brand-primary hover:bg-brand-hover text-white text-[10px] sm:text-xs font-semibold rounded-lg flex items-center gap-1 transition-all cursor-pointer shadow-xs"
                                 title="Join Video Call"

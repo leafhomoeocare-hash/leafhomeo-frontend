@@ -16,8 +16,6 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 import {
-  sendPhoneOTP,
-  verifyPhoneOTP,
   sendEmailOTP,
   verifyEmailOTP,
   getTermsConditions,
@@ -36,15 +34,8 @@ const Register = () => {
     password: "",
     confirmPassword: "",
     emailOtp: "",
-    phoneOtp: "",
     termsAccepted: false
   });
-
-  // State for Phone OTP
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [phoneOtpSent, setPhoneOtpSent] = useState(false);
-  const [phoneLoading, setPhoneLoading] = useState(false);
-  const [phoneCooldown, setPhoneCooldown] = useState(0);
 
   // State for Email OTP
   const [emailVerified, setEmailVerified] = useState(false);
@@ -66,14 +57,6 @@ const Register = () => {
     }
     return () => clearTimeout(timer);
   }, [emailCooldown]);
-
-  useEffect(() => {
-    let timer;
-    if (phoneCooldown > 0) {
-      timer = setTimeout(() => setPhoneCooldown((prev) => prev - 1), 1000);
-    }
-    return () => clearTimeout(timer);
-  }, [phoneCooldown]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -165,92 +148,6 @@ const Register = () => {
     }
   };
 
-  // ===================== PHONE OTP LOGIC =====================
-  const handleSendPhoneOTP = async () => {
-    if (!formData.mobile) {
-      setError("Please enter your mobile number first");
-      return;
-    }
-
-    const cleanMobile = formData.mobile.replace(/\D/g, "");
-    if (cleanMobile.length < 10) {
-      setError("Please enter a valid 10-digit mobile number");
-      return;
-    }
-
-    try {
-      setPhoneLoading(true);
-      setError(null);
-
-      const response = await sendPhoneOTP({ mobile: formData.mobile });
-
-      if (response.status === 1) {
-        setPhoneOtpSent(true);
-        setPhoneCooldown(60);
-        setSuccess("OTP sent successfully to your mobile!");
-
-        if (response.data?.formattedMobile) {
-          setFormData((prev) => ({
-            ...prev,
-            mobile: response.data.formattedMobile
-          }));
-        }
-
-        if (response.data?.otp) {
-          Swal.fire({
-            icon: "info",
-            title: "Phone OTP (Development Mode)",
-            text: `Your OTP is: ${response.data.otp}`,
-            timer: 3000,
-            showConfirmButton: false,
-            timerProgressBar: true
-          });
-        }
-      } else {
-        setError(response.message || "Failed to send phone OTP");
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to send phone OTP. Please try again.");
-    } finally {
-      setPhoneLoading(false);
-    }
-  };
-
-  const handleVerifyPhoneOTP = async () => {
-    if (!formData.phoneOtp) {
-      setError("Please enter the OTP sent to your phone");
-      return;
-    }
-
-    try {
-      setPhoneLoading(true);
-      setError(null);
-
-      const response = await verifyPhoneOTP({
-        mobile: formData.mobile,
-        otp: formData.phoneOtp.trim()
-      });
-
-      if (response.status === 1) {
-        setPhoneVerified(true);
-        setSuccess("Phone number verified successfully! ✓");
-        Swal.fire({
-          icon: "success",
-          title: "Phone Verified",
-          text: "Your mobile number has been verified successfully.",
-          timer: 2000,
-          showConfirmButton: false
-        });
-      } else {
-        setError(response.message || "Invalid OTP");
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || "Phone OTP verification failed.");
-    } finally {
-      setPhoneLoading(false);
-    }
-  };
-
   // ===================== TERMS & CONDITIONS =====================
   const fetchTermsAndConditions = async () => {
     try {
@@ -278,11 +175,6 @@ const Register = () => {
       return;
     }
 
-    if (!phoneVerified) {
-      setError("Please verify your mobile number before proceeding.");
-      return;
-    }
-
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -307,7 +199,6 @@ const Register = () => {
         mobile: formData.mobile,
         password: formData.password,
         termsAccepted: formData.termsAccepted,
-        phoneVerified: phoneVerified,
         isEmailVerified: emailVerified
       });
 
@@ -349,7 +240,7 @@ const Register = () => {
             Create Patient Account
           </h1>
           <p className="text-xs text-gray-500 mt-1">
-            Complete email and phone verification to secure your health record
+            Verify your email to secure your health record
           </p>
         </div>
 
@@ -488,18 +379,11 @@ const Register = () => {
             )}
           </div>
 
-          {/* 2. MOBILE NUMBER + OTP VERIFICATION */}
-          <div className="space-y-1.5 p-3.5 rounded-2xl border border-brand-100 bg-brand-50/20">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
-                Mobile Number <span className="text-red-500">*</span>
-              </label>
-              {phoneVerified && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#64a281] bg-[#64a281]/10 px-2.5 py-0.5 rounded-full border border-[#64a281]/30 shadow-2xs">
-                  <CheckCircle size={13} className="text-[#64a281]" /> Phone Verified
-                </span>
-              )}
-            </div>
+          {/* 2. MOBILE NUMBER (verification happens in complete profile) */}
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider block">
+              Mobile Number <span className="text-red-500">*</span>
+            </label>
             <div className="relative">
               <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
                 <Phone size={16} />
@@ -510,80 +394,10 @@ const Register = () => {
                 value={formData.mobile}
                 onChange={handleChange}
                 placeholder="9876543210"
-                className={`w-full h-11 pl-10 pr-32 rounded-xl border text-sm outline-hidden transition-all font-medium ${
-                  phoneVerified
-                    ? "bg-[#64a281]/5 border-[#64a281]/40 text-gray-900"
-                    : "bg-white border-gray-200 focus:ring-2 focus:ring-[#64a281]/20 focus:border-[#64a281]"
-                }`}
+                className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 text-sm outline-hidden transition-all bg-gray-50/50 focus:bg-white focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary font-medium"
                 required
-                disabled={phoneVerified}
               />
-              <button
-                type="button"
-                onClick={handleSendPhoneOTP}
-                disabled={phoneLoading || phoneVerified || phoneCooldown > 0}
-                className={`absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 z-10 ${
-                  phoneVerified
-                    ? "bg-[#64a281] text-white cursor-default"
-                    : phoneCooldown > 0
-                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-[#64a281] hover:bg-[#528f6e] text-white shadow-xs active:scale-95"
-                }`}
-              >
-                {phoneLoading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : phoneVerified ? (
-                  <CheckCircle className="h-3.5 w-3.5 text-white" />
-                ) : phoneCooldown > 0 ? (
-                  <RotateCcw className="h-3 w-3" />
-                ) : (
-                  <Send className="h-3 w-3" />
-                )}
-                {phoneVerified
-                  ? "Verified"
-                  : phoneCooldown > 0
-                  ? `Resend (${phoneCooldown}s)`
-                  : phoneOtpSent
-                  ? "Resend OTP"
-                  : "Send OTP"}
-              </button>
             </div>
-
-            {/* Phone OTP Input Block */}
-            {phoneOtpSent && !phoneVerified && (
-              <div className="mt-2.5 pt-2.5 border-t border-[#64a281]/20 space-y-1.5">
-                <div className="flex items-center justify-between text-xs text-gray-600 font-medium">
-                  <span>Enter OTP sent to your phone</span>
-                  <span className="text-[11px] text-gray-400">Valid for 10 min</span>
-                </div>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400">
-                    <Shield size={16} />
-                  </span>
-                  <input
-                    type="text"
-                    name="phoneOtp"
-                    value={formData.phoneOtp}
-                    onChange={handleChange}
-                    placeholder="Enter Phone OTP"
-                    maxLength={6}
-                    className="w-full h-10 pl-10 pr-24 rounded-lg border border-[#64a281]/40 text-sm bg-white outline-hidden focus:ring-2 focus:ring-[#64a281]/20 focus:border-[#64a281] font-semibold tracking-wider text-gray-800"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleVerifyPhoneOTP}
-                    disabled={phoneLoading || !formData.phoneOtp}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-[#64a281] hover:bg-[#528f6e] text-white text-xs font-bold rounded-md transition-all disabled:opacity-50 shadow-xs cursor-pointer active:scale-95"
-                  >
-                    {phoneLoading ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : (
-                      "Verify"
-                    )}
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Password */}
@@ -682,7 +496,7 @@ const Register = () => {
           </div>
 
           {/* Verification Status Indicator */}
-          {(!emailVerified || !phoneVerified) && (
+          {!emailVerified && (
             <div className="p-3 bg-brand-secondary-50/60 border border-brand-secondary-200 rounded-xl text-xs text-brand-dark space-y-1.5">
               <p className="font-semibold flex items-center gap-1.5 text-brand-dark">
                 <AlertCircle size={14} className="text-brand-primary" />
@@ -697,14 +511,6 @@ const Register = () => {
                   )}
                   <span>{emailVerified ? "Email address verified" : "Verify Email address with OTP"}</span>
                 </li>
-                <li className={`flex items-center gap-1.5 ${phoneVerified ? "text-brand-dark font-bold" : "text-brand-dark/70 font-medium"}`}>
-                  {phoneVerified ? (
-                    <CheckCircle size={13} className="text-brand-primary shrink-0" />
-                  ) : (
-                    <span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0" />
-                  )}
-                  <span>{phoneVerified ? "Mobile number verified" : "Verify Mobile number with OTP"}</span>
-                </li>
               </ul>
             </div>
           )}
@@ -712,7 +518,7 @@ const Register = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading || !phoneVerified || !emailVerified || !formData.termsAccepted}
+            disabled={loading || !emailVerified || !formData.termsAccepted}
             className="w-full h-11 bg-brand-primary hover:bg-brand-hover text-white font-bold rounded-xl shadow-md shadow-brand-primary/20 transition-all cursor-pointer flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {loading ? (

@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   User,
-  Mail,
-  Phone,
   Calendar,
   Stethoscope,
   GraduationCap,
@@ -74,13 +72,6 @@ export default function PublicDoctorProfile() {
   if (!profileData) {
     return null;
   }
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "-";
-    return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
-  };
 
   const formatCurrency = (amount) => {
     if (!amount) return "-";
@@ -171,53 +162,7 @@ export default function PublicDoctorProfile() {
         </div>
 
         {/* Details Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {/* Personal Information */}
-          <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2">
-              <User className="h-5 w-5 text-brand-primary" />
-              Personal Information
-            </h3>
-            <div className="space-y-5">
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                  <User className="h-4 w-4 text-brand-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Full Name</p>
-                  <p className="text-sm font-medium text-gray-900 mt-0.5">{profileData.name || "-"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                  <Mail className="h-4 w-4 text-brand-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Email Address</p>
-                  <p className="text-sm font-medium text-gray-900 mt-0.5">{profileData.email || "-"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                  <Phone className="h-4 w-4 text-brand-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Mobile Number</p>
-                  <p className="text-sm font-medium text-gray-900 mt-0.5">{profileData.mobile || "-"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="p-2.5 bg-brand-light rounded-xl shrink-0">
-                  <Calendar className="h-4 w-4 text-brand-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider">Joined Date</p>
-                  <p className="text-sm font-medium text-gray-900 mt-0.5">{formatDate(profileData.joinedDate)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Professional Information */}
           <div className="bg-white border-2 border-gray-100 rounded-2xl p-6 shadow-sm">
             <h3 className="text-lg font-extrabold text-gray-900 mb-5 flex items-center gap-2">

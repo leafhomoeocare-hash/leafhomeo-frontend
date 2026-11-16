@@ -284,10 +284,10 @@ export default function AppointmentManagement() {
 
       {/* Table card */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
-        {/* Table - desktop/tablet */}
-        <div className="hidden md:block">
+        {/* Table - desktop only */}
+        <div className="hidden lg:block">
           <div className="w-full overflow-x-auto -mx-4 px-4 lg:mx-0 lg:px-0 custom-scrollbar">
-            <table className="w-full text-xs text-left min-w-[900px]">
+            <table className="w-full text-xs text-left min-w-[800px]">
               <thead className="bg-gray-50/50 border-b border-gray-100">
                 <tr className="text-left text-gray-500 uppercase tracking-wider text-[10px]">
                   {COLUMNS.map((col) => (
@@ -432,8 +432,8 @@ export default function AppointmentManagement() {
           </div>
         </div>
 
-        {/* Cards - mobile only */}
-        <div className="md:hidden divide-y divide-gray-100">
+        {/* Cards - mobile/tablet only */}
+        <div className="lg:hidden divide-y divide-gray-100">
           {appointments.map((appt) => {
             const dt = formatDateTime(appt.appointmentDate);
             return (

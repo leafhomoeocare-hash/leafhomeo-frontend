@@ -16,6 +16,7 @@ const ConsultationForm = () => {
   const [appointmentId, setAppointmentId] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [existingScreenshots, setExistingScreenshots] = useState([]);
+  const [previewImage, setPreviewImage] = useState(null);
   const [formData, setFormData] = useState({
     appointmentId: "",
     chiefComplaints: "",
@@ -281,7 +282,8 @@ const ConsultationForm = () => {
                         <img
                           src={`${import.meta.env.VITE_API_URL}${screenshot}`}
                           alt={`Screenshot ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                          onClick={() => setPreviewImage(`${import.meta.env.VITE_API_URL}${screenshot}`)}
+                          className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in hover:opacity-90 transition-opacity"
                         />
                         {isEditMode && (
                           <button
@@ -331,7 +333,8 @@ const ConsultationForm = () => {
                           <img
                             src={URL.createObjectURL(file)}
                             alt={`New Screenshot ${index + 1}`}
-                            className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                            onClick={(e) => setPreviewImage(e.currentTarget.src)}
+                            className="w-full h-32 object-cover rounded-lg border border-gray-200 cursor-zoom-in hover:opacity-90 transition-opacity"
                           />
                           <button
                             type="button"
@@ -571,6 +574,28 @@ const ConsultationForm = () => {
           </div>
         </form>
       </div>
+
+      {/* Image Preview Lightbox */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2 transition-colors"
+          >
+            <X size={24} />
+          </button>
+          <img
+            src={previewImage}
+            alt="Screenshot preview"
+            className="max-w-full max-h-[90vh] rounded-xl object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </DoctorLayout>
   );
 };

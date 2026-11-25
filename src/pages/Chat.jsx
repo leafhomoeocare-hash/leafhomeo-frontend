@@ -323,7 +323,8 @@ export default function Chat() {
     try {
       // Fetch appointment-based chat history (last 3 appointments)
       // Show appointment conversations for doctor-patient chats only.
-      // Patient <-> Admin (support) chat stays plain - no appointment context.
+      // Patient <-> Admin (support) chat stays plain - fetch same data but
+      // flatten messages without showing appointment grouping.
       if ((userRole === 'doctor' || userRole === 'patient') && contact.role !== 'admin') {
         const res = await getChatHistoryByAppointments(contact.id);
         if (res.status === 1) {
@@ -345,8 +346,21 @@ export default function Chat() {
           setSelectedContact(null);
           setIsMobileChatOpen(false);
         }
+      } else if (contact.role === 'admin' && (userRole === 'doctor' || userRole === 'patient')) {
+        // Patient/Doctor chatting with admin (support): fetch appointment-grouped
+        // history (same data source that works) but show as plain flat messages
+        const res = await getChatHistoryByAppointments(contact.id);
+        if (res.status === 1 && Array.isArray(res.data)) {
+          const allMessages = res.data.flatMap(conv => conv.messages || []);
+          allMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          setMessages(allMessages);
+        } else {
+          setMessages([]);
+        }
+        setAppointmentConversations([]);
+        setCurrentAppointmentId(null);
       } else {
-        // For admin, fetch normal chat history (not appointment-based)
+        // Admin user chatting with anyone: normal chat history
         const res = await getChatHistory(contact.id);
         if (res.status === 1) {
           setMessages(res.data || []);

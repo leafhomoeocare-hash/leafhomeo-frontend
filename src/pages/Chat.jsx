@@ -322,8 +322,9 @@ export default function Chat() {
 
     try {
       // Fetch appointment-based chat history (last 3 appointments)
-      // Show appointment conversations for doctor and patient, but NOT for admin
-      if (userRole === 'doctor' || userRole === 'patient') {
+      // Show appointment conversations for doctor-patient chats only.
+      // Patient <-> Admin (support) chat stays plain - no appointment context.
+      if ((userRole === 'doctor' || userRole === 'patient') && selectedContact.role !== 'admin') {
         const res = await getChatHistoryByAppointments(contact.id);
         if (res.status === 1) {
           setAppointmentConversations(res.data || []);

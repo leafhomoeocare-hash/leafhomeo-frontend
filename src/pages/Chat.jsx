@@ -108,7 +108,7 @@ export default function Chat() {
 
     for (const msg of messagesToRetry) {
       try {
-        const data = await sendMessageToServer(msg);
+        const data = await sendMessage(msg);
         // Replace temporary message with real one
         setMessages(prev => prev.map(m => 
           m.id === msg.tempId ? { ...data, status: 'sent' } : m
@@ -481,10 +481,27 @@ export default function Chat() {
           }
         });
     } else {
-      // Queue message when offline
-      queueMessage(messagePayload);
-      setNewMessage("");
-      setIsTyping(false);
+      // No socket connection - send via REST API directly
+      sendMessage(messagePayload)
+        .then((data) => {
+          setMessages((prev) => [...prev, data]);
+          setNewMessage("");
+          setIsTyping(false);
+          scrollToBottom();
+          setContacts(prev => prev.map(c => c.id === selectedContact.id ? {
+            ...c,
+            lastMessage: {
+              message: data.message,
+              createdAt: data.createdAt
+            }
+          } : c));
+        })
+        .catch((err) => {
+          console.error("Failed to send message:", err);
+          queueMessage(messagePayload);
+          setNewMessage("");
+          setIsTyping(false);
+        });
     }
   };
 

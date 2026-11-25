@@ -23,7 +23,7 @@ import {
 
 import PatientLayout from "../components/PatientLayout";
 import DoctorLayout from "../components/DoctorLayout";
-import { getContacts, getChatHistory, getContactById, editMessage, deleteMessage, getChatHistoryByAppointments, uploadAttachment } from "../api/chatApi";
+import { getContacts, getChatHistory, getContactById, editMessage, deleteMessage, getChatHistoryByAppointments, uploadAttachment, sendMessage } from "../api/chatApi";
 import { getImageUrl } from "../utils/imageHelper";
 
 export default function Chat() {
@@ -434,9 +434,14 @@ export default function Chat() {
       timestamp: Date.now()
     };
 
-    // Check if online and connected
+    // Check if online and connected - socket first, REST fallback on failure/timeout
     if (isOnline && socketRef.current && isConnected) {
-      sendMessageToServer(messagePayload)
+      const socketPromise = sendMessageToServer(messagePayload);
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Socket ack timeout")), 5000)
+      );
+      Promise.race([socketPromise, timeoutPromise])
+        .catch(() => sendMessage(messagePayload)) // REST fallback
         .then((data) => {
           // Update messages state
           setMessages((prev) => [...prev, data]);

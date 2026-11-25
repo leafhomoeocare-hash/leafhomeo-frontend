@@ -49,6 +49,11 @@ export const uploadAttachment = async (file) => {
   return response.data;
 };
 
+export const sendMessage = async (payload) => {
+  const response = await API.post('/api/v1/chat/send', payload);
+  return response.data;
+};
+
 export const sendMedicalMessage = async (receiverId, messageType, medicalData, message) => {
   const response = await API.post('/api/v1/chat/medical', {
     receiverId,

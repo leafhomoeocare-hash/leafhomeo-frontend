@@ -441,7 +441,7 @@ export default function Chat() {
         setTimeout(() => reject(new Error("Socket ack timeout")), 5000)
       );
       Promise.race([socketPromise, timeoutPromise])
-        .catch(() => sendMessage(messagePayload)) // REST fallback
+        .catch(() => sendMessage(messagePayload).then((r) => r.data)) // REST fallback
         .then((data) => {
           // Update messages state
           setMessages((prev) => [...prev, data]);
@@ -483,6 +483,7 @@ export default function Chat() {
     } else {
       // No socket connection - send via REST API directly
       sendMessage(messagePayload)
+        .then((r) => r.data)
         .then((data) => {
           setMessages((prev) => [...prev, data]);
           setNewMessage("");

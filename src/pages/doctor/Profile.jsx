@@ -80,8 +80,8 @@ export default function DoctorProfile() {
           }
           return config;
         });
-        const response = await API.get("/api/v1/patient/get-doctor-details", {
-          params: { doctorId: profileData?.id }
+        const response = await API.post("/api/v1/patient/get-doctor-details", {
+          doctorId: profileData?.id
         });
         if (response.data.status === 1) {
           setReviews(response.data.data.reviews || []);

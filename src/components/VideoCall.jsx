@@ -14,6 +14,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [error, setError] = useState(null);
   const [participantCount, setParticipantCount] = useState(0);
+  const [otherPartyName, setOtherPartyName] = useState(null);
   const [connectionQuality, setConnectionQuality] = useState('unknown');
   const [callDuration, setCallDuration] = useState(0);
   
@@ -352,7 +353,8 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
         throw new Error(response.message || "Failed to get video token");
       }
 
-      const { token, roomName } = response.data;
+      const { token, roomName, otherPartyName: remoteName } = response.data;
+      if (remoteName) setOtherPartyName(remoteName);
       console.log("Token received, room name:", roomName);
       console.log("Attempting to connect to Twilio room:", roomName);
 
@@ -1242,7 +1244,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
                 {/* Participant Name */}
                 <div className="absolute bottom-4 left-4 bg-black/50 backdrop-blur-sm px-4 py-2 rounded-xl">
                   <span className="text-white text-sm font-medium">
-                    {participant.identity || 'Other Person'}
+                    {otherPartyName || participant.identity || 'Other Person'}
                   </span>
                 </div>
               </div>

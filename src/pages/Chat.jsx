@@ -354,10 +354,12 @@ export default function Chat() {
           const allMessages = res.data.flatMap(conv => conv.messages || []);
           allMessages.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
           setMessages(allMessages);
+          // Keep grouped conversations so the message list renders (header is hidden for ADMIN_CHAT)
+          setAppointmentConversations(res.data);
         } else {
           setMessages([]);
+          setAppointmentConversations([]);
         }
-        setAppointmentConversations([]);
         setCurrentAppointmentId(null);
       } else {
         // Admin user chatting with anyone: normal chat history
@@ -1160,7 +1162,8 @@ export default function Chat() {
                   (userRole === 'doctor' || userRole === 'patient') && appointmentConversations.length > 0 ? (
                     appointmentConversations.map((conversation, convIndex) => (
                       <div key={conversation.appointment.id || 'legacy'} className="space-y-4 relative z-10 mb-8">
-                        {/* Appointment Section Header */}
+                        {/* Appointment Section Header - hidden for admin support chat */}
+                        {conversation.appointment.appointmentId !== 'ADMIN_CHAT' && (
                         <div className={`bg-gradient-to-r ${conversation.appointment.appointmentId === 'LEGACY' ? 'from-amber-50/50 to-slate-50 border-amber-200/30' : 'from-brand-light/50 to-slate-50 border-brand-primary/20'} border rounded-2xl p-4 mb-4 shadow-sm`}>
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -1218,13 +1221,14 @@ export default function Chat() {
                                 )}
                               </div>
                             </div>
-                            {conversation.appointment.isCurrent && conversation.appointment.appointmentId !== 'LEGACY' && (
+                            {conversation.appointment.isCurrent && conversation.appointment.appointmentId !== 'LEGACY' && conversation.appointment.appointmentId !== 'ADMIN_CHAT' && (
                               <span className="text-[9px] font-extrabold bg-brand-primary text-white px-2 py-1 rounded-full uppercase tracking-wider">
                                 Current
                               </span>
                             )}
                           </div>
                         </div>
+                        )}
 
                         {/* Messages for this appointment */}
                         {conversation.messages.length > 0 ? (

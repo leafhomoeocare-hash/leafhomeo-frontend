@@ -29,6 +29,7 @@ export default function DoctorProfile() {
   const [error, setError] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [visibleReviews, setVisibleReviews] = useState(5);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -305,7 +306,7 @@ export default function DoctorProfile() {
             </div>
           ) : (
             <div className="space-y-4">
-              {reviews.map((review) => (
+              {reviews.slice(0, visibleReviews).map((review) => (
                 <div key={review.id} className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -328,6 +329,14 @@ export default function DoctorProfile() {
                 </div>
               ))}
             </div>
+          )}
+          {!reviewsLoading && reviews.length > visibleReviews && (
+            <button
+              onClick={() => setVisibleReviews((prev) => prev + 5)}
+              className="mt-4 w-full py-2.5 border-2 border-brand-primary/30 text-brand-primary font-semibold rounded-xl hover:bg-brand-primary/5 transition-colors"
+            >
+              Load More Reviews ({reviews.length - visibleReviews} remaining)
+            </button>
           )}
         </div>
 

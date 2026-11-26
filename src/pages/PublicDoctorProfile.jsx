@@ -24,6 +24,7 @@ export default function PublicDoctorProfile() {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [visibleReviews, setVisibleReviews] = useState(5);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -264,7 +265,7 @@ export default function PublicDoctorProfile() {
               Patient Reviews ({profileData.totalReviews || 0})
             </h3>
             <div className="space-y-4">
-              {profileData.reviews.map((review) => (
+              {profileData.reviews.slice(0, visibleReviews).map((review) => (
                 <div key={review.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -291,6 +292,14 @@ export default function PublicDoctorProfile() {
                 </div>
               ))}
             </div>
+            {profileData.reviews.length > visibleReviews && (
+              <button
+                onClick={() => setVisibleReviews((prev) => prev + 5)}
+                className="mt-4 w-full py-2.5 border-2 border-brand-primary/30 text-brand-primary font-semibold rounded-xl hover:bg-brand-primary/5 transition-colors"
+              >
+                Load More Reviews ({profileData.reviews.length - visibleReviews} remaining)
+              </button>
+            )}
           </div>
         )}
 

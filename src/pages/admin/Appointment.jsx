@@ -150,6 +150,8 @@ export default function AppointmentManagement() {
 
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusCounts, setStatusCounts] = useState({ all: 0, pending: 0, accepted: 0, paid: 0, completed: 0, cancelled: 0 });
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -209,18 +211,19 @@ export default function AppointmentManagement() {
   const fetchAppointments = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getAppointments(currentPage, entriesPerPage, appliedSearch);
+      const response = await getAppointments(currentPage, entriesPerPage, appliedSearch, statusFilter);
       if (response.status === 1) {
         setAppointments(response.data?.appointments || []);
         setTotalRecords(response.data?.totalRecords || 0);
         setTotalPages(response.data?.totalPages || 1);
+        if (response.data?.statusCounts) setStatusCounts(response.data.statusCounts);
       }
     } catch (error) {
       console.log(error);
     } finally {
       setLoading(false);
     }
-  }, [currentPage, entriesPerPage, appliedSearch]);
+  }, [currentPage, entriesPerPage, appliedSearch, statusFilter]);
 
   useEffect(() => {
     fetchAppointments();
@@ -277,9 +280,34 @@ export default function AppointmentManagement() {
           onClick={handleSearchClick}
           className="flex h-11 items-center justify-center gap-2 text-white px-6 rounded-xl text-sm font-semibold shadow-xs transition-colors bg-brand-primary hover:bg-brand-hover cursor-pointer"
         >
-          <Search size={16} />
-          Search
+          <Search size={16} /> Search
         </button>
+      </div>
+
+      {/* Status Filter Badges */}
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-2 mb-4 scrollbar-none">
+        {["all", "Pending", "Accepted", "Paid", "Completed", "Cancelled"].map((status) => {
+          const statusKey = status.toLowerCase();
+          const isSelected = statusFilter === statusKey;
+          return (
+            <button
+              key={status}
+              onClick={() => { setStatusFilter(statusKey); setCurrentPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                isSelected
+                  ? status === "Cancelled"
+                    ? "bg-rose-500 text-white shadow-xs"
+                    : "bg-brand-primary text-white shadow-xs"
+                  : "bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200/60"
+              }`}
+            >
+              {status}
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${isSelected ? "bg-white/20 text-white" : "bg-gray-200 text-gray-700"}`}>
+                {statusCounts[statusKey] ?? 0}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Table card */}

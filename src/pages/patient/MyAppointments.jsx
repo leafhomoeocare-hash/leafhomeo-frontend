@@ -358,16 +358,19 @@ export default function MyAppointments() {
     return colors[index];
   };
 
+  // Map raw DB statuses to the tab groups so counts match filtered rows
+  const getStatusGroup = (status) => {
+    const s = (status || "").toLowerCase();
+    if (s === "rejected" || s === "cancelled") return "cancelled";
+    if (s === "confirmed") return "accepted";
+    if (s === "payment_pending") return "pending";
+    return s;
+  };
+
   const getStatusCount = (status) => {
     if (status === "all") return appointments.length;
     const statusLower = status.toLowerCase();
-    return appointments.filter(app => {
-      const appStatus = (app.status || "").toLowerCase();
-      if (statusLower === "accepted") {
-        return appStatus === "accepted" || appStatus === "confirmed";
-      }
-      return appStatus === statusLower;
-    }).length;
+    return appointments.filter(app => getStatusGroup(app.status) === statusLower).length;
   };
 
   // Sorting Handler
@@ -390,11 +393,7 @@ export default function MyAppointments() {
         (apt.appointmentId || "").toString().toLowerCase().includes(term) ||
         (apt.reason || apt.symptoms || "").toLowerCase().includes(term);
 
-      const appStatus = (apt.status || "").toLowerCase();
-      let matchesFilter = filter === "all" || appStatus === filter.toLowerCase();
-      if (filter === "accepted") {
-        matchesFilter = appStatus === "accepted" || appStatus === "confirmed";
-      }
+      const matchesFilter = filter === "all" || getStatusGroup(apt.status) === filter.toLowerCase();
       return matchesSearch && matchesFilter;
     });
 

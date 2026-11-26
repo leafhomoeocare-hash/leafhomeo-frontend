@@ -313,9 +313,18 @@ export default function DoctorAppointments() {
     return colors[index];
   };
 
+  // Map raw DB statuses to the tab groups so counts match filtered rows
+  const getStatusGroup = (status) => {
+    const s = (status || "").toLowerCase();
+    if (s === "rejected" || s === "cancelled") return "cancelled";
+    if (s === "confirmed") return "accepted";
+    if (s === "payment_pending") return "pending";
+    return s;
+  };
+
   const getStatusCount = (status) => {
     if (status === "all") return appointments.length;
-    return appointments.filter(app => (app.status || "").toLowerCase() === status.toLowerCase()).length;
+    return appointments.filter(app => getStatusGroup(app.status) === status.toLowerCase()).length;
   };
 
   // Sort Handler
@@ -339,7 +348,7 @@ export default function DoctorAppointments() {
         (apt.patientPhone || "").toLowerCase().includes(term) ||
         (apt.reason || apt.symptoms || "").toLowerCase().includes(term);
 
-      const matchesFilter = filter === "all" || (apt.status || "").toLowerCase() === filter.toLowerCase();
+      const matchesFilter = filter === "all" || getStatusGroup(apt.status) === filter.toLowerCase();
       return matchesSearch && matchesFilter;
     });
 

@@ -1,10 +1,11 @@
 import API from "../utils/axios";
 
-export const getAppointments = async (page, limit, search) => {
+export const getAppointments = async (page, limit, search, status = "all") => {
   const response = await API.post("/api/v1/admin/Appointments", {
     page,
     limit,
     search,
+    status,
   });
 
   return response.data;

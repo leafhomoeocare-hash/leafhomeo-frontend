@@ -52,7 +52,8 @@ export default function DoctorAppointments() {
 
   useEffect(() => {
     fetchAppointments();
-  }, [filter]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Reset pagination when search or filter changes
   useEffect(() => {
@@ -62,8 +63,8 @@ export default function DoctorAppointments() {
   const fetchAppointments = async () => {
     try {
       setLoading(true);
-      const statusFilter = filter === "all" ? "all" : filter.toLowerCase();
-      const response = await getDoctorAppointments(statusFilter);
+      // Always fetch all appointments - filtering & counts happen client-side
+      const response = await getDoctorAppointments("all", 1, 1000);
       if (response.status === 1) {
         setAppointments(response.data || []);
       }

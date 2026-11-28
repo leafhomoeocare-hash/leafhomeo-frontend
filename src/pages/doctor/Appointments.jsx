@@ -660,8 +660,8 @@ export default function DoctorAppointments() {
                               <Eye size={11} className="sm:w-[13px] sm:h-[13px]" />
                             </button>
 
-                            {/* Chat Button - hidden once appointment is completed */}
-                            {apt.patientUserId && apt.status !== 'completed' && (
+                            {/* Chat Button - hidden once appointment is completed or cancelled */}
+                            {apt.patientUserId && !['completed', 'cancelled', 'rejected'].includes(apt.status) && (
                               <button
                                 onClick={() =>
                                   navigate("/doctor/chat", {

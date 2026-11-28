@@ -890,20 +890,20 @@ export default function AppointmentDetailsPage() {
                   <p className="text-sm font-bold text-gray-900">{appointment.courierName || "Not available"}</p>
                 </div>
 
-                {/* Tracking URL */}
-                {appointment.trackingUrl && (
+                {/* Tracking URL - Shiprocket public tracking page */}
+                {(appointment.trackingUrl || appointment.trackerId) && (
                   <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
                     <div className="flex items-center gap-2 mb-2">
                       <ExternalLink size={16} className="text-emerald-600" />
                       <p className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Live Tracking</p>
                     </div>
                     <a
-                      href={appointment.trackingUrl}
+                      href={appointment.trackingUrl || `https://shiprocket.co/tracking/${appointment.trackerId}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 text-sm font-bold text-emerald-700 hover:text-emerald-800 underline"
                     >
-                      Track your shipment
+                      Track your shipment on Shiprocket
                       <ExternalLink size={14} />
                     </a>
                   </div>

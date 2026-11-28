@@ -1164,7 +1164,17 @@ export default function Chat() {
                       <div key={conversation.appointment.id || 'legacy'} className="space-y-4 relative z-10 mb-8">
                         {/* Appointment Section Header - hidden for admin support chat */}
                         {conversation.appointment.appointmentId !== 'ADMIN_CHAT' && (
-                        <div className={`bg-gradient-to-r ${conversation.appointment.appointmentId === 'LEGACY' ? 'from-amber-50/50 to-slate-50 border-amber-200/30' : 'from-brand-light/50 to-slate-50 border-brand-primary/20'} border rounded-2xl p-4 mb-4 shadow-sm`}>
+                        <div
+                          onClick={() => {
+                            const aptId = conversation.appointment.id;
+                            const aptRef = conversation.appointment.appointmentId;
+                            if (!aptId || aptRef === 'LEGACY') return;
+                            if (userRole === 'doctor') navigate(`/doctor/appointments/${aptId}`);
+                            else if (userRole === 'patient') navigate(`/patient/appointments/${aptId}`);
+                          }}
+                          className={`bg-gradient-to-r ${conversation.appointment.appointmentId === 'LEGACY' ? 'from-amber-50/50 to-slate-50 border-amber-200/30' : 'from-brand-light/50 to-slate-50 border-brand-primary/20'} border rounded-2xl p-4 mb-4 shadow-sm ${conversation.appointment.appointmentId !== 'LEGACY' ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
+                          title="View appointment details"
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${conversation.appointment.appointmentId === 'LEGACY' ? 'bg-amber-100' : 'bg-brand-primary/10'}`}>

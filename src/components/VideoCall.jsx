@@ -32,6 +32,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
   const [showConsultationForm, setShowConsultationForm] = useState(true); // Show by default for doctors
   const [consultationNotes, setConsultationNotes] = useState('');
   const [submittingForm, setSubmittingForm] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Comprehensive consultation form states
   const [formData, setFormData] = useState({
@@ -804,6 +805,7 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
 
         // Clear local storage draft
         localStorage.removeItem(`consultation_draft_${appointmentId}`);
+        setFormSubmitted(true);
 
         // Don't end the call automatically - just hide the form
         setShowConsultationForm(false);
@@ -1374,8 +1376,8 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
               </div>
             </div>
 
-            {/* Comprehensive Consultation Form */}
-            <div className="space-y-4">
+            {/* Comprehensive Consultation Form - read-only once submitted */}
+            <div className={`space-y-4 ${formSubmitted ? 'opacity-70 pointer-events-none select-none' : ''}`}>
               {/* Chief Complaints & Associate Symptoms */}
               <div>
                 <label className="text-xs font-bold text-gray-700 mb-2 block">
@@ -1614,23 +1616,21 @@ const VideoCall = ({ appointmentId, onEndCall, userType = 'patient' }) => {
                 />
               </div>
 
-              {/* Form Actions */}
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={handleSaveForm}
-                  disabled={submittingForm}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                >
-                  {submittingForm ? 'Saving...' : 'Save'}
-                </button>
-                <button
-                  onClick={handleSubmitForm}
-                  disabled={submittingForm}
-                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-50"
-                >
-                  {submittingForm ? 'Submitting...' : 'Submit'}
-                </button>
-              </div>
+              {/* Form Actions - only Submit; hidden once submitted (read-only) */}
+              {!formSubmitted && (
+                <div className="mt-4">
+                  <button
+                    onClick={handleSubmitForm}
+                    disabled={submittingForm}
+                    className="w-full bg-teal-600 hover:bg-teal-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium disabled:opacity-50"
+                  >
+                    {submittingForm ? 'Submitting...' : 'Submit'}
+                  </button>
+                </div>
+              )}
+              {formSubmitted && (
+                <p className="text-xs text-green-600 font-semibold mt-4 text-center">Consultation submitted - read only</p>
+              )}
             </div>
           </div>
         )}

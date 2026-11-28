@@ -263,6 +263,8 @@ const ConsultationForm = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Read-only mode - doctor can view submitted consultation but not edit */}
+        <fieldset disabled className="space-y-6 border-0 p-0 m-0 min-w-0 opacity-80">
           {/* Screenshots Section */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 px-6 py-4 border-b border-gray-200">
@@ -534,6 +536,8 @@ const ConsultationForm = () => {
             </div>
           </div>
 
+        </fieldset>
+
           {/* Action Buttons */}
           <div className="flex justify-end gap-4 pt-4">
             <button
@@ -543,34 +547,6 @@ const ConsultationForm = () => {
             >
               {isEditMode ? "Cancel" : "Back"}
             </button>
-            {isEditMode && (
-              <>
-                <button
-                  type="button"
-                  onClick={handleSaveDraft}
-                  className="px-8 py-3 border-2 border-amber-400 text-amber-700 rounded-xl font-semibold hover:bg-amber-50 transition-all"
-                >
-                  Save Draft
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-500/30"
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save size={18} />
-                      Save Changes
-                    </>
-                  )}
-                </button>
-              </>
-            )}
           </div>
         </form>
       </div>

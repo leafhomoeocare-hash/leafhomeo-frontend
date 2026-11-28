@@ -852,7 +852,7 @@ export default function EditProfile() {
             <div className="space-y-2">
               <label className="text-sm font-bold text-gray-700 block">Gender</label>
               <select
-                name="gender"
+                name="gender" required
                 value={formData.gender}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium cursor-pointer"
@@ -871,7 +871,7 @@ export default function EditProfile() {
                 <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
                   type="date"
-                  name="dob"
+                  name="dob" required
                   value={formData.dob}
                   onChange={handleChange}
                   className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium"
@@ -891,7 +891,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">House Number</label>
               <input
                 type="text"
-                name="houseNumber"
+                name="houseNumber" required
                 value={formData.houseNumber}
                 onChange={handleChange}
                 placeholder="House / Flat / Building No."
@@ -904,7 +904,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">Address Line 1</label>
               <input
                 type="text"
-                name="addressLine1"
+                name="addressLine1" required
                 value={formData.addressLine1}
                 onChange={handleChange}
                 placeholder="Street address or locality"
@@ -917,7 +917,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">Address Line 2</label>
               <input
                 type="text"
-                name="addressLine2"
+                name="addressLine2" required
                 value={formData.addressLine2}
                 onChange={handleChange}
                 placeholder="Apartment, suite, unit (optional)"
@@ -930,7 +930,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">Landmark</label>
               <input
                 type="text"
-                name="landmark"
+                name="landmark" required
                 value={formData.landmark}
                 onChange={handleChange}
                 placeholder="Nearby landmark"
@@ -943,7 +943,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">City</label>
               <input
                 type="text"
-                name="city"
+                name="city" required
                 value={formData.city}
                 onChange={handleChange}
                 placeholder="City"
@@ -956,7 +956,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">State</label>
               <input
                 type="text"
-                name="state"
+                name="state" required
                 value={formData.state}
                 onChange={handleChange}
                 placeholder="State / Province"
@@ -969,7 +969,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">Pincode</label>
               <input
                 type="text"
-                name="pincode"
+                name="pincode" required
                 value={formData.pincode}
                 onChange={handleChange}
                 placeholder="Postal / Zip code"
@@ -982,7 +982,7 @@ export default function EditProfile() {
               <label className="text-sm font-bold text-gray-700 block">Country</label>
               <input
                 type="text"
-                name="country"
+                name="country" required
                 value={formData.country}
                 onChange={handleChange}
                 placeholder="Country"

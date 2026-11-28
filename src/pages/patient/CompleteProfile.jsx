@@ -302,7 +302,7 @@ export default function CompleteProfile() {
               <label className="text-sm font-bold text-gray-700 block">House Number</label>
               <input
                 type="text"
-                name="houseNumber"
+                name="houseNumber" required
                 value={formData.houseNumber}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium"
@@ -325,7 +325,7 @@ export default function CompleteProfile() {
               <label className="text-sm font-bold text-gray-700 block">Address Line 2</label>
               <input
                 type="text"
-                name="addressLine2"
+                name="addressLine2" required
                 value={formData.addressLine2}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium"
@@ -336,7 +336,7 @@ export default function CompleteProfile() {
               <label className="text-sm font-bold text-gray-700 block">Landmark</label>
               <input
                 type="text"
-                name="landmark"
+                name="landmark" required
                 value={formData.landmark}
                 onChange={handleChange}
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 text-gray-800 font-medium"

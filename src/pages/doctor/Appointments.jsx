@@ -510,7 +510,8 @@ export default function DoctorAppointments() {
 
         {/* Compact Table */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-xs overflow-hidden">
-          <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+          {/* Table - desktop only */}
+          <div className="hidden lg:block w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="bg-gray-50/80 border-b border-gray-200 text-[10px] sm:text-[11px] uppercase tracking-wider text-gray-500 font-bold">
@@ -740,6 +741,119 @@ export default function DoctorAppointments() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Cards - mobile/tablet only */}
+          <div className="lg:hidden divide-y divide-gray-100">
+            {currentAppointments.length === 0 ? (
+              <div className="py-8 sm:py-12 text-center text-gray-400 font-medium">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Calendar className="h-8 w-8 text-gray-300" />
+                  <p className="text-xs text-gray-500">No appointments found matching your criteria.</p>
+                </div>
+              </div>
+            ) : (
+              currentAppointments.map((apt) => {
+                const statusLower = (apt.status || "").toLowerCase();
+                const isPending = statusLower === "pending";
+                const isCompleted = statusLower === "completed";
+                const isPaidOrAccepted = ["accepted", "paid", "confirmed"].includes(statusLower);
+                const canCallNow = isPaidOrAccepted && canJoinCall(apt.appointmentDateTime);
+
+                return (
+                  <div key={apt.id} className="p-4 hover:bg-brand-light/30 transition-colors">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {apt.patientImage ? (
+                          <img
+                            src={getImageUrl(apt.patientImage)}
+                            alt={apt.patientName}
+                            className="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                          />
+                        ) : (
+                          <div className={`w-10 h-10 rounded-xl ${getAvatarColor(apt.patientName)} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                            {getInitials(apt.patientName)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-gray-900 truncate text-sm">{apt.patientName}</p>
+                          <p className="text-[11px] text-gray-500 font-mono">#{apt.appointmentId || apt.id}</p>
+                        </div>
+                      </div>
+                      {getStatusBadge(apt.status)}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs font-medium text-gray-600 mb-3">
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-brand-primary" />
+                        {formatDate(apt.appointmentDateTime)}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-gray-400" />
+                        {formatTime(apt.appointmentDateTime)}
+                      </span>
+                      <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-100 text-gray-700 w-fit">
+                        {apt.requestType === "any_doctor" ? "Any Doctor" : apt.requestType === "specific_doctor" ? "Specific Doctor" : apt.requestType || "Standard"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => navigate(`/doctor/appointments/${apt.id}`, { state: { appointmentId: apt.id } })}
+                        className="h-8 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                      >
+                        <Eye size={13} /> View
+                      </button>
+                      {apt.patientUserId && !['completed', 'cancelled', 'rejected'].includes(apt.status) && (
+                        <button
+                          onClick={() => navigate("/doctor/chat", { state: { selectUserId: apt.patientUserId } })}
+                          className="h-8 px-3 bg-white text-brand-dark hover:bg-emerald-50 text-xs border border-brand-primary font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <MessageSquare size={13} /> Chat
+                        </button>
+                      )}
+                      {isPending && (
+                        <>
+                          <button
+                            onClick={() => handleAccept(apt.id)}
+                            disabled={actionLoadingId === apt.id}
+                            className="h-8 px-3 bg-brand-primary text-white hover:bg-brand-hover text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            {actionLoadingId === apt.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check size={13} />} Accept
+                          </button>
+                          <button
+                            onClick={() => handleReject(apt.id)}
+                            disabled={actionLoadingId === apt.id}
+                            className="h-8 px-3 bg-white text-rose-600 hover:bg-rose-50 border border-rose-300 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            {actionLoadingId === apt.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X size={13} />} Reject
+                          </button>
+                        </>
+                      )}
+                      {canCallNow && (
+                        <button
+                          onClick={() => {
+                            if (!apt.id) return;
+                            openVideoCallInNewTab(`/doctor/video-call?appointmentId=${apt.id}`);
+                          }}
+                          className="h-8 px-3 bg-brand-primary text-white hover:bg-brand-hover text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <Video size={13} /> Join Call
+                        </button>
+                      )}
+                      {(statusLower === 'paid' || statusLower === 'completed') && (
+                        <button
+                          onClick={() => navigate(`/doctor/consultation/${apt.id}`, { state: { mode: 'edit' } })}
+                          className="h-8 px-3 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-300 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <FileText size={13} /> Rx
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {/* Pagination Footer */}

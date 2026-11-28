@@ -580,7 +580,8 @@ export default function MyAppointments() {
 
         {/* Compact Table */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-xs">
-          <div className="w-full overflow-x-auto rounded-2xl custom-scrollbar">
+          {/* Table - desktop only */}
+          <div className="hidden lg:block w-full overflow-x-auto rounded-2xl custom-scrollbar">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
                 <tr className="bg-gray-50/80 border-b border-gray-200 text-[10px] sm:text-[11px] uppercase tracking-wider text-gray-500 font-bold">
@@ -789,6 +790,108 @@ export default function MyAppointments() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Cards - mobile/tablet only */}
+          <div className="lg:hidden divide-y divide-gray-100">
+            {currentAppointments.length === 0 ? (
+              <div className="py-8 sm:py-12 text-center text-gray-400 font-medium">
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Calendar className="h-8 w-8 text-gray-300" />
+                  <p className="text-xs text-gray-500">No appointments match your criteria.</p>
+                </div>
+              </div>
+            ) : (
+              currentAppointments.map((apt) => {
+                const statusLower = (apt.status || "").toLowerCase();
+                const isAccepted = statusLower === "accepted";
+                const isPaid = statusLower === "paid";
+                const isCompleted = statusLower === "completed";
+                const isCancelled = statusLower === "cancelled" || statusLower === "rejected";
+
+                return (
+                  <div key={apt.id} className="p-4 hover:bg-brand-light/30 transition-colors">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {apt.doctorImage ? (
+                          <img
+                            src={getImageUrl(apt.doctorImage)}
+                            alt={apt.doctorName}
+                            className="w-10 h-10 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+                          />
+                        ) : (
+                          <div className={`w-10 h-10 rounded-xl ${getAvatarColor(apt.doctorName)} flex items-center justify-center text-white font-bold text-sm flex-shrink-0`}>
+                            {getInitials(apt.doctorName)}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-gray-900 truncate text-sm">
+                            {apt.doctorName ? `Dr. ${apt.doctorName.replace(/^Dr\.\s*/i, "")}` : "Doctor will be assigned"}
+                          </p>
+                          <p className="text-[11px] text-gray-500 font-mono">#{apt.appointmentId || apt.id}</p>
+                        </div>
+                      </div>
+                      {getStatusBadge(apt.status)}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs font-medium text-gray-600 mb-3">
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5 text-brand-primary" />
+                        {formatDate(apt.appointmentDateTime)}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5 text-gray-400" />
+                        {formatTime(apt.appointmentDateTime)}
+                      </span>
+                      <span className="inline-flex px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-100 text-gray-700 w-fit">
+                        {apt.requestType === "any_doctor" ? "Any Doctor" : apt.requestType === "specific_doctor" ? "Specific Doctor" : apt.requestType || "Standard"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        onClick={() => navigate(`/patient/appointments/${apt.id}`, { state: { appointmentId: apt.id } })}
+                        className="h-8 px-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                      >
+                        <Eye size={13} /> View
+                      </button>
+                      {isAccepted && (
+                        <button
+                          onClick={() => handleOpenPaymentModal(apt)}
+                          className="h-8 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <CreditCard size={13} /> Pay
+                        </button>
+                      )}
+                      {isPaid && !isCancelled && apt.doctorUserId && (
+                        <button
+                          onClick={() => navigate("/patient/chat", { state: { selectUserId: apt.doctorUserId } })}
+                          className="h-8 px-3 bg-white text-brand-dark hover:bg-emerald-50 text-xs border border-brand-primary font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <MessageSquare size={13} /> Chat
+                        </button>
+                      )}
+                      {isPaid && !isCancelled && canJoinCall(apt) && (
+                        <button
+                          onClick={() => openVideoCallInNewTab(`/patient/video-call?appointmentId=${apt.id}`)}
+                          className="h-8 px-3 bg-brand-primary hover:bg-brand-hover text-white text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <Video size={13} /> Call
+                        </button>
+                      )}
+                      {isCompleted && !isCancelled && !apt.hasReviewed && (
+                        <button
+                          onClick={() => handleOpenReviewModal(apt)}
+                          className="h-8 px-3 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-300 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer"
+                        >
+                          <Star size={13} className="fill-amber-400 text-amber-400" /> Review
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {/* Pagination Footer */}
